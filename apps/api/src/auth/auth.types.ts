@@ -5,6 +5,11 @@ export interface AuthenticatedUser {
   name: string;
   isSiteAdmin: boolean;
   /**
+   * Proof the person controls this address. Anything matched to them *by
+   * email* — guest bookings, relay threads — requires it; matching by id does not.
+   */
+  emailVerified: boolean;
+  /**
    * When a site admin is acting as this user, the admin's real id.
    * The audit interceptor records it as actorUserId.
    */

@@ -97,6 +97,7 @@ export class SalonsService {
     leadTimeMin: number;
     maxAdvanceDays: number;
     cancelWindowHours: number;
+    reminderHoursBefore: number[];
     createdAt: Date;
   }): Salon {
     return {
@@ -108,6 +109,7 @@ export class SalonsService {
       leadTimeMin: s.leadTimeMin,
       maxAdvanceDays: s.maxAdvanceDays,
       cancelWindowHours: s.cancelWindowHours,
+      reminderHoursBefore: s.reminderHoursBefore,
       createdAt: s.createdAt.toISOString(),
     };
   }

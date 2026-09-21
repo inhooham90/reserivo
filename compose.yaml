@@ -57,9 +57,15 @@ services:
       REDIS_URL: redis://redis:6379
       CORS_ORIGIN: http://localhost:3000
       WEB_URL: http://localhost:3000
+      # Accounts that always hold site admin (comma-separated). Grant-only.
+      SITE_ADMIN_EMAILS: ${SITE_ADMIN_EMAILS:-james@akkija.com}
       # Email: leave RESEND_API_KEY unset locally and notifications are only logged.
       RESEND_API_KEY: ${RESEND_API_KEY:-}
       EMAIL_FROM: ${EMAIL_FROM:-Reserivo <onboarding@resend.dev>}
+      # SMS stays dark until all three are set (and the number is A2P 10DLC registered).
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      TWILIO_FROM_NUMBER: ${TWILIO_FROM_NUMBER:-}
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev-access-secret-change-me}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev-refresh-secret-change-me}
       # Bind mounts from Windows deliver no inotify events; tsc must poll.

@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import type { Env } from '../config/env.js';
 import { LogTransport, NotificationsService, ResendTransport } from './notifications.service.js';
 import { NOTIFICATION_TRANSPORT } from './notifications.types.js';
+import { LogSmsTransport, SMS_TRANSPORT, SmsService, TwilioSmsTransport } from './sms.service.js';
 
 @Global()
 @Module({
@@ -21,8 +22,22 @@ import { NOTIFICATION_TRANSPORT } from './notifications.types.js';
         return log;
       },
     },
+    LogSmsTransport,
+    {
+      provide: SMS_TRANSPORT,
+      inject: [ConfigService, LogSmsTransport],
+      useFactory: (config: ConfigService<Env, true>, log: LogSmsTransport) => {
+        if (config.get('TWILIO_ACCOUNT_SID') && config.get('TWILIO_AUTH_TOKEN') && config.get('TWILIO_FROM_NUMBER')) {
+          Logger.log('SMS via Twilio', 'Sms');
+          return new TwilioSmsTransport(config);
+        }
+        Logger.log('Twilio not configured — reminders will be email only', 'Sms');
+        return log;
+      },
+    },
     NotificationsService,
+    SmsService,
   ],
-  exports: [NotificationsService],
+  exports: [NotificationsService, SmsService],
 })
 export class NotificationsModule {}

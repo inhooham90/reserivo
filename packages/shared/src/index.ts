@@ -9,3 +9,4 @@ export * from './time';
 export * from './appointment';
 export * from './customer';
 export * from './message';
+export * from './admin';

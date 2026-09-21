@@ -8,6 +8,7 @@ import type {
   StartConversationInput,
   Thread,
 } from '@reserivo/shared';
+import { ownedBy } from '../appointments/appointments.service.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import type { Env } from '../config/env.js';
 import { CustomersService } from '../customers/customers.service.js';
@@ -189,9 +190,13 @@ export class MessagingService {
 
   // ---------- Internals ----------
 
-  /** Ownership by account, or by the email the account registered with (guest bookings before signing up). */
+  /**
+   * Ownership by account, or by a *confirmed* email (guest bookings made
+   * before signing up). An unconfirmed address proves nothing, so it never
+   * grants access to someone else's conversations.
+   */
   private ownedBy(user: AuthenticatedUser) {
-    return { OR: [{ userId: user.id }, { email: user.email }] };
+    return ownedBy(user);
   }
 
   private async staffConversation(tenant: TenantContext, conversationId: string): Promise<ConvRow> {

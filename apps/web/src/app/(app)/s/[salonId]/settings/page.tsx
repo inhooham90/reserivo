@@ -12,6 +12,15 @@ import { api, ApiError } from "@/lib/api";
 import { salonKeys, useSalon } from "@/lib/salon-context";
 
 /** Salon identity and booking policies. Managers only; others see the values read-only. */
+/** At most three may be picked; the shared schema enforces the same. */
+const REMINDER_CHOICES = [48, 24, 2] as const;
+
+const reminderLabel = (hours: number) => {
+  if (hours < 24) return hours + " hours before";
+  const days = hours / 24;
+  return days === 1 ? "1 day before" : days + " days before";
+};
+
 export default function SettingsPage() {
   const { salon, isManager } = useSalon();
   const queryClient = useQueryClient();
@@ -24,6 +33,7 @@ export default function SettingsPage() {
     leadTimeMin: salon.leadTimeMin,
     maxAdvanceDays: salon.maxAdvanceDays,
     cancelWindowHours: salon.cancelWindowHours,
+    reminderHoursBefore: salon.reminderHoursBefore,
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -112,6 +122,35 @@ export default function SettingsPage() {
               <Input id="st-cancel" type="number" min={0} max={336} value={form.cancelWindowHours} disabled={!isManager} onChange={num("cancelWindowHours")} />
             </div>
           </div>
+          <div className="grid gap-2 border-t pt-4">
+            <Label>Reminders</Label>
+            <p className="text-xs text-muted-foreground">
+              When to remind a customer before their appointment. Always by email; also by text once that customer has
+              agreed to one and SMS is switched on for the platform.
+            </p>
+            {REMINDER_CHOICES.map((hours) => (
+              <label key={hours} className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  disabled={!isManager}
+                  checked={form.reminderHoursBefore.includes(hours)}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      reminderHoursBefore: e.target.checked
+                        ? [...form.reminderHoursBefore, hours].sort((a, b) => b - a)
+                        : form.reminderHoursBefore.filter((h) => h !== hours),
+                    })
+                  }
+                />
+                {reminderLabel(hours)}
+              </label>
+            ))}
+            {form.reminderHoursBefore.length === 0 && (
+              <p className="text-xs text-muted-foreground">No reminders will be sent.</p>
+            )}
+          </div>
+
           {isManager && (
             <>
               <FieldError message={error ?? (save.error instanceof ApiError ? save.error.message : undefined)} />

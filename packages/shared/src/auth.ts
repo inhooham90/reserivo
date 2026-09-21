@@ -23,6 +23,11 @@ export const currentUserSchema = z.object({
   email: z.string(),
   name: z.string(),
   isSiteAdmin: z.boolean(),
+  /**
+   * Proof the person controls the address. Until it is true, nothing is
+   * matched to them by email — guest bookings and conversations stay hidden.
+   */
+  emailVerified: z.boolean(),
   /** Present only when a site admin is acting as this user. */
   actorUserId: z.string().nullable().optional(),
 });
@@ -33,3 +38,15 @@ export const authResponseSchema = z.object({
   user: currentUserSchema,
 });
 export type AuthResponse = z.infer<typeof authResponseSchema>;
+
+/** Emailed links carry an opaque high-entropy token; only its hash is stored. */
+export const linkTokenSchema = z.string().trim().min(20).max(200);
+
+export const forgotPasswordSchema = z.object({ email: emailSchema });
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+
+export const resetPasswordSchema = z.object({ token: linkTokenSchema, password: passwordSchema });
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
+export const verifyEmailSchema = z.object({ token: linkTokenSchema });
+export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;

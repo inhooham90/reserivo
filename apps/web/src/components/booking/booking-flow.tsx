@@ -226,6 +226,7 @@ function Details({
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
   const [phone, setPhone] = useState("");
+  const [smsConsent, setSmsConsent] = useState(false);
   const [notes, setNotes] = useState("");
 
   const book = useMutation({
@@ -259,7 +260,12 @@ function Details({
                 designerId: designer.id,
                 serviceId: service.id,
                 startAt,
-                customer: { name: name.trim(), email: email.trim(), phone: phone.trim() || undefined },
+                customer: {
+                  name: name.trim(),
+                  email: email.trim(),
+                  phone: phone.trim() || undefined,
+                  smsConsent: phone.trim() ? smsConsent : undefined,
+                },
                 notes: notes.trim() || undefined,
               });
             }}
@@ -289,6 +295,38 @@ function Details({
                 <FieldError message={fieldError("phone")} />
               </div>
             </div>
+            {/*
+              Always rendered, so the opt-in is plainly visible to anyone reading
+              the page — including a carrier reviewing the A2P campaign — and only
+              enabled once there is a number to send to. Never pre-ticked: consent
+              has to be given, not withdrawn. The wording carries the disclosures
+              US carriers expect, and must stay in step with what is filed with them.
+            */}
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={smsConsent}
+                disabled={!phone.trim()}
+                onChange={(e) => setSmsConsent(e.target.checked)}
+              />
+              <span className={cn(!phone.trim() && "text-muted-foreground")}>
+                Text me a reminder before my appointment.
+                <span className="block text-xs text-muted-foreground">
+                  {!phone.trim() && "Add a mobile number above to turn this on. "}
+                  Reserivo appointment reminders only, never marketing. 1–2 messages per appointment. Message and data
+                  rates may apply. Reply STOP to unsubscribe, HELP for help. See our{" "}
+                  <Link href="/terms" target="_blank" className="underline">
+                    Terms
+                  </Link>{" "}
+                  and{" "}
+                  <Link href="/privacy" target="_blank" className="underline">
+                    Privacy Policy
+                  </Link>
+                  .
+                </span>
+              </span>
+            </label>
             <div className="grid gap-1.5">
               <Label htmlFor="bk-notes">Anything the stylist should know? (optional)</Label>
               <Textarea id="bk-notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />

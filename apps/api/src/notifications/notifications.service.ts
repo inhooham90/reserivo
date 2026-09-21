@@ -13,8 +13,11 @@ export class LogTransport implements NotificationTransport {
   private readonly logger = new Logger('Notifications');
 
   async send(event: NotificationEvent): Promise<void> {
-    const ref = event.type === 'message.received' ? event.data.conversationId : event.data.appointmentId;
-    this.logger.log(`${event.type} → ${event.to.name} (${ref})`);
+    // This transport is only chosen when no Resend key is set — development
+    // and tests — so printing the link is safe here and is the only way to
+    // follow a confirmation or reset locally. Production uses ResendTransport.
+    const ref = 'link' in event.data ? event.data.link : event.data.appointmentId;
+    this.logger.log(`${event.type} → ${event.to.name} ${ref}`);
   }
 }
 

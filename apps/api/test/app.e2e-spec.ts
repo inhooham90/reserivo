@@ -92,6 +92,17 @@ describe('Phase 0 (e2e)', () => {
     expect(res.body.issues.map((i: { path: string }) => i.path)).toEqual(expect.arrayContaining(['slug', 'timezone']));
   });
 
+  it('POST /salons refuses a slug that would be shadowed by one of our own pages', async () => {
+    for (const slug of ['terms', 'privacy', 'login', 'admin']) {
+      const res = await api()
+        .post('/salons')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ name: 'Shadow', slug, timezone: 'America/Los_Angeles' })
+        .expect(400);
+      expect(res.body.issues[0]).toMatchObject({ path: 'slug', message: expect.stringContaining('reserved') });
+    }
+  });
+
   it('GET /salons/mine lists it with the role', async () => {
     const res = await api().get('/salons/mine').set('Authorization', `Bearer ${ownerToken}`).expect(200);
     expect(res.body).toEqual(expect.arrayContaining([expect.objectContaining({ id: salonId, roles: ['MANAGER', 'DESIGNER'] })]));

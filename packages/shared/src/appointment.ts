@@ -79,6 +79,8 @@ export const bookAppointmentSchema = z.object({
     name: z.string().trim().min(1).max(100),
     email: emailSchema,
     phone: phoneSchema.optional(),
+    /** Express consent to be texted. Required by the TCPA before any automated SMS. */
+    smsConsent: z.boolean().optional(),
   }),
   notes: z.string().trim().max(500).optional(),
 });

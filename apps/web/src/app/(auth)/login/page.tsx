@@ -56,6 +56,11 @@ function LoginForm() {
               {form.formState.isSubmitting ? "Signing in…" : "Sign in"}
             </Button>
             <p className="text-center text-sm text-muted-foreground">
+              <Link href="/forgot-password" className="underline">
+                Forgot your password?
+              </Link>
+            </p>
+            <p className="text-center text-sm text-muted-foreground">
               New here?{" "}
               <Link href="/register" className="underline">
                 Create an account

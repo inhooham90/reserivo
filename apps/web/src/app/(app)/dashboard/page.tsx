@@ -1,146 +1,77 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { createSalonSchema, type CreateSalonInput, type MySalon } from "@reserivo/shared";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { MySalon } from "@reserivo/shared";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
-import type { z } from "zod";
-import { FieldError } from "@/components/field-error";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { CreateSalonCard } from "@/components/salon/create-salon-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { api, ApiError } from "@/lib/api";
-import { rolesLabel } from "@/lib/format";
+import { api } from "@/lib/api";
+import { readCurrentSalon } from "@/lib/current-salon";
 
+/**
+ * Where signing in lands. Staff go straight to a schedule — that is the screen
+ * they live in. Someone with no salon gets the first-run screen instead, since
+ * for them the only useful next step is creating one or seeing their own bookings.
+ */
 export default function DashboardPage() {
+  const router = useRouter();
   const salons = useQuery({ queryKey: ["salons", "mine"], queryFn: () => api<MySalon[]>("/salons/mine") });
 
-  return (
-    <div className="grid gap-6 md:grid-cols-[1fr_360px]">
-      <section className="grid gap-3">
-        <h1 className="text-xl font-semibold">Your salons</h1>
-        {salons.isPending && <p className="text-muted-foreground">Loading…</p>}
-        {salons.isError && <p className="text-destructive">Could not load your salons.</p>}
-        {salons.data?.length === 0 && (
-          <p className="text-muted-foreground">You are not part of any salon yet. Create one to get started.</p>
-        )}
-        {salons.data?.map((s) => (
-          <Link key={s.id} href={`/s/${s.id}`}>
-            <Card className="transition-colors hover:bg-accent">
-              <CardHeader>
-                <CardTitle>{s.name}</CardTitle>
-                <CardDescription>
-                  /{s.slug} · {s.timezone} · {rolesLabel(s.roles)}
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
-        ))}
-      </section>
-      <CreateSalonCard />
-    </div>
-  );
-}
+  const list = salons.data;
+  useEffect(() => {
+    if (!list || list.length === 0) return;
+    // Return to wherever they were last, as long as they still work there.
+    const remembered = readCurrentSalon();
+    const salon = list.find((s) => s.id === remembered) ?? list[0];
+    router.replace(`/s/${salon.id}/calendar`);
+  }, [list, router]);
 
-function CreateSalonCard() {
-  const queryClient = useQueryClient();
-  const [serverError, setServerError] = useState<string | null>(null);
-  const timezones = useMemo(() => Intl.supportedValuesOf("timeZone"), []);
-  const browserZone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone, []);
-
-  // takesAppointments has a schema default, so the form's input type is looser than its output.
-  const form = useForm<z.input<typeof createSalonSchema>, unknown, CreateSalonInput>({
-    resolver: zodResolver(createSalonSchema),
-    defaultValues: { name: "", slug: "", timezone: browserZone, takesAppointments: true },
-  });
-
-  const create = useMutation({
-    mutationFn: (input: CreateSalonInput) => api<MySalon>("/salons", { method: "POST", json: input }),
-    onSuccess: () => {
-      form.reset({ name: "", slug: "", timezone: browserZone, takesAppointments: true });
-      void queryClient.invalidateQueries({ queryKey: ["salons", "mine"] });
-    },
-    onError: (err) => setServerError(err instanceof ApiError ? err.message : "Something went wrong"),
-  });
-
-  // Suggest a slug from the name until the user edits the slug themselves.
-  const slugTouched = form.formState.dirtyFields.slug;
-  const onNameChange = (name: string) => {
-    if (!slugTouched) form.setValue("slug", slugify(name), { shouldValidate: false });
-  };
-
-  return (
-    <Card className="self-start">
-      <CardHeader>
-        <CardTitle>Create a salon</CardTitle>
-        <CardDescription>You become its first manager.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form
-          onSubmit={form.handleSubmit((v) => {
-            setServerError(null);
-            create.mutate(v);
-          })}
-          className="grid gap-4"
-          noValidate
-        >
-          <div className="grid gap-1.5">
-            <Label htmlFor="salon-name">Name</Label>
-            <Input
-              id="salon-name"
-              {...form.register("name", { onChange: (e) => onNameChange(e.target.value) })}
-            />
-            <FieldError message={form.formState.errors.name?.message} />
-          </div>
-          <div className="grid gap-1.5">
-            <Label htmlFor="salon-slug">Booking URL</Label>
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <span>/</span>
-              <Input id="salon-slug" {...form.register("slug")} />
-            </div>
-            <FieldError message={form.formState.errors.slug?.message} />
-          </div>
-          <div className="grid gap-1.5">
-            <Label htmlFor="salon-tz">Time zone</Label>
-            <select
-              id="salon-tz"
-              className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-              {...form.register("timezone")}
-            >
-              {timezones.map((tz) => (
-                <option key={tz} value={tz}>
-                  {tz}
-                </option>
-              ))}
-            </select>
-            <FieldError message={form.formState.errors.timezone?.message} />
-          </div>
-          <label className="flex items-start gap-2 text-sm">
-            <input type="checkbox" className="mt-0.5" {...form.register("takesAppointments")} />
-            <span>
-              I also take appointments myself
-              <span className="block text-xs text-muted-foreground">Solo operators and owner-stylists. You can change this later under Team.</span>
-            </span>
-          </label>
-          <FieldError message={serverError ?? undefined} />
-          <Button type="submit" disabled={create.isPending}>
-            {create.isPending ? "Creating…" : "Create salon"}
+  if (salons.isError) {
+    return (
+      <Card className="mx-auto mt-8 max-w-md">
+        <CardHeader>
+          <CardTitle>Couldn’t load your salons</CardTitle>
+          <CardDescription>Check your connection and try again.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-3">
+          <Button className="justify-self-start" onClick={() => void salons.refetch()}>
+            Retry
           </Button>
-        </form>
-      </CardContent>
-    </Card>
-  );
-}
+          <p className="text-sm text-muted-foreground">
+            Or go to{" "}
+            <Link href="/appointments" className="underline">
+              your appointments
+            </Link>
+            .
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
-function slugify(s: string) {
-  return s
-    .toLowerCase()
-    .normalize("NFKD")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/[\s-]+/g, "-")
-    .slice(0, 50);
+  if (list && list.length === 0) {
+    return (
+      <div className="mx-auto grid max-w-xl gap-4">
+        <div>
+          <h1 className="text-2xl">Welcome to Reserivo</h1>
+          <p className="text-sm text-muted-foreground">
+            Set up your salon and you’ll get a booking page to share with clients. It takes a minute.
+          </p>
+        </div>
+        <CreateSalonCard title="Create your salon" description="You become its manager, and can invite your team next." />
+        <p className="text-sm text-muted-foreground">
+          Here as a client instead?{" "}
+          <Link href="/appointments" className="underline">
+            See your appointments
+          </Link>
+          .
+        </p>
+      </div>
+    );
+  }
+
+  return <p className="text-muted-foreground">Opening your schedule…</p>;
 }

@@ -7,8 +7,11 @@ import type { TenantContext } from '../tenancy/tenant.types.js';
 import { AuditService } from './audit.service.js';
 
 const MUTATING = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
-/** Auth endpoints hand out credentials; their bodies are never worth persisting. */
-const SKIP_PREFIXES = ['/auth/'];
+/**
+ * Endpoints that hand out credentials: their bodies are never worth
+ * persisting, and impersonation writes its own labelled row instead.
+ */
+const SKIP_PREFIXES = ['/auth/', '/admin/impersonate/'];
 
 type AuditedRequest = Request & { user?: AuthenticatedUser; tenant?: TenantContext };
 

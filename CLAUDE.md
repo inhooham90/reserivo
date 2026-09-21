@@ -20,7 +20,11 @@ See README.md for how to run things. This file is the non-obvious stuff.
 - **Past slots are never offered.** Staff availability uses `notBefore = now` (no lead time, but no past); the public path adds the salon's lead time on top. The staff calendar shades gone time and refuses placement there. Booking a past time is still possible through the raw API, so a retroactive walk-in record stays available to a future admin path.
 - **The slot engine is pure.** `availability/slot-engine.ts` takes rules, exceptions, busy intervals and policies and returns slots; `SlotsService` does the I/O. Public booking is valid only if the requested `startAt` is one of the slots the engine would offer *right now* — that one check enforces hours, lead time, max advance, grid alignment and known conflicts. Staff bookings skip the engine and rely on the constraint alone.
 - **All wall-clock ⇄ instant conversion goes through `packages/shared/src/time.ts`** (`localToUtc`, `utcToLocal`). Do not call `date-fns-tz` elsewhere in the API.
-- **`@OptionalAuth()`** populates `req.user` when a token is present and leaves it `null` otherwise; used by public booking so signed-in customers get linked. Registration also claims guest `Customer` rows with the same email.
+- **`@OptionalAuth()`** populates `req.user` when a token is present and leaves it `null` otherwise; used by public booking so signed-in customers get linked.
+- **Nothing is matched to a person by email until the address is confirmed.** Registering proves nothing about owning an address, so `ownedBy()` (exported from `appointments.service.ts`, used there and by the relay) falls back to `userId` alone while `emailVerified` is false. Guest `Customer` rows are claimed at verification, never at registration. Undoing this re-opens a real hole: anyone could sign up as someone@example.com and read their guest bookings and conversations.
+- **Account links are `UserTokensService`**: high-entropy, SHA-256 stored, single-use, expiring (24h to confirm, 1h to reset), and issuing a new one retires the outstanding one. A reset also revokes every refresh token and counts as confirming the address.
+- **`/auth/forgot-password` always returns 204**, known address or not — anything else is an account-enumeration oracle.
+- **Rate limiting** is `@nestjs/throttler`: a 300/min default with far tighter `@Throttle` budgets on credential endpoints. It is **skipped when `NODE_ENV=test`** (set in both vitest configs) because the suite makes more credential calls in seconds than a human could, so throttling is verified by hand against a running container, not in tests.
 - **Staff see customer names; managers see contact fields.** `toStaffView(row, isManager)` / `toCustomer(row, includeContact)` are the only places that decide, and designers' calendars must never include `customer.email`/`phone`.
 - **Notifications go through `NotificationsService.emit`** (fire-and-forget). Transport is chosen at boot: `ResendTransport` when `RESEND_API_KEY` is set, otherwise `LogTransport`. Templates live in `notifications/templates.ts`; a message aimed at a designer carries the customer's display name only, and relay emails never include the chat body — they are nudges with a link.
 - **The relay never reveals who typed.** `Message.actorUserId` is the real author; `sentAsMembershipId` is the thread's designer. `threadMine` (customer view) exposes `fromName` only; `threadStaff` adds `writtenBy` when a manager wrote as the designer. Customers can open a thread only with a designer at a salon that has them on record (they booked); staff can open one only with customers who have an account (`Customer.userId`).
@@ -29,8 +33,42 @@ See README.md for how to run things. This file is the non-obvious stuff.
 - **shadcn/ui v4 is on Base UI, not Radix.** There is no `asChild`; compose with `render={<Link href="…" />}`. Components are in `apps/web/src/components/ui`.
 - **Timestamps are UTC `timestamptz`.** `Salon.timezone` (IANA) is for rendering only.
 
+## Site admin
+
+- **`SITE_ADMIN_EMAILS` is how you become one.** A comma-separated list, applied on boot to accounts that already exist (`SiteAdminBootstrap`) and at registration to newcomers (`AuthService.register`). **Grant-only** — removing an address never demotes anyone, so a hand-promoted admin survives. There is still no endpoint that grants the flag. `JwtStrategy` re-reads the user per request, so it takes effect immediately.
+- **`SiteAdminGuard` protects `/admin/*`** and refuses while impersonating, so an act-as session can never reach admin tools.
+- **Impersonation is `AuthService.impersonationToken`**: an access token with an `act` claim and **no refresh cookie**. It therefore expires with the access token, and `POST /auth/refresh` — which still uses the admin's own untouched cookie — is what ends it. Never issue a refresh token alongside one. Admins cannot act as themselves or as another admin.
+- **Never point the e2e suite at a real database.** It writes freely, and since Phase 4 it also creates accounts holding `isSiteAdmin` (`phase4.e2e-spec.ts`, `site-admin-bootstrap.e2e-spec.ts`). Harmless in the dev database, unacceptable anywhere else.
+- **Every impersonated action is attributed twice.** `AuditService` writes `actorUserId` = the real admin and `impersonatedUserId` = the user. The switch itself writes `admin.impersonate.start`; `/admin/impersonate/` is in the interceptor's skip list so there is exactly one row and no token in it.
+
+## Information architecture
+
+- **Signing in lands on a schedule, not a dashboard.** `/dashboard` is a redirector: it sends staff to `/s/{id}/calendar` (the salon they last used, remembered in `localStorage` via `lib/current-salon.ts` and always re-validated against `/salons/mine`), and renders the first-run create-a-salon screen for anyone with no membership. Don't turn it back into a landing page.
+- **Salon tabs are day-to-day only**: Schedule, Customers, Messages, Settings. Anything configured once — team, services, hours, salon info, switching or creating salons — lives under `/s/{id}/settings/*` with its own side nav.
+- **The header salon switcher only appears with more than one salon**, so single-salon users never see it. Settings → Your salons is the full version.
+
+## Legal pages and SMS compliance
+
+- **`lib/legal.ts` is the single source** for company name, address, support email and jurisdiction; `/terms` and `/privacy` render from it. Those placeholders must be real before launch.
+- **Three texts have to agree**: the booking page's consent checkbox, the "Text messages" section of the privacy policy, and what is filed with Twilio for A2P 10DLC. Change one and change all three, or a carrier audit finds the mismatch.
+- **The consent checkbox is always rendered**, disabled until a mobile number is entered, and never pre-ticked. Hiding it entirely made the opt-in invisible to anyone reviewing the page.
+- **Root paths are reserved** (`RESERVED_SLUGS` in `packages/shared/src/salon.ts`). A salon slug of `terms` or `login` would be shadowed by a static route and its booking page would never load. Add to that list whenever a new root page is added.
+- **SMS failures are split.** `SmsPermanentError` (any 4xx from Twilio) keeps the reminder claim so we stop retrying; anything else releases it for the next sweep. Code `21610` means the recipient replied STOP, so consent is cleared as well — the carrier already blocks us and our record should say the same.
+
+## Reminders
+
+- **A cron sweep, not a queue of scheduled jobs.** `RemindersService.sweep(now)` asks the database what is owed; `RemindersScheduler` runs it every five minutes. Reschedules and cancellations need no bookkeeping, a restart loses nothing, and two instances racing is settled by the database. `sweep` takes its clock as an argument, which is what makes it testable. If retry backoff or dedicated workers are ever needed, this is the seam to swap for BullMQ — Redis is already in compose and still otherwise unused.
+- **`AppointmentReminder` is the idempotency guarantee.** Unique on `(appointmentId, hoursBefore, channel)`. The sweep *claims the row before sending* and deletes it if the send throws, so a failure retries and a success can never double-send.
+- **An appointment booked after its reminder was due gets no reminder** (`createdAt >= dueAt`) — otherwise booking two hours out would instantly fire the day-before notice.
+- **Never text without consent.** US law (TCPA) requires express opt-in, so `Customer.smsConsentAt` must be set, the customer must have a number, and Twilio must be configured. The booking checkbox is never pre-ticked, and unticking it withdraws consent immediately. SMS bodies stay under one 160-character segment and carry a STOP notice.
+- **Twilio is called over `fetch`**, not the SDK — it is one form POST, and the runtime image stays smaller. US delivery additionally needs the number registered for A2P 10DLC or carriers filter it; that is account setup, not code.
+
 ## Styling
 
+- **Accessibility floor.** Token pairs are held to WCAG AA: 4.5:1 for text, 3:1 for control boundaries and focus rings. `scratchpad/contrast.mjs` in the session notes shows the method — convert OKLCH to linear sRGB, compute relative luminance, compare. Re-measure after touching any colour token.
+- **`--input` and `--border` are not interchangeable.** `--input` draws *control* boundaries (inputs, textareas, outline buttons) and must clear 3:1. `--border` is decoration — dividers, card edges — and stays soft on purpose. Putting a control on `--border` silently drops it below the line.
+- **Focus rings must be opaque.** `ring-ring/50` on a near-white ground cannot reach 3:1 at any colour — even pure black manages only 1.9:1. The ui components use `ring-ring`; do not reintroduce the alpha.
+- **Type scale**: `--text-xs` and `--text-sm` are overridden upward (13px and 15px) in `@theme`, because the dense screens lean on them. Heading steps are untouched.
 - **Tokens, not colors.** All color/radius/font decisions live as CSS variables in `apps/web/src/app/globals.css`. Components use `bg-primary`, `text-muted-foreground`, etc. Never a raw hex/oklch in a page or component.
 - **Direction: warm & editorial.** Warm off-white ground, warm charcoal text, one muted terracotta accent, 0.5rem radius. Body/UI font is Geist (`font-sans`); headings use Fraunces via `font-heading`.
 - **Dark mode follows the OS** (`prefers-color-scheme`). There is no manual toggle; if one is added, switch the `dark` custom variant to class-based and add `next-themes`.
@@ -43,9 +81,21 @@ See README.md for how to run things. This file is the non-obvious stuff.
 - After editing `packages/shared`, restart the `api` container; the `shared` service rebuilds `dist/` but Nest does not re-resolve it.
 - **Windows bind mounts emit no inotify events**, so every watcher in compose polls: `api` and `shared` set `TSC_WATCHFILE`/`TSC_WATCHDIRECTORY`, and `web` runs `next dev --webpack` with `WATCHPACK_POLLING` because Turbopack cannot poll. On Linux/WSL you can drop `--webpack` for faster builds. Moving the repo into the WSL filesystem is the real fix.
 - Compose passes unset variables as **empty strings** (`${VAR:-}`), so optional env vars must accept `""` as absent — see `RESEND_API_KEY` in `config/env.ts`. A plain `z.string().min(1).optional()` crashes the api at boot.
+- **`apps/api/.env` beats a real environment variable** in this ConfigModule setup: `SITE_ADMIN_EMAILS=x npm run test:e2e` is ignored in favour of the file. It does not affect compose (the image has no `.env` — `.dockerignore` excludes it, so `environment:` wins), but it means host-side tests cannot vary config through `process.env`. Stub `ConfigService.get` or construct the service directly instead; see `test/site-admin-bootstrap.e2e-spec.ts`.
 - Headless screenshots: `msedge --headless=new --user-data-dir=<tmp> --screenshot=… --blink-settings=preferredColorScheme=1` (1 = light, 0 = dark). Without its own `--user-data-dir` it silently hands off to the running Edge and writes nothing.
 - `apps/api/.env` is for host-side tooling (tests, prisma CLI). Inside compose the same vars come from `compose.yaml`.
+- **`nest build` crashes on Node 22** (`ERR_REQUIRE_CYCLE_MODULE` from `@angular-devkit/schematics` requiring ESM-only `ora`). We use no CLI build plugins, so the api's `build` script is plain `tsc -p tsconfig.build.json`, which emits the same `dist/main.js`. `nest start --watch` is unaffected and still runs in dev.
+- **`NEXT_PUBLIC_*` is baked into the browser bundle at build time**, so `NEXT_PUBLIC_API_URL` is a Docker build arg in `apps/web/Dockerfile`, not a runtime variable. Pointing production at a different API means rebuilding the web image.
 
 ## Roadmap
 
-Phase 0 Foundations ✅ → 1 Salon setup (invites, services, hours) ✅ → 2 Booking core (slot engine, exclusion constraint, public booking, staff calendar) ✅ → 3 CRM + message relay + Resend email ✅ (availability engine, exclusion constraint) → 3 CRM + message relay → 4 Admin console (act-as) → 5 Growth (reminders, no-shows, Stripe deposits).
+- Phase 0 — Foundations: workspaces, Postgres, auth, tenancy guard, audit log ✅
+- Phase 1 — Salon setup: invites, role sets, services, hours ✅
+- Phase 2 — Booking core: slot engine, exclusion constraint, public booking, staff calendar ✅
+- Phase 3 — CRM, message relay, Resend email ✅
+- Phase 4 — Admin console: search, act-as, audit viewer ✅
+- Phase 5 — Launch readiness: email confirmation, password reset, rate limiting, production images ✅
+- Phase 6 — Accessibility pass and appointment reminders (email now, SMS behind Twilio config) ✅
+- Next — Stripe deposits, reviews, salon suspend; all discussed, none built
+
+Not built yet, previously discussed: suspending a salon (needs `Salon.suspendedAt` plus enforcement on the public page and new bookings).

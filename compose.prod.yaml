@@ -1,0 +1,75 @@
+# Production-shaped stack.
+#
+#   docker compose -f compose.prod.yaml up -d --build
+#
+# Every secret comes from the environment and the stack refuses to start
+# without one — no defaults, so a missing value can never silently ship.
+# Redis is deliberately absent until reminders need a queue.
+#
+# The project name is pinned so this can never adopt the dev stack's
+# containers or, worse, its database volume.
+name: reserivo-prod
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-reserivo}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: "3001"
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-reserivo}
+      # Distinct, long, random. Rotating either signs everyone out.
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?set JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?set JWT_REFRESH_SECRET}
+      # Must be the browser-facing origins, or cookies and CORS will not line up.
+      CORS_ORIGIN: ${WEB_URL:?set WEB_URL}
+      WEB_URL: ${WEB_URL}
+      SITE_ADMIN_EMAILS: ${SITE_ADMIN_EMAILS:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:?set RESEND_API_KEY so confirmations and resets can be delivered}
+      EMAIL_FROM: ${EMAIL_FROM:?set EMAIL_FROM to an address on a domain verified with Resend}
+      # Optional: leave unset and reminders go out by email only.
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      TWILIO_FROM_NUMBER: ${TWILIO_FROM_NUMBER:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${API_PORT:-3001}:3001"
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        # Inlined into the browser bundle at build time, so changing it needs a rebuild.
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?set NEXT_PUBLIC_API_URL to the public API origin}
+    environment:
+      NODE_ENV: production
+      # Server components call the API over the internal network.
+      API_URL_INTERNAL: http://api:3001
+    depends_on:
+      - api
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

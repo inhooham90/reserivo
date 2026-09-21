@@ -154,14 +154,14 @@ export default function CalendarPage() {
     <div className="grid gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" onClick={() => setDate((d) => addDays(d, -1))}>
-            ←
+          <Button size="sm" variant="outline" aria-label="Previous day" onClick={() => setDate((d) => addDays(d, -1))}>
+            <span aria-hidden="true">←</span>
           </Button>
           <Button size="sm" variant="outline" onClick={() => setDate(todayIn(salon.timezone))}>
             Today
           </Button>
-          <Button size="sm" variant="outline" onClick={() => setDate((d) => addDays(d, 1))}>
-            →
+          <Button size="sm" variant="outline" aria-label="Next day" onClick={() => setDate((d) => addDays(d, 1))}>
+            <span aria-hidden="true">→</span>
           </Button>
           <Input type="date" className="w-40" value={date} onChange={(e) => e.target.value && setDate(e.target.value)} />
           <span className="text-sm text-muted-foreground">{formatLocalDate(date)}</span>

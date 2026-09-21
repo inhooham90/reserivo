@@ -13,6 +13,7 @@ type CustomerRow = {
   notes: string | null;
   tags: string[];
   userId: string | null;
+  smsConsentAt: Date | null;
   createdAt: Date;
 };
 
@@ -30,13 +31,17 @@ export class CustomersService {
   async resolveForBooking(
     salonId: string,
     user: AuthenticatedUser | null,
-    details: { name: string; email: string; phone?: string },
+    details: { name: string; email: string; phone?: string; smsConsent?: boolean },
   ): Promise<CustomerRow> {
+    // Consent is only recorded when explicitly given, and withdrawing it here
+    // takes effect immediately — the TCPA treats an opt-out as binding.
+    const smsConsentAt = details.smsConsent === undefined ? undefined : details.smsConsent ? new Date() : null;
+
     if (user) {
       return this.prisma.customer.upsert({
         where: { salonId_userId: { salonId, userId: user.id } },
-        update: { name: details.name, email: user.email, phone: details.phone ?? undefined },
-        create: { salonId, userId: user.id, name: details.name, email: user.email, phone: details.phone },
+        update: { name: details.name, email: user.email, phone: details.phone ?? undefined, smsConsentAt },
+        create: { salonId, userId: user.id, name: details.name, email: user.email, phone: details.phone, smsConsentAt },
       });
     }
 
@@ -44,10 +49,11 @@ export class CustomersService {
     if (existing) {
       return this.prisma.customer.update({
         where: { id: existing.id },
-        data: { name: details.name, phone: details.phone ?? existing.phone },
+        data: { name: details.name, phone: details.phone ?? existing.phone, smsConsentAt },
       });
     }
-    return this.prisma.customer.create({ data: { salonId, ...details } });
+    const { smsConsent: _consent, ...fields } = details;
+    return this.prisma.customer.create({ data: { salonId, ...fields, smsConsentAt } });
   }
 
   async search(tenant: TenantContext, query: CustomersQuery): Promise<Customer[]> {

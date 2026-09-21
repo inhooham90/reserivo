@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PublicFooter } from "@/components/legal/public-footer";
 import { Button } from "@/components/ui/button";
 
 /** Marketing landing for salon owners. Customers arrive via /{slug} links instead. */
@@ -18,6 +19,7 @@ export default function Home() {
           Sign in
         </Button>
       </div>
+      <PublicFooter />
     </main>
   );
 }

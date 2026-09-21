@@ -4,6 +4,7 @@ import { addDays, localToUtc, todayIn } from '@reserivo/shared';
 import cookieParser from 'cookie-parser';
 import request from 'supertest';
 import { AppModule } from '../src/app.module.js';
+import { NotificationsService } from '../src/notifications/notifications.service.js';
 
 const LA = 'America/Los_Angeles';
 
@@ -184,9 +185,23 @@ describe('Phase 2 (e2e)', () => {
     expect(mine.body.map((a: { id: string }) => a.id)).toEqual([clientApptId]);
   });
 
-  it('a guest who later registers with the same email sees their booking', async () => {
+  it('a guest who registers must confirm the address before their booking appears', async () => {
+    const spy = vi.spyOn(app.get(NotificationsService), 'emit');
     const reg = await api().post('/auth/register').send({ email: guestEmail, password: pw, name: 'Gia Guest' }).expect(201);
-    const mine = await api().get('/me/appointments').set(auth(reg.body.accessToken)).expect(200);
+    expect(reg.body.user.emailVerified).toBe(false);
+
+    // Signing up with an address proves nothing about owning it, so nothing is linked yet.
+    const before = await api().get('/me/appointments').set(auth(reg.body.accessToken)).expect(200);
+    expect(before.body).toEqual([]);
+
+    const sent = spy.mock.calls.map((c) => c[0]).find((e) => e.type === 'auth.verify_email');
+    spy.mockRestore();
+    if (!sent || !('link' in sent.data)) throw new Error('no confirmation email was sent');
+    const token = new URL(sent.data.link).searchParams.get('token');
+
+    const verified = await api().post('/auth/verify-email').send({ token }).expect(200);
+    expect(verified.body.user.emailVerified).toBe(true);
+    const mine = await api().get('/me/appointments').set(auth(verified.body.accessToken)).expect(200);
     expect(mine.body.map((a: { id: string }) => a.id)).toEqual([guestApptId]);
   });
 

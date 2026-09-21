@@ -64,6 +64,50 @@ export function render(event: NotificationEvent, webUrl: string): RenderedEmail 
         html: wrap('Appointment cancelled', lines, cta),
       };
     }
+    case 'appointment.reminder': {
+      const d = event.data;
+      const at = when(d.startAt, d.timezone);
+      const lead = d.hoursBefore >= 24 ? `${Math.round(d.hoursBefore / 24)} day` : `${d.hoursBefore} hour`;
+      const lines = [
+        `Hi ${event.to.name},`,
+        `A reminder that you're booked for ${d.serviceName} with ${d.designerName} at ${d.salonName}.`,
+        at,
+        'Need to change it? Use the link below.',
+      ];
+      const cta = { label: 'View or cancel', href: d.link };
+      return {
+        subject: `Reminder: ${d.serviceName} at ${d.salonName}`,
+        text: `${lines.join('\n\n')}\n\n${cta.href}`,
+        html: wrap(`Your appointment is in about a ${lead}`, lines, cta),
+      };
+    }
+    case 'auth.verify_email': {
+      const hours = Math.round(event.data.expiresInMinutes / 60);
+      const lines = [
+        `Hi ${event.to.name},`,
+        'Confirm this address so we can show you your bookings and let salons reach you.',
+        `The link works once and expires in ${hours} hour${hours === 1 ? '' : 's'}.`,
+      ];
+      const cta = { label: 'Confirm my email', href: event.data.link };
+      return {
+        subject: 'Confirm your email · Reserivo',
+        text: `${lines.join('\n\n')}\n\n${cta.href}`,
+        html: wrap('Confirm your email', lines, cta),
+      };
+    }
+    case 'auth.password_reset': {
+      const lines = [
+        `Hi ${event.to.name},`,
+        `Use the link below to choose a new password. It works once and expires in ${event.data.expiresInMinutes} minutes.`,
+        'If you did not ask for this, you can ignore this email — nothing has changed.',
+      ];
+      const cta = { label: 'Choose a new password', href: event.data.link };
+      return {
+        subject: 'Reset your Reserivo password',
+        text: `${lines.join('\n\n')}\n\n${cta.href}`,
+        html: wrap('Reset your password', lines, cta),
+      };
+    }
     case 'message.received': {
       const d = event.data;
       // Deliberately no message body: the email is a nudge, the conversation lives in the app.

@@ -2,6 +2,7 @@ import type { PublicSalon } from "@reserivo/shared";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BookingFlow } from "@/components/booking/booking-flow";
+import { PublicFooter } from "@/components/legal/public-footer";
 import { serverApi } from "@/lib/api-server";
 import { summarizeHours } from "@/lib/format";
 
@@ -25,6 +26,7 @@ export default async function SalonPublicPage({ params }: Props) {
         <p className="text-muted-foreground">Choose a service to see available times.</p>
       </header>
       <BookingFlow salon={salon} />
+      <PublicFooter />
     </main>
   );
 }

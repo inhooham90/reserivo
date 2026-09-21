@@ -23,6 +23,28 @@ export type NotificationEvent =
       };
     }
   | {
+      /** Account links. `link` carries a single-use token and is never logged. */
+      type: 'auth.verify_email' | 'auth.password_reset';
+      to: Recipient;
+      data: { link: string; expiresInMinutes: number };
+    }
+  | {
+      type: 'appointment.reminder';
+      to: Recipient;
+      data: {
+        appointmentId: string;
+        salonName: string;
+        designerName: string;
+        serviceName: string;
+        startAt: string;
+        timezone: string;
+        /** How far ahead this reminder is going out, so the wording can match. */
+        hoursBefore: number;
+        /** Where the customer can cancel or reschedule. */
+        link: string;
+      };
+    }
+  | {
       type: 'message.received';
       to: Recipient;
       data: {

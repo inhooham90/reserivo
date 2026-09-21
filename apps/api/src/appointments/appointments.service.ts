@@ -30,6 +30,15 @@ import type { TenantContext } from '../tenancy/tenant.types.js';
 
 const DOUBLE_BOOKING_CONSTRAINT = 'appointments_no_double_booking';
 
+/**
+ * Which customer records belong to this person. Matching by email requires a
+ * confirmed address — otherwise signing up as someone@example.com would hand
+ * over that person's guest bookings.
+ */
+export function ownedBy(user: AuthenticatedUser) {
+  return user.emailVerified ? { OR: [{ userId: user.id }, { email: user.email }] } : { userId: user.id };
+}
+
 /** The DB refused an overlapping PENDING/CONFIRMED appointment for the same designer. */
 function isDoubleBooking(err: unknown): boolean {
   const msg = err instanceof Error ? err.message : String(err);
@@ -124,10 +133,10 @@ export class AppointmentsService {
 
   // ---------- Customer (signed in) ----------
 
-  /** Bookings made with this account, plus guest bookings made with the same email. */
+  /** Bookings made with this account, plus guest bookings on a *confirmed* address. */
   async listMine(user: AuthenticatedUser): Promise<CustomerAppointment[]> {
     const rows = await this.prisma.appointment.findMany({
-      where: { customer: { OR: [{ userId: user.id }, { email: user.email }] } },
+      where: { customer: ownedBy(user) },
       include: APPT_INCLUDE,
       orderBy: { startAt: 'desc' },
       take: 100,
@@ -137,7 +146,7 @@ export class AppointmentsService {
 
   async cancelMine(user: AuthenticatedUser, id: string): Promise<CustomerAppointment> {
     const row = await this.prisma.appointment.findFirst({
-      where: { id, customer: { OR: [{ userId: user.id }, { email: user.email }] } },
+      where: { id, customer: ownedBy(user) },
       include: APPT_INCLUDE,
     });
     if (!row) throw new NotFoundException('Appointment not found');

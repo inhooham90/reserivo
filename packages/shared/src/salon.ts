@@ -1,12 +1,35 @@
 import { z } from 'zod';
 import { salonRolesSchema } from './roles';
 
+/**
+ * Paths the web app already owns at the root. A salon taking one of these
+ * would be shadowed by the static route and its booking page would never load.
+ */
+const RESERVED_SLUGS = new Set([
+  'admin',
+  'api',
+  'appointments',
+  'dashboard',
+  'forgot-password',
+  'invite',
+  'login',
+  'messages',
+  'privacy',
+  'register',
+  'reset-password',
+  's',
+  'settings',
+  'terms',
+  'verify-email',
+]);
+
 /** URL-safe identifier used at /{slug}. Lowercase letters, digits, single hyphens. */
 export const salonSlugSchema = z
   .string()
   .min(3)
   .max(50)
-  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use lowercase letters, numbers and single hyphens');
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use lowercase letters, numbers and single hyphens')
+  .refine((slug) => !RESERVED_SLUGS.has(slug), { message: 'That address is reserved — pick another' });
 
 /** IANA zone like "America/Los_Angeles". Validated against the runtime's zone list. */
 export const timezoneSchema = z.string().refine(
@@ -31,6 +54,11 @@ export const salonPoliciesSchema = z.object({
   maxAdvanceDays: z.number().int().min(1).max(365),
   /** How many hours before the start a customer may still self-cancel. */
   cancelWindowHours: z.number().int().min(0).max(24 * 14),
+  /** Hours before the start to remind the customer. Empty turns reminders off. */
+  reminderHoursBefore: z
+    .array(z.number().int().min(1).max(168))
+    .max(3)
+    .transform((hours) => Array.from(new Set(hours)).sort((a, b) => b - a)),
 });
 export type SalonPolicies = z.infer<typeof salonPoliciesSchema>;
 
