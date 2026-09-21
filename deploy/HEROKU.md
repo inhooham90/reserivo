@@ -115,33 +115,69 @@ separate, so it is the public API origin rather than an internal hostname.
 
 ## 4. Custom domains
 
+The three domains are **already added to Heroku**:
+
 ```powershell
 heroku domains:add api.reserivo.com -a reserivo-api
 heroku domains:add reserivo.com -a reserivo-web
 heroku domains:add www.reserivo.com -a reserivo-web
 ```
 
-Each command prints a DNS target ending in `herokudns.com`. In Namecheap's
-Advanced DNS, add:
+### The Namecheap records
 
-| Type  | Host  | Value                    |
-|-------|-------|--------------------------|
-| CNAME | `api` | the API app's DNS target |
-| CNAME | `www` | the web app's DNS target |
-| ALIAS | `@`   | the web app's DNS target |
+Namecheap → Domain List → **reserivo.com** → Manage → **Advanced DNS** → Host
+Records. Every target is unique to its hostname; they are not interchangeable.
 
-A root domain cannot be a CNAME; Namecheap's **ALIAS Record** type is the way
-round it and works on their BasicDNS.
+| Type            | Host  | Value                                                          | TTL       |
+|-----------------|-------|----------------------------------------------------------------|-----------|
+| ALIAS Record    | `@`   | `shrouded-date-wddud7nwy26fs7oobbnhwnew.herokudns.com`         | Automatic |
+| CNAME Record    | `www` | `fluffy-pear-ag5mahj9uo2nishg2b24o413.herokudns.com`           | Automatic |
+| CNAME Record    | `api` | `cylindrical-mayflower-k5gfadg9r54dnju25v7n9nmq.herokudns.com` | Automatic |
 
-**Leave the existing MX and TXT records alone.** `reserivo.com` is a Google
-Workspace alias domain and mail to it breaks if those go.
+A root domain cannot be a CNAME. Namecheap's **ALIAS Record** type is the way
+round it and works on their BasicDNS, which is what this domain uses
+(`pdns1/pdns2.registrar-servers.com`).
 
-Certificates are automatic once DNS resolves:
+### Delete these if present
+
+Namecheap adds them to new domains and both will fight the records above:
+
+- **CNAME `www` → `parkingpage.namecheap.com`**
+- **URL Redirect Record on `@`**
+
+Also turn off any Domain Parking on the domain.
+
+### Do not touch these
+
+`reserivo.com` is a Google Workspace alias domain. Mail to it dies if these
+go, and Google may un-verify the domain:
+
+| Type | Host | Value                                                                 |
+|------|------|-----------------------------------------------------------------------|
+| MX   | `@`  | `1 smtp.google.com`                                                   |
+| TXT  | `@`  | `google-site-verification=C2GXEfisVKykn-ohOFva6KXElwGU4sULlyRkjsbBThU` |
+
+Resend will ask for its own records on a `send` subdomain. Those are additive
+and safe to add in the same sitting.
+
+### After DNS resolves
+
+Certificates are issued automatically, then the app has to be told its real
+origins. The web image must be rebuilt because the API origin is compiled into
+the browser bundle.
 
 ```powershell
 heroku certs:auto:enable -a reserivo-api
 heroku certs:auto:enable -a reserivo-web
+
+heroku config:set -a reserivo-api WEB_URL=https://reserivo.com
+heroku config:set -a reserivo-web API_URL_INTERNAL=https://api.reserivo.com
+
+.\deploy\heroku-deploy.ps1 -ApiOrigin https://api.reserivo.com
 ```
+
+`CORS_ORIGIN` already lists both `reserivo.com` and `www.reserivo.com`, so it
+needs no change.
 
 ## 5. Deploy
 
