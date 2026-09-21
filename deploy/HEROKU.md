@@ -4,19 +4,18 @@ Two Heroku apps built from the Dockerfiles already in this repo, `reserivo-api`
 and `reserivo-web`, plus Heroku Postgres. Roughly $19/month: two Basic dynos at
 $7 and an `essential-0` database at $5.
 
-**This is already deployed and running.** Steps 1 to 3 and 5 are done, and
-step 7 (backups) is on. What is left is section 4, the custom domains, which
-needs DNS at Namecheap and one web rebuild afterwards.
+**This is live on its custom domains.** Every step below is done, including
+DNS, certificates and backups. It is kept as the record of how the stack is
+put together and how to rebuild it.
 
 | | |
 |---|---|
-| API | https://reserivo-api-e04c6a11001e.herokuapp.com |
-| Web | https://reserivo-web-95d8b262c913.herokuapp.com |
+| Web | https://reserivo.com (and www) |
+| API | https://api.reserivo.com |
+| Heroku origins | `reserivo-web-95d8b262c913`, `reserivo-api-e04c6a11001e` |
 
-The config vars below show the **custom-domain** values. What is live right now
-points at those herokuapp origins instead, with `reserivo.com` and
-`www.reserivo.com` already in the `CORS_ORIGIN` allowlist so the cutover only
-needs `WEB_URL`, `API_URL_INTERNAL` and one web rebuild.
+The one thing still missing is `RESEND_API_KEY` — see step 2. Until it is set
+no email is actually sent, so nobody can confirm an account.
 
 Everything below is idempotent. Re-running a step is never destructive except
 where it says otherwise.
@@ -231,6 +230,18 @@ additive. Before shipping one that drops or rewrites a column, capture a backup
 first and assume rollback will not save you.
 
 ## Gotchas
+
+- **A missing certificate looks like a CORS bug.** Before ACM issued, the
+  browser fell back to `http://reserivo.com`, which is not in `CORS_ORIGIN`
+  and never will be. The symptom was an `OPTIONS` preflight returning 204 with
+  no `Access-Control-Allow-Origin` header and no `POST` following it, which
+  reads as "I cannot create an account". Fix the certificate, never widen the
+  allowlist to plain http.
+- **Split the app across two herokuapp.com subdomains and sessions break.**
+  `herokuapp.com` is on the Public Suffix List, so `reserivo-web-*` and
+  `reserivo-api-*` are different *sites* and the refresh cookie
+  (`SameSite=Lax`) is dropped. `reserivo.com` and `api.reserivo.com` share a
+  registrable domain, so the custom domains are what make login actually work.
 
 - **PowerShell parsing.** Unquoted commas become arrays and `\` is not a line
   continuation, which is why step 2 builds an array and splats it. If you hit
