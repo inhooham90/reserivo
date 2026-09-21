@@ -56,6 +56,7 @@ services:
       DATABASE_URL: postgresql://reserivo:reserivo@postgres:5432/reserivo
       REDIS_URL: redis://redis:6379
       CORS_ORIGIN: http://localhost:3000
+      WEB_URL: http://localhost:3000
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev-access-secret-change-me}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev-refresh-secret-change-me}
       # Bind mounts from Windows deliver no inotify events; tsc must poll.

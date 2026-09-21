@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import type { CreateSalonInput, MySalon, Salon } from '@reserivo/shared';
+import type { CreateSalonInput, MySalon, PublicSalon, Salon } from '@reserivo/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
@@ -40,11 +40,34 @@ export class SalonsService {
     return this.toSalon(salon);
   }
 
-  /** Public lookup for the booking page at /{slug}. */
-  async getBySlug(slug: string): Promise<Salon> {
-    const salon = await this.prisma.salon.findUnique({ where: { slug } });
+  /**
+   * Public lookup for the booking page at /{slug}: the salon, its bookable
+   * members and their active services. Deliberately selects no user fields, so
+   * an email or phone can never ride along.
+   */
+  async getBySlug(slug: string): Promise<PublicSalon> {
+    const salon = await this.prisma.salon.findUnique({
+      where: { slug },
+      include: {
+        memberships: {
+          where: { status: 'ACTIVE', acceptsBookings: true },
+          orderBy: { displayName: 'asc' },
+          select: {
+            id: true,
+            displayName: true,
+            bio: true,
+            photoUrl: true,
+            services: {
+              where: { active: true },
+              orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+              select: { id: true, name: true, category: true, description: true, priceCents: true, durationMin: true },
+            },
+          },
+        },
+      },
+    });
     if (!salon) throw new NotFoundException();
-    return this.toSalon(salon);
+    return { ...this.toSalon(salon), designers: salon.memberships };
   }
 
   private toSalon(s: { id: string; name: string; slug: string; timezone: string; createdAt: Date }): Salon {

@@ -6,6 +6,8 @@ const envSchema = z.object({
   DATABASE_URL: z.url(),
   REDIS_URL: z.url().optional(),
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
+  /** Public web origin, used to build links we hand to users (invites). */
+  WEB_URL: z.url().default('http://localhost:3000'),
   JWT_ACCESS_SECRET: z.string().min(16),
   JWT_REFRESH_SECRET: z.string().min(16),
   JWT_ACCESS_TTL_SECONDS: z.coerce.number().int().positive().default(15 * 60),

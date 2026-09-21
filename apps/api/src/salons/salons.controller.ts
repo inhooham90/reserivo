@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { createSalonSchema, type CreateSalonInput, type MySalon, type Salon } from '@reserivo/shared';
+import { createSalonSchema, type CreateSalonInput, type MySalon, type PublicSalon, type Salon } from '@reserivo/shared';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { CurrentUser } from '../common/decorators/current-user.decorator.js';
 import { Public } from '../common/decorators/public.decorator.js';
@@ -28,7 +28,7 @@ export class SalonsController {
   /** Public: what the booking page needs before anyone logs in. */
   @Public()
   @Get('by-slug/:slug')
-  getBySlug(@Param('slug') slug: string): Promise<Salon> {
+  getBySlug(@Param('slug') slug: string): Promise<PublicSalon> {
     return this.salons.getBySlug(slug);
   }
 

@@ -9,7 +9,10 @@ See README.md for how to run things. This file is the non-obvious stuff.
 - **Tenancy goes through the guard.** Any route scoped to a salon takes `:salonId` and uses `@SalonRoles(...)`; services read `salonId` from `@Tenant()`, never from the body.
 - **Public routes are explicit.** `JwtAuthGuard` is global; opt out with `@Public()`.
 - **Audit is automatic.** `AuditInterceptor` logs every mutating request. Call `AuditService.record` directly only when you need a real before/after diff.
-- **Designers never receive customer contact fields.** No select, DTO, or notification template that reaches a DESIGNER role may include customer `phone` or `email`.
+- **Designers never receive customer contact fields.** No select, DTO, or notification template that reaches a DESIGNER role may include customer `phone` or `email`. The public `/salons/by-slug` payload selects no user fields at all.
+- **Any member can own services and hours.** "Designer" in `Service.designerId` / availability means a `SalonMembership` of either role — owner-stylists are the norm. `acceptsBookings=false` hides a member from the booking page. Managers act on anyone via `assertCanManageMember`; others only on themselves.
+- **Hours are local minutes.** `AvailabilityRule`/`Exception` store minutes-from-midnight in `Salon.timezone`; exception dates are plain `YYYY-MM-DD`. Nothing is converted to UTC until a concrete slot is computed.
+- **Invites return the URL once.** Only the SHA-256 of the token is stored; the audit redactor already masks `token` params.
 - **Prisma 7.** Config is `apps/api/prisma.config.ts`; client is the `prisma-client` generator with the `pg` adapter. Regenerate with `npm run -w api prisma:generate` after schema edits.
 - **shadcn/ui v4 is on Base UI, not Radix.** There is no `asChild`; compose with `render={<Link href="…" />}`. Components are in `apps/web/src/components/ui`.
 - **Timestamps are UTC `timestamptz`.** `Salon.timezone` (IANA) is for rendering only.
@@ -32,4 +35,4 @@ See README.md for how to run things. This file is the non-obvious stuff.
 
 ## Roadmap
 
-Phase 0 Foundations ✅ → 1 Salon setup (invites, services, hours) → 2 Booking core (availability engine, exclusion constraint) → 3 CRM + message relay → 4 Admin console (act-as) → 5 Growth (reminders, no-shows, Stripe deposits).
+Phase 0 Foundations ✅ → 1 Salon setup (invites, services, hours) ✅ → 2 Booking core (availability engine, exclusion constraint) → 3 CRM + message relay → 4 Admin console (act-as) → 5 Growth (reminders, no-shows, Stripe deposits).

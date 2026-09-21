@@ -1,8 +1,9 @@
-// Reserivo data model — Phase 0: identity, tenancy, audit.
+// Reserivo data model.
 // Every tenant-scoped table carries salonId. Roles live on SalonMembership,
 // never on User (one person can be a customer at one salon and a designer at
 // another). Timestamps are timestamptz (UTC); Salon.timezone is the IANA zone
-// used for rendering.
+// used for rendering. Working hours are local wall-clock minutes, resolved
+// against Salon.timezone only when a concrete date is involved.
 
 generator client {
   provider = "prisma-client"
@@ -27,8 +28,9 @@ model User {
 
   memberships   SalonMembership[]
   refreshTokens RefreshToken[]
-  auditActions  AuditLog[] @relation("AuditActor")
-  auditSubject  AuditLog[] @relation("AuditImpersonated")
+  invitesSent   Invitation[]
+  auditActions  AuditLog[]        @relation("AuditActor")
+  auditSubject  AuditLog[]        @relation("AuditImpersonated")
 
   @@map("users")
 }
@@ -61,6 +63,8 @@ model Salon {
   updatedAt DateTime @updatedAt @db.Timestamptz(6)
 
   memberships SalonMembership[]
+  invitations Invitation[]
+  services    Service[]
   auditLogs   AuditLog[]
 
   @@map("salons")
@@ -77,24 +81,121 @@ enum MembershipStatus {
   REMOVED
 }
 
-/// A user's role within one salon. Designer profile fields live here too.
+/// A user's role within one salon. Profile fields live here too. Any member
+/// (manager or designer) can own services and hours — owner-stylists are the
+/// norm; acceptsBookings=false hides a member from the public booking page.
 model SalonMembership {
-  id          String           @id @default(uuid()) @db.Uuid
-  salonId     String           @db.Uuid
-  userId      String           @db.Uuid
-  role        SalonRole
-  status      MembershipStatus @default(ACTIVE)
-  displayName String
-  bio         String?
-  createdAt   DateTime         @default(now()) @db.Timestamptz(6)
-  updatedAt   DateTime         @updatedAt @db.Timestamptz(6)
+  id              String           @id @default(uuid()) @db.Uuid
+  salonId         String           @db.Uuid
+  userId          String           @db.Uuid
+  role            SalonRole
+  status          MembershipStatus @default(ACTIVE)
+  displayName     String
+  bio             String?
+  photoUrl        String?
+  acceptsBookings Boolean          @default(true)
+  createdAt       DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime         @updatedAt @db.Timestamptz(6)
 
   salon Salon @relation(fields: [salonId], references: [id], onDelete: Cascade)
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  services               Service[]
+  availabilityRules      AvailabilityRule[]
+  availabilityExceptions AvailabilityException[]
+
   @@unique([salonId, userId])
   @@index([userId])
   @@map("salon_memberships")
+}
+
+/// Manager-issued invite to join a salon. Only the token hash is stored; the
+/// raw token appears once in the invite URL. Single use, expires.
+model Invitation {
+  id              String    @id @default(uuid()) @db.Uuid
+  salonId         String    @db.Uuid
+  email           String
+  role            SalonRole
+  tokenHash       String    @unique
+  invitedByUserId String?   @db.Uuid
+  expiresAt       DateTime  @db.Timestamptz(6)
+  acceptedAt      DateTime? @db.Timestamptz(6)
+  revokedAt       DateTime? @db.Timestamptz(6)
+  createdAt       DateTime  @default(now()) @db.Timestamptz(6)
+
+  salon     Salon @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  invitedBy User? @relation(fields: [invitedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([salonId, email])
+  @@map("invitations")
+}
+
+// ---------- Catalog ----------
+
+/// A bookable service offered by one member. Price in integer cents.
+model Service {
+  id          String   @id @default(uuid()) @db.Uuid
+  salonId     String   @db.Uuid
+  designerId  String   @db.Uuid
+  name        String
+  category    String?
+  description String?
+  priceCents  Int
+  durationMin Int
+  bufferMin   Int      @default(0)
+  active      Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(6)
+
+  salon    Salon           @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  designer SalonMembership @relation(fields: [designerId], references: [id], onDelete: Cascade)
+
+  @@index([salonId])
+  @@index([designerId, active])
+  @@map("services")
+}
+
+// ---------- Availability ----------
+
+/// Recurring weekly working window. weekday 0=Sun…6=Sat; minutes are local
+/// wall-clock minutes from midnight in the salon's timezone.
+model AvailabilityRule {
+  id           String @id @default(uuid()) @db.Uuid
+  salonId      String @db.Uuid
+  designerId   String @db.Uuid
+  weekday      Int
+  startMinutes Int
+  endMinutes   Int
+
+  designer SalonMembership @relation(fields: [designerId], references: [id], onDelete: Cascade)
+
+  @@index([designerId, weekday])
+  @@map("availability_rules")
+}
+
+enum ExceptionType {
+  OFF
+  CUSTOM
+}
+
+/// Overrides the weekly rules for one local calendar date: a day off, or a
+/// custom window that replaces that day's rules.
+model AvailabilityException {
+  id           String        @id @default(uuid()) @db.Uuid
+  salonId      String        @db.Uuid
+  designerId   String        @db.Uuid
+  date         DateTime      @db.Date
+  type         ExceptionType
+  startMinutes Int?
+  endMinutes   Int?
+  note         String?
+  createdAt    DateTime      @default(now()) @db.Timestamptz(6)
+
+  designer SalonMembership @relation(fields: [designerId], references: [id], onDelete: Cascade)
+
+  @@index([designerId, date])
+  @@map("availability_exceptions")
 }
 
 // ---------- Audit ----------

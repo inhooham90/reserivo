@@ -49,3 +49,26 @@ export type SalonMembership = z.infer<typeof salonMembershipSchema>;
 /** What a logged-in user sees in their salon switcher. */
 export const mySalonSchema = salonSchema.extend({ role: salonRoleSchema });
 export type MySalon = z.infer<typeof mySalonSchema>;
+
+/** The booking page payload: salon + bookable team + their live services. No contact fields, ever. */
+export const publicSalonSchema = salonSchema.extend({
+  designers: z.array(
+    z.object({
+      id: z.string(),
+      displayName: z.string(),
+      bio: z.string().nullable(),
+      photoUrl: z.string().nullable(),
+      services: z.array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+          category: z.string().nullable(),
+          description: z.string().nullable(),
+          priceCents: z.number().int(),
+          durationMin: z.number().int(),
+        }),
+      ),
+    }),
+  ),
+});
+export type PublicSalon = z.infer<typeof publicSalonSchema>;

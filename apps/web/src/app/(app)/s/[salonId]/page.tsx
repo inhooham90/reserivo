@@ -1,35 +1,52 @@
 "use client";
 
-import type { MySalon, Salon } from "@reserivo/shared";
+import type { Service } from "@reserivo/shared";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
+import Link from "next/link";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/lib/api";
+import { salonKeys, useSalon } from "@/lib/salon-context";
 
-/** Salon home. Phase 1 fills this in with services, hours and team. */
-export default function SalonPage() {
-  const { salonId } = useParams<{ salonId: string }>();
-  const salon = useQuery({ queryKey: ["salons", salonId], queryFn: () => api<Salon>(`/salons/${salonId}`) });
-  const mine = useQuery({ queryKey: ["salons", "mine"], queryFn: () => api<MySalon[]>("/salons/mine") });
-  const role = mine.data?.find((s) => s.id === salonId)?.role;
+/** Salon home: a quick read on setup progress. Bookings land here in Phase 2. */
+export default function SalonOverviewPage() {
+  const { salon, members, me, isManager } = useSalon();
+  const services = useQuery({
+    queryKey: salonKeys.services(salon.id),
+    queryFn: () => api<Service[]>(`/salons/${salon.id}/services`),
+  });
 
-  if (salon.isPending) return <p className="text-muted-foreground">Loading…</p>;
-  if (salon.isError) return <p className="text-destructive">You do not have access to this salon.</p>;
+  const bookable = members.filter((m) => m.acceptsBookings).length;
+  const activeServices = services.data?.filter((s) => s.active).length ?? 0;
+  const base = `/s/${salon.id}`;
 
   return (
-    <div className="grid gap-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>{salon.data.name}</CardTitle>
-          <CardDescription>
-            Booking page: <code>/{salon.data.slug}</code> · {salon.data.timezone}
-            {role && <> · You are a {role === "MANAGER" ? "manager" : "designer"} here</>}
-          </CardDescription>
-        </CardHeader>
-      </Card>
-      <p className="text-sm text-muted-foreground">
-        Services, working hours and team management arrive in Phase 1.
-      </p>
+    <div className="grid gap-4 sm:grid-cols-3">
+      <Link href={`${base}/team`}>
+        <Card className="h-full transition-colors hover:bg-accent">
+          <CardHeader>
+            <CardTitle>{members.length} on the team</CardTitle>
+            <CardDescription>
+              {bookable} bookable · {isManager ? "Invite designers and manage roles" : "See who you work with"}
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </Link>
+      <Link href={`${base}/services`}>
+        <Card className="h-full transition-colors hover:bg-accent">
+          <CardHeader>
+            <CardTitle>{activeServices} active services</CardTitle>
+            <CardDescription>{me ? "Set what you offer, prices and durations" : "The salon menu"}</CardDescription>
+          </CardHeader>
+        </Card>
+      </Link>
+      <Link href={`${base}/hours`}>
+        <Card className="h-full transition-colors hover:bg-accent">
+          <CardHeader>
+            <CardTitle>Working hours</CardTitle>
+            <CardDescription>Weekly schedule and days off, in {salon.timezone}</CardDescription>
+          </CardHeader>
+        </Card>
+      </Link>
     </div>
   );
 }
