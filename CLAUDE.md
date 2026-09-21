@@ -83,6 +83,16 @@ See README.md for how to run things. This file is the non-obvious stuff.
 - **Dark mode follows the OS** (`prefers-color-scheme`). There is no manual toggle; if one is added, switch the `dark` custom variant to class-based and add `next-themes`.
 - **Two moods, one system.** The dashboard is a dense tool. The public booking page `/{slug}` is a storefront: larger type, more whitespace, and it must keep working when `--primary` is overridden per salon (future salon branding). Don't hard-code brand color on that route.
 
+## Deployment
+
+- **Heroku, two container apps** (`reserivo-api`, `reserivo-web`) plus Heroku Postgres. The runbook is `deploy/HEROKU.md`; `deploy/heroku-deploy.sh` is the repeatable build-push-release. `compose.prod.yaml` still works and stays the reference for a single-box deploy.
+- **`DATABASE_SSL` defaults to `off` and must be `no-verify` on Heroku.** Managed Postgres requires TLS but presents a certificate signed by its own CA, which Node will not trust. Defaulting it on anywhere would be a silent downgrade, so a wrong value fails the boot loudly instead. It is applied in *two* places for two different connections: `postgresSsl()` feeds the node-postgres pool in `PrismaService`, and `prisma.config.ts` rewrites the URL for the CLI that runs `migrate deploy`.
+- **`prisma.config.ts` must stay self-contained.** The runtime image ships `dist/` and that file but **no `src/`**, so importing a helper from `src/` works locally and crashes the container before the app starts. Its copy of the SSL logic is deliberate duplication.
+- **Heroku's registry rejects buildx's default output.** Build with `--platform linux/amd64 --provenance=false --sbom=false` or the push fails on the attestation manifest. The deploy script already does.
+- **Migrations run at dyno boot** (the API image's `CMD`). Correct at one dyno, a race at two — move them to a release-phase image before scaling out.
+- **`NEXT_PUBLIC_API_URL` is compiled into the browser bundle**, so the web image is tied to one API origin and changing it needs a rebuild, not a config var.
+- **Smoke-test the production stack before shipping**: `docker compose -p reserivo-prodsmoke -f compose.prod.yaml --env-file <throwaway> up -d` on spare ports, then `down -v`. A distinct project name keeps it away from the dev volume.
+
 ## Gotchas
 
 - `.npmrc` sets `legacy-peer-deps=true` to dodge an npm 10 arborist crash (`edgesOut` of null) on this dependency graph. Keep it until the host npm is upgraded.

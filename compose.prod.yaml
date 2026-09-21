@@ -34,6 +34,9 @@ services:
       NODE_ENV: production
       PORT: "3001"
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-reserivo}
+      # Plaintext is right for a Postgres on the same private network. A managed
+      # provider needs "no-verify" — see DATABASE_SSL in apps/api/src/config/env.ts.
+      DATABASE_SSL: ${DATABASE_SSL:-off}
       # Distinct, long, random. Rotating either signs everyone out.
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?set JWT_ACCESS_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?set JWT_REFRESH_SECRET}

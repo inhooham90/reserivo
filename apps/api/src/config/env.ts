@@ -7,6 +7,20 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(3001),
   DATABASE_URL: z.url(),
+  /**
+   * How to talk TLS to Postgres.
+   *   off       — plaintext. Right for the local container, wrong anywhere else.
+   *   require   — TLS, certificate verified against the system CA store.
+   *   no-verify — TLS, certificate *not* verified.
+   *
+   * Managed providers (Heroku among them) require TLS but present a
+   * certificate their own CA signed, which Node will not trust, so 'no-verify'
+   * is the only setting that connects. It protects the traffic from passive
+   * eavesdropping but not from an active machine-in-the-middle, which is the
+   * accepted trade on those platforms because the hop is inside their network.
+   * Never default this on: a silent downgrade is worse than a failed boot.
+   */
+  DATABASE_SSL: z.enum(['off', 'require', 'no-verify']).default('off'),
   REDIS_URL: z.url().optional(),
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
   /** Email delivery. Unset RESEND_API_KEY → notifications are logged, not sent. */
@@ -56,4 +70,13 @@ export function validateEnv(config: Record<string, unknown>): Env {
     throw new Error(`Invalid environment:\n${z.prettifyError(result.error)}`);
   }
   return result.data;
+}
+
+/**
+ * node-postgres `ssl` option for a DATABASE_SSL setting. Returns false rather
+ * than undefined for 'off' so the intent is explicit in the pool config.
+ */
+export function postgresSsl(mode: Env['DATABASE_SSL']): false | true | { rejectUnauthorized: false } {
+  if (mode === 'off') return false;
+  return mode === 'require' ? true : { rejectUnauthorized: false };
 }
