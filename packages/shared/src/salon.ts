@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { designerRatingSchema } from './rating';
 import { salonRolesSchema } from './roles';
 
 /**
@@ -120,6 +121,8 @@ export const publicSalonSchema = salonSchema.extend({
       displayName: z.string(),
       bio: z.string().nullable(),
       photoUrl: z.string().nullable(),
+      /// Prior-weighted score; see rating.ts. Every designer has one.
+      rating: designerRatingSchema,
       services: z.array(
         z.object({
           id: z.string(),

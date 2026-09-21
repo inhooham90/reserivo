@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { RatingSummary } from "@/components/rating/stars";
 import { useFormat } from "@/lib/use-format";
 import { cn } from "cn";
 
@@ -70,7 +71,10 @@ export function BookingFlow({ salon }: { salon: PublicSalon }) {
       {withServices.map((d) => (
         <section key={d.id} className="grid gap-4">
           <div className="grid gap-1">
-            <h2 className="text-2xl">{d.displayName}</h2>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <h2 className="text-2xl">{d.displayName}</h2>
+              <RatingSummary rating={d.rating} />
+            </div>
             {d.bio && <p className="max-w-prose text-muted-foreground">{d.bio}</p>}
           </div>
           <ul className="divide-y rounded-xl border bg-card">

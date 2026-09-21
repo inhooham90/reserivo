@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useState } from "react";
 import { FieldError } from "@/components/field-error";
+import { RateDesigner } from "@/components/rating/rate-designer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -103,6 +104,11 @@ export default function MyAppointmentsPage() {
               </span>
               <span className="flex items-center gap-2">
                 <Badge variant="outline">{f.status(a.status)}</Badge>
+                {/* Only a finished visit can be rated, and the API checks the same
+                    thing — a cancelled or missed appointment is no basis for a score. */}
+                {a.status === "COMPLETED" && (
+                  <RateDesigner designerId={a.designerId} designerName={a.designerName} />
+                )}
                 <Button size="xs" variant="ghost" disabled={message.isPending} onClick={() => message.mutate(a)}>
                   Message
                 </Button>

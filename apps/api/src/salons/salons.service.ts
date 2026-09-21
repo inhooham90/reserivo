@@ -1,6 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import type { CreateSalonInput, MySalon, PublicSalon, Salon, SalonRole, UpdateSalonInput } from '@reserivo/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { RatingsService } from '../ratings/ratings.service.js';
 import { SalonHoursService } from '../salon-hours/salon-hours.service.js';
 
 @Injectable()
@@ -8,6 +9,7 @@ export class SalonsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly salonHours: SalonHoursService,
+    private readonly ratings: RatingsService,
   ) {}
 
   /**
@@ -79,7 +81,13 @@ export class SalonsService {
       },
     });
     if (!salon) throw new NotFoundException();
-    return { ...this.toSalon(salon), hours: salon.hours, designers: salon.memberships };
+
+    // One grouped query for the whole page. Every designer gets a score even
+    // with no ratings, because the prior means one always exists.
+    const scores = await this.ratings.forDesigners(salon.memberships.map((m) => m.id));
+    const designers = salon.memberships.map((m) => ({ ...m, rating: scores.get(m.id)! }));
+
+    return { ...this.toSalon(salon), hours: salon.hours, designers };
   }
 
   /** Managers edit identity and booking policies. */

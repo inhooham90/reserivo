@@ -19,6 +19,7 @@ import { NotificationsModule } from './notifications/notifications.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { RemindersModule } from './reminders/reminders.module.js';
 import { SalonHoursModule } from './salon-hours/salon-hours.module.js';
+import { RatingsModule } from './ratings/ratings.module.js';
 import { SalonsModule } from './salons/salons.module.js';
 import { ServicesModule } from './services/services.module.js';
 
@@ -38,6 +39,7 @@ import { ServicesModule } from './services/services.module.js';
     NotificationsModule,
     AuthModule,
     SalonHoursModule,
+    RatingsModule,
     SalonsModule,
     MembersModule,
     InvitationsModule,

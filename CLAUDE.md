@@ -42,6 +42,16 @@ See README.md for how to run things. This file is the non-obvious stuff.
 - **shadcn/ui v4 is on Base UI, not Radix.** There is no `asChild`; compose with `render={<Link href="…" />}`. Components are in `apps/web/src/components/ui`.
 - **Timestamps are UTC `timestamptz`.** `Salon.timezone` (IANA) is for rendering only.
 
+## Designer ratings
+
+- **The score is never the plain mean.** Every designer starts as though they held ten 4-star ratings (`RATING_PRIOR_STARS` = 4, `RATING_PRIOR_WEIGHT` = 10 in `packages/shared/src/rating.ts`). Ten real 5s land on 4.5, not 5.0; a single 1-star against a designer with 25 ratings only pulls them to 4.60. Without the prior the first client to rate would set the public number outright. Both constants are a product decision — changing either moves every designer's score, which is why `src/ratings/rating.spec.ts` pins the arithmetic.
+- **One client, one rating per designer**, enforced by a unique index on `(designerId, customerId)`; rating again overwrites. Per-visit ratings were considered and rejected: a regular with twenty appointments would outvote twenty separate first-time clients.
+- **You may only rate a designer who has finished a service for you.** The check is a `COMPLETED` appointment — the only record that says the visit actually happened — and the customer is resolved through `Customer.userId` only, never by matching an email. Matching on an unconfirmed address would let someone rate off a stranger's history, the same hole `ownedBy()` exists to close.
+- **Nothing is denormalised.** The score comes from one grouped aggregate per page load, so it cannot drift from the rows behind it.
+- **The count is hidden below `RATING_COUNT_VISIBLE_FROM` (3), and hidden on the server**, not in the UI — a number a client is not meant to see never reaches their browser. A new designer shows "4.0" with no count, so it reads as a starting point rather than as praise somebody gave them.
+- **No comments, and no author anywhere.** Designers see an aggregate only. Adding written reviews is a much larger feature than it looks: moderation, an abuse path, a right of reply, and every comment becomes user text in four languages.
+- **Ratings hang off `me/`, not `salons/:salonId`.** That tree runs through the tenancy guard, which asks "is this person staff here?" — a client rating a designer never is.
+
 ## Site admin
 
 - **`SITE_ADMIN_EMAILS` is how you become one.** A comma-separated list, applied on boot to accounts that already exist (`SiteAdminBootstrap`) and at registration to newcomers (`AuthService.register`). **Grant-only** — removing an address never demotes anyone, so a hand-promoted admin survives. There is still no endpoint that grants the flag. `JwtStrategy` re-reads the user per request, so it takes effect immediately.

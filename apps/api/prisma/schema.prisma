@@ -112,6 +112,7 @@ model Salon {
   auditLogs       AuditLog[]
 
   @@map("salons")
+  designerRatings DesignerRating[]
 }
 
 /// The shop's opening hours. Shared by every manager; designers' personal
@@ -183,6 +184,7 @@ model SalonMembership {
   availabilityExceptions AvailabilityException[]
   appointments           Appointment[]
   conversations          Conversation[]
+  ratings                DesignerRating[]
 
   @@unique([salonId, userId])
   @@index([userId])
@@ -270,6 +272,7 @@ model Customer {
   user          User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
   appointments  Appointment[]
   conversations Conversation[]
+  ratings       DesignerRating[]
 
   @@unique([salonId, userId])
   @@index([salonId, email])
@@ -496,4 +499,37 @@ model AuditLog {
   @@index([salonId, createdAt])
   @@index([entityType, entityId])
   @@map("audit_logs")
+}
+
+/// A client's rating of one designer, one to five stars.
+///
+/// Unique on (designerId, customerId): a client holds a single rating per
+/// designer and updating it overwrites, rather than one rating per visit. That
+/// was a deliberate choice — per-visit would let a regular with twenty
+/// appointments outvote twenty separate first-time clients.
+///
+/// The displayed score is never the plain mean of these rows. It is weighted
+/// against a prior of ten 4-star ratings; see bayesianStars() in
+/// packages/shared/src/rating.ts.
+///
+/// There is no comment field and no author shown anywhere. Designers see an
+/// aggregate only, which keeps this in line with the rest of the product:
+/// a designer never learns which client said what.
+model DesignerRating {
+  id         String   @id @default(uuid()) @db.Uuid
+  salonId    String   @db.Uuid
+  /// The SalonMembership being rated, not a User.
+  designerId String   @db.Uuid
+  customerId String   @db.Uuid
+  stars      Int
+  createdAt  DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @db.Timestamptz(6)
+
+  salon    Salon           @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  designer SalonMembership @relation(fields: [designerId], references: [id], onDelete: Cascade)
+  customer Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([designerId, customerId])
+  @@index([designerId])
+  @@map("designer_ratings")
 }
