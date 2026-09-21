@@ -14,8 +14,8 @@ put together and how to rebuild it.
 | API | https://api.reserivo.com |
 | Heroku origins | `reserivo-web-95d8b262c913`, `reserivo-api-e04c6a11001e` |
 
-The one thing still missing is `RESEND_API_KEY` — see step 2. Until it is set
-no email is actually sent, so nobody can confirm an account.
+Email is live: Resend is configured and sending as `noreply@reserivo.com`.
+Text reminders are still off until Twilio is registered.
 
 Everything below is idempotent. Re-running a step is never destructive except
 where it says otherwise.
@@ -31,8 +31,11 @@ where it says otherwise.
 
 - `heroku login`
 - Docker running
-- A Resend-verified sending domain. Use a subdomain such as `send.reserivo.com`
-  so it cannot affect Google Workspace mail on `reserivo.com`
+- A Resend-verified sending domain. **`reserivo.com` itself is the verified
+  one**, not a subdomain: Resend signs with DKIM at
+  `resend._domainkey.reserivo.com` and uses `send.reserivo.com` only as the
+  bounce return path, which it sets up itself. Google Workspace mail is
+  unaffected because the apex carries no SPF record of its own
 - DNS for `reserivo.com` is at **Namecheap**, not Google Admin
 
 ## 1. Create the apps
@@ -65,7 +68,7 @@ $vars = @(
   "CORS_ORIGIN=https://reserivo.com,https://www.reserivo.com",
   "SITE_ADMIN_EMAILS=james@akkija.com",
   "RESEND_API_KEY=re_your_key_here",
-  "EMAIL_FROM=Reserivo <noreply@send.reserivo.com>"
+  "EMAIL_FROM=Reserivo <noreply@reserivo.com>"
 )
 
 heroku config:set -a reserivo-api @vars
@@ -87,13 +90,19 @@ traffic without verifying the certificate. It is the accepted trade on Heroku
 because the hop stays inside their network. The default is `off`, so nothing
 silently downgrades anywhere else.
 
-`RESEND_API_KEY` is **not set yet**, which is why it is listed above but was
-not applied. Without it the app boots fine and writes every email to the log
-instead of sending it — so account confirmation and password reset do not work
-until you add it:
+Without `RESEND_API_KEY` the app boots fine and writes every email to the log
+instead of sending it, so account confirmation and password reset silently do
+nothing. The boot log says which it picked: `Email via Resend` or
+`No RESEND_API_KEY — notifications are logged only`.
+
+`EMAIL_FROM` **must be on a domain verified in Resend** or every send is
+rejected with a 403. The production key is send-only, so it cannot list
+domains — the only way to find out which are verified is to attempt a send. A
+rejected attempt delivers nothing, so probing is safe:
 
 ```powershell
-heroku config:set -a reserivo-api RESEND_API_KEY=re_your_key_here "EMAIL_FROM=Reserivo <noreply@send.reserivo.com>"
+$body = @{ from = "Reserivo <noreply@reserivo.com>"; to = @("you@example.com"); subject = "check"; text = "check" } | ConvertTo-Json
+Invoke-RestMethod -Method Post -Uri https://api.resend.com/emails -Body $body -ContentType application/json -Headers @{ Authorization = "Bearer $env:RESEND_API_KEY" }
 ```
 
 Text reminders stay off until all three Twilio values are set, and the app is
