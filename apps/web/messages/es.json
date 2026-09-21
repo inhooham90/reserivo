@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "title": "Reserivo",
+    "description": "Reservas en línea para peluquerías y salones de uñas."
+  },
+  "common": {
+    "loading": "Cargando…",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "language": "Idioma"
+  },
+  "labels": {
+    "role": {
+      "MANAGER": "Gerente",
+      "DESIGNER": "Estilista",
+      "OWNER_STYLIST": "Propietario-estilista"
+    },
+    "status": {
+      "PENDING": "Pendiente",
+      "CONFIRMED": "Confirmada",
+      "COMPLETED": "Completada",
+      "CANCELLED": "Cancelada",
+      "NO_SHOW": "No asistió"
+    },
+    "payment": {
+      "CARD": "Tarjeta",
+      "CASH": "Efectivo",
+      "GIFT_CARD": "Tarjeta regalo",
+      "MOBILE_PAY": "Pago móvil",
+      "OTHER": "Otro"
+    }
+  }
+}

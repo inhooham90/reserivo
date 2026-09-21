@@ -4,14 +4,22 @@ import { salonRolesSchema } from './roles';
 /**
  * Paths the web app already owns at the root. A salon taking one of these
  * would be shadowed by the static route and its booking page would never load.
+ *
+ * The language codes are here for the same reason: `/ko/glow-salon` puts the
+ * locale in the first segment, so a salon named "ko" would be indistinguishable
+ * from Korean. English is reserved too even though it is unprefixed today, so
+ * switching to a prefix for every language stays a one-line change.
  */
 const RESERVED_SLUGS = new Set([
   'admin',
   'api',
   'appointments',
   'dashboard',
+  'en',
+  'es',
   'forgot-password',
   'invite',
+  'ko',
   'login',
   'messages',
   'privacy',
@@ -21,6 +29,7 @@ const RESERVED_SLUGS = new Set([
   'settings',
   'terms',
   'verify-email',
+  'zh',
 ]);
 
 /** URL-safe identifier used at /{slug}. Lowercase letters, digits, single hyphens. */

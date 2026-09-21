@@ -3,7 +3,7 @@
 import { Menu } from "@base-ui/react/menu";
 import type { MySalon } from "@reserivo/shared";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";

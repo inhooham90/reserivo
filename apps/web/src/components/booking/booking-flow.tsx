@@ -9,7 +9,7 @@ import {
   type PublicSalon,
 } from "@reserivo/shared";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useMemo, useState } from "react";
 import { FieldError } from "@/components/field-error";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import { formatCents, formatDuration, formatInTz, formatLocalDate, minutesLabel } from "@/lib/format";
+import { useFormat } from "@/lib/use-format";
 import { cn } from "cn";
 
 type Designer = PublicSalon["designers"][number];
@@ -33,6 +33,7 @@ const DAYS_SHOWN = 14;
  * type, plenty of air, and every color a token so a salon's accent can take over.
  */
 export function BookingFlow({ salon }: { salon: PublicSalon }) {
+  const f = useFormat();
   const [step, setStep] = useState<Step>({ kind: "pick" });
   const withServices = salon.designers.filter((d) => d.services.length > 0);
 
@@ -83,12 +84,12 @@ export function BookingFlow({ salon }: { salon: PublicSalon }) {
                   <span className="grid gap-0.5">
                     <span className="font-medium">{s.name}</span>
                     <span className="text-sm text-muted-foreground">
-                      {formatDuration(s.durationMin)}
+                      {f.duration(s.durationMin)}
                       {s.category ? ` · ${s.category}` : ""}
                       {s.description ? ` — ${s.description}` : ""}
                     </span>
                   </span>
-                  <span className="shrink-0 tabular-nums">{formatCents(s.priceCents)}</span>
+                  <span className="shrink-0 tabular-nums">{f.cents(s.priceCents)}</span>
                 </button>
               </li>
             ))}
@@ -100,6 +101,7 @@ export function BookingFlow({ salon }: { salon: PublicSalon }) {
 }
 
 function Summary({ designer, service, startAt, timezone }: { designer: Designer; service: Service; startAt?: string; timezone: string }) {
+  const f = useFormat();
   return (
     <div className="flex flex-wrap items-baseline justify-between gap-2 rounded-xl border bg-card px-5 py-4">
       <div className="grid gap-0.5">
@@ -107,11 +109,11 @@ function Summary({ designer, service, startAt, timezone }: { designer: Designer;
           {service.name} <span className="text-muted-foreground">with {designer.displayName}</span>
         </span>
         <span className="text-sm text-muted-foreground">
-          {formatDuration(service.durationMin)}
-          {startAt ? ` · ${formatInTz(startAt, timezone)}` : ""}
+          {f.duration(service.durationMin)}
+          {startAt ? ` · ${f.inTz(startAt, timezone)}` : ""}
         </span>
       </div>
-      <span className="tabular-nums">{formatCents(service.priceCents)}</span>
+      <span className="tabular-nums">{f.cents(service.priceCents)}</span>
     </div>
   );
 }
@@ -129,6 +131,7 @@ function TimePicker({
   onBack: () => void;
   onPick: (startAt: string) => void;
 }) {
+  const f = useFormat();
   const from = useMemo(() => todayIn(salon.timezone), [salon.timezone]);
   const [date, setDate] = useState(from);
 
@@ -158,6 +161,9 @@ function TimePicker({
           {Array.from({ length: DAYS_SHOWN }, (_, i) => addDays(from, i)).map((d) => {
             const count = days.find((x) => x.date === d)?.slots.length ?? 0;
             const active = d === date;
+            // Asked for as parts, never split out of a formatted string: the
+            // comma the old code cut on does not exist in every language.
+            const { weekday, rest } = f.localDateParts(d);
             return (
               <button
                 key={d}
@@ -170,8 +176,8 @@ function TimePicker({
                   "disabled:cursor-not-allowed disabled:opacity-40",
                 )}
               >
-                <span className="text-xs uppercase tracking-wide opacity-80">{formatLocalDate(d).split(",")[0]}</span>
-                <span className="font-medium">{formatLocalDate(d).split(", ")[1]}</span>
+                <span className="text-xs uppercase tracking-wide opacity-80">{weekday}</span>
+                <span className="font-medium">{rest}</span>
               </button>
             );
           })}
@@ -187,7 +193,7 @@ function TimePicker({
             Nothing open on this day.{" "}
             {firstOpen && firstOpen !== date && (
               <button type="button" className="underline" onClick={() => setDate(firstOpen)}>
-                Jump to {formatLocalDate(firstOpen)}
+                Jump to {f.localDate(firstOpen)}
               </button>
             )}
           </p>
@@ -196,12 +202,12 @@ function TimePicker({
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
             {selected.slots.map((s) => (
               <Button key={s.startAt} variant="outline" size="lg" onClick={() => onPick(s.startAt)}>
-                {minutesLabel(s.startMinutes)}
+                {f.minutes(s.startMinutes)}
               </Button>
             ))}
           </div>
         )}
-        <p className="text-xs text-muted-foreground">Times shown in {salon.timezone.replace("_", " ")}.</p>
+        <p className="text-xs text-muted-foreground">Times shown in {f.timezone(salon.timezone)}.</p>
       </div>
     </div>
   );
@@ -346,6 +352,7 @@ function Details({
 }
 
 function Confirmation({ appt }: { appt: CustomerAppointment }) {
+  const f = useFormat();
   const { user } = useAuth();
   return (
     <Card>
@@ -356,10 +363,10 @@ function Confirmation({ appt }: { appt: CustomerAppointment }) {
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
-        <p className="text-2xl">{formatInTz(appt.startAt, appt.salon.timezone, "EEEE, MMMM d · h:mm a")}</p>
+        <p className="text-2xl">{f.inTz(appt.startAt, appt.salon.timezone, "dateTimeLong")}</p>
         <p className="text-sm text-muted-foreground">
-          {formatCents(appt.priceCents)} · pay at the salon.
-          {appt.cancellableUntil && ` Cancel free online until ${formatInTz(appt.cancellableUntil, appt.salon.timezone)}.`}
+          {f.cents(appt.priceCents)} · pay at the salon.
+          {appt.cancellableUntil && ` Cancel free online until ${f.inTz(appt.cancellableUntil, appt.salon.timezone)}.`}
         </p>
         {user ? (
           <Button nativeButton={false} render={<Link href="/appointments" />} className="justify-self-start">

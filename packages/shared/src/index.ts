@@ -1,3 +1,4 @@
+export * from './locale';
 export * from './roles';
 export * from './auth';
 export * from './salon';

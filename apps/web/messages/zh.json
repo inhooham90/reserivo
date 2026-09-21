@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "title": "Reserivo",
+    "description": "美发与美甲沙龙在线预约。"
+  },
+  "common": {
+    "loading": "加载中…",
+    "save": "保存",
+    "cancel": "取消",
+    "language": "语言"
+  },
+  "labels": {
+    "role": {
+      "MANAGER": "店长",
+      "DESIGNER": "发型师",
+      "OWNER_STYLIST": "店主兼发型师"
+    },
+    "status": {
+      "PENDING": "待确认",
+      "CONFIRMED": "已确认",
+      "COMPLETED": "已完成",
+      "CANCELLED": "已取消",
+      "NO_SHOW": "未到店"
+    },
+    "payment": {
+      "CARD": "刷卡",
+      "CASH": "现金",
+      "GIFT_CARD": "礼品卡",
+      "MOBILE_PAY": "移动支付",
+      "OTHER": "其他"
+    }
+  }
+}

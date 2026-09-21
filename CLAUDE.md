@@ -75,6 +75,24 @@ See README.md for how to run things. This file is the non-obvious stuff.
 - **Never text without consent.** US law (TCPA) requires express opt-in, so `Customer.smsConsentAt` must be set, the customer must have a number, and Twilio must be configured. The booking checkbox is never pre-ticked, and unticking it withdraws consent immediately. SMS bodies stay under one 160-character segment and carry a STOP notice.
 - **Twilio is called over `fetch`**, not the SDK — it is one form POST, and the runtime image stays smaller. US delivery additionally needs the number registered for A2P 10DLC or carriers filter it; that is account setup, not code.
 
+## Languages
+
+The product ships in **English, Korean, Chinese (Simplified) and Spanish**. English is the default and the only unprefixed one.
+
+- **The locale list lives in `packages/shared/src/locale.ts`**, not in the web app, because the API needs the same one: a client's language is stored on their record and decides what language their confirmation and reminders are written in. Two copies would eventually mean a booking page someone can read and a reminder they cannot.
+- **URLs are `localePrefix: "as-needed"`.** English stays on the bare path so every booking link already printed on a card keeps working; the rest are prefixed (`/ko/glow-salon`). **`en`, `ko`, `zh` and `es` are in `RESERVED_SLUGS`** — the storefront is `/{slug}` at the root, so without that a salon named "ko" would be indistinguishable from Korean.
+- **Import `Link`, `useRouter`, `usePathname` and `redirect` from `@/i18n/navigation`, never from Next.** Next's own versions drop the prefix, which silently throws a Korean visitor back into English on the first click. `useParams`, `useSearchParams` and `notFound` read the request rather than build URLs, so they still come from `next/navigation`.
+- **Two kinds of text, two mechanisms.** Dates, times, money, durations and weekday names are *derived* from the locale — `Intl` already knows them in every language, and `lib/format.ts` is the only place that calls it. Roles, appointment statuses and payment methods are product vocabulary stored as enums, so they are written by hand under `labels` in `messages/*.json`. Components get both pre-bound from `useFormat()`.
+- **Never build a date by concatenating, and never parse a formatted one apart.** Both were real bugs: the booking page split a formatted date on its comma to get the weekday (Korean and Chinese have no comma there) and the calendar string-replaced `":00"` out of a time. Use `f.localDateParts()` and `f.hour()`. `format.ts` exposes named `DateStyle` presets precisely so no caller invents a date-fns pattern like `h:mm a`, which bakes in a 12-hour clock.
+- **Geist and Fraunces carry no CJK glyphs.** `[locale]/layout.tsx` adds a Noto face as `--font-cjk` on Korean and Chinese only, `preload: false`, so Latin locales never download it. The `var(--font-cjk, …)` fallbacks in `globals.css` are **not optional** — an undefined custom property invalidates the whole `font-family` declaration and would strip the font from every English page.
+- **A locale is not a market.** Currency is still hardcoded USD in `format.ts`; `Intl` will format it correctly per language, but it is still dollars.
+
+### Not done yet
+
+String extraction has barely started: `messages/*.json` holds `meta`, `common` and `labels` only. Roughly 670 further strings are still hardcoded English, plus ~1,470 words of legal prose. The API is entirely untranslated — no `Accept-Language` handling, ~60 exception messages that surface verbatim to users, 7 email templates and the SMS body. `users.locale` and `customers.locale` columns exist but nothing writes or reads them yet.
+
+Two decisions already taken: legal pages get translated with an **English-governs** clause, and outgoing email and SMS get translated **per client** off `customers.locale`. Note that a CJK SMS segment is 70 characters rather than 160, so translated reminders cost more per message, and `Reply STOP` is a carrier-mandated English keyword that must not be translated.
+
 ## Styling
 
 - **Accessibility floor.** Token pairs are held to WCAG AA: 4.5:1 for text, 3:1 for control boundaries and focus rings. `scratchpad/contrast.mjs` in the session notes shows the method — convert OKLCH to linear sRGB, compute relative luminance, compare. Re-measure after touching any colour token.

@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { LocaleSwitcher } from "@/components/layout/locale-switcher";
+import { Link } from "@/i18n/navigation";
 import { LEGAL } from "@/lib/legal";
 
 /**
@@ -21,6 +22,9 @@ export function PublicFooter() {
       <a href={`mailto:${LEGAL.supportEmail}`} className="underline">
         Contact
       </a>
+      {/* A client who cannot read the page needs this without signing in, so it
+          lives in the footer of every public page rather than the app header. */}
+      <LocaleSwitcher className="ml-auto" />
     </footer>
   );
 }

@@ -26,6 +26,9 @@ model User {
   passwordHash    String?
   name            String
   phone           String?
+  /// UI language for this account. A plain string, not an enum, so shipping a
+  /// new language needs no migration; reads narrow it with toLocale().
+  locale          String    @default("en")
   isSiteAdmin     Boolean   @default(false)
   createdAt       DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt       DateTime  @updatedAt @db.Timestamptz(6)
@@ -252,6 +255,11 @@ model Customer {
   phone     String?
   notes     String?
   tags      String[] @default([])
+  /// The language this client booked in. Their confirmations and reminders
+  /// are written in it, so it is stored per salon record rather than read off
+  /// the request — a reminder is sent days later, from a cron sweep that has
+  /// no browser to ask.
+  locale       String    @default("en")
   /// US law (TCPA) requires express consent before texting someone
   /// automatically. Null means no consent on file, so we never text them.
   smsConsentAt DateTime? @db.Timestamptz(6)

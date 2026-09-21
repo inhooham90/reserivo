@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "title": "Reserivo",
+    "description": "Online booking for hair and nail salons."
+  },
+  "common": {
+    "loading": "Loading…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "language": "Language"
+  },
+  "labels": {
+    "role": {
+      "MANAGER": "Manager",
+      "DESIGNER": "Designer",
+      "OWNER_STYLIST": "Owner-stylist"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "CONFIRMED": "Confirmed",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled",
+      "NO_SHOW": "No-show"
+    },
+    "payment": {
+      "CARD": "Card",
+      "CASH": "Cash",
+      "GIFT_CARD": "Gift card",
+      "MOBILE_PAY": "Mobile pay",
+      "OTHER": "Other"
+    }
+  }
+}

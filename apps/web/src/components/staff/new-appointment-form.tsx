@@ -18,8 +18,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api, ApiError } from "@/lib/api";
-import { formatCents, formatDuration, minutesLabel } from "@/lib/format";
 import { salonKeys, useSalon } from "@/lib/salon-context";
+import { useFormat } from "@/lib/use-format";
 import { cn } from "cn";
 
 /**
@@ -65,6 +65,7 @@ export function NewAppointmentForm({
   onCreated: () => void;
   onCancel: () => void;
 }) {
+  const f = useFormat();
   const { salon, members, me, isManager } = useSalon();
   const designers = members.filter((m) => m.roles.includes("DESIGNER"));
   const choosable = isManager ? designers : designers.filter((m) => m.id === me?.id);
@@ -166,13 +167,13 @@ export function NewAppointmentForm({
               {mine.length === 0 && <option value="">No active services for this designer</option>}
               {mine.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.name} · {formatDuration(s.durationMin)} · {formatCents(s.priceCents)}
+                  {s.name} · {f.duration(s.durationMin)} · {f.cents(s.priceCents)}
                 </option>
               ))}
             </select>
             {service && service.bufferMin > 0 && (
               <p className="text-xs text-muted-foreground">
-                Blocks {formatDuration(service.durationMin + service.bufferMin)} including {service.bufferMin} min cleanup.
+                Blocks {f.duration(service.durationMin + service.bufferMin)} including {service.bufferMin} min cleanup.
               </p>
             )}
           </div>
@@ -208,7 +209,7 @@ export function NewAppointmentForm({
             !onGrid &&
             availability.isSuccess && (
               <p className="text-xs text-muted-foreground">
-                {minutesLabel(minutes)} is outside published hours or off the slot grid — fine for staff, and nothing else is booked then.
+                {f.minutes(minutes)} is outside published hours or off the slot grid — fine for staff, and nothing else is booked then.
               </p>
             )
           )}
@@ -228,7 +229,7 @@ export function NewAppointmentForm({
                       minutes === s.startMinutes ? "border-primary bg-primary text-primary-foreground" : "hover:bg-accent",
                     )}
                   >
-                    {minutesLabel(s.startMinutes)}
+                    {f.minutes(s.startMinutes)}
                   </button>
                 ))}
               </div>
@@ -286,7 +287,7 @@ export function NewAppointmentForm({
           <FieldError message={book.error instanceof ApiError ? book.error.message : undefined} />
           <div className="flex gap-2">
             <Button type="submit" disabled={!canSubmit || book.isPending}>
-              {book.isPending ? "Booking…" : service && minutes !== null ? `Book ${service.name} at ${minutesLabel(minutes)}` : "Book"}
+              {book.isPending ? "Booking…" : service && minutes !== null ? `Book ${service.name} at ${f.minutes(minutes)}` : "Book"}
             </Button>
             <Button type="button" variant="ghost" onClick={onCancel}>
               Cancel

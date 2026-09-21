@@ -17,9 +17,18 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
-  --font-heading: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  /* Korean and Chinese pages set --font-cjk to a Noto face (see
+     [locale]/layout.tsx); everywhere else this default stands. It sits after
+     the Latin faces so those still shape English text and only the glyphs they
+     lack fall through to it.
+
+     The fallback in each var() is not optional: an *undefined* custom property
+     makes the whole font-family declaration invalid at computed-value time,
+     which would strip the font from every English page. */
+  --font-cjk: "Noto Sans KR", "Noto Sans SC", "Malgun Gothic", "Microsoft YaHei", sans-serif;
+  --font-sans: var(--font-geist-sans), var(--font-cjk, sans-serif), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), var(--font-cjk, monospace), ui-monospace, monospace;
+  --font-heading: var(--font-fraunces), var(--font-cjk, serif), Georgia, "Times New Roman", serif;
 
   /*
    * The dense parts of the UI lean on xs and sm, and 12px is below what is
