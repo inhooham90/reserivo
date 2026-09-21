@@ -38,13 +38,18 @@ heroku config:set -a reserivo-api \
   JWT_ACCESS_SECRET="$(node -e 'console.log(require("crypto").randomBytes(32).toString("base64url"))')" \
   JWT_REFRESH_SECRET="$(node -e 'console.log(require("crypto").randomBytes(32).toString("base64url"))')" \
   WEB_URL=https://reserivo.com \
-  CORS_ORIGIN=https://reserivo.com \
+  CORS_ORIGIN=https://reserivo.com,https://www.reserivo.com \
   SITE_ADMIN_EMAILS=james@akkija.com \
   RESEND_API_KEY=re_your_key_here \
   EMAIL_FROM='Reserivo <noreply@send.reserivo.com>'
 ```
 
 **Do not set `PORT`.** Heroku assigns it per dyno and the app reads it.
+
+`CORS_ORIGIN` is a comma-separated allowlist and must name **every** origin a
+browser will load the app from. Miss `www` and the site looks fine until
+someone types it, then every API call fails. `WEB_URL` stays a single
+canonical origin because it builds the invite links people receive.
 
 `DATABASE_SSL=no-verify` is required: Heroku Postgres demands TLS but presents a
 certificate signed by its own CA, which Node will not trust. This encrypts the
