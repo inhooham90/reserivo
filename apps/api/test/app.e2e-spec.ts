@@ -78,7 +78,8 @@ describe('Phase 0 (e2e)', () => {
       .set('Authorization', `Bearer ${ownerToken}`)
       .send({ name: 'Glow Salon', slug: `glow-${stamp}`, timezone: 'America/Los_Angeles' })
       .expect(201);
-    expect(res.body).toMatchObject({ name: 'Glow Salon', role: 'MANAGER', timezone: 'America/Los_Angeles' });
+    // Creator defaults to taking appointments: manager and designer.
+    expect(res.body).toMatchObject({ name: 'Glow Salon', roles: ['MANAGER', 'DESIGNER'], timezone: 'America/Los_Angeles' });
     salonId = res.body.id;
   });
 
@@ -93,7 +94,7 @@ describe('Phase 0 (e2e)', () => {
 
   it('GET /salons/mine lists it with the role', async () => {
     const res = await api().get('/salons/mine').set('Authorization', `Bearer ${ownerToken}`).expect(200);
-    expect(res.body).toEqual(expect.arrayContaining([expect.objectContaining({ id: salonId, role: 'MANAGER' })]));
+    expect(res.body).toEqual(expect.arrayContaining([expect.objectContaining({ id: salonId, roles: ['MANAGER', 'DESIGNER'] })]));
   });
 
   it('GET /salons/by-slug/:slug is public', async () => {

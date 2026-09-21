@@ -6,12 +6,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+import type { z } from "zod";
 import { FieldError } from "@/components/field-error";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api, ApiError } from "@/lib/api";
+import { rolesLabel } from "@/lib/format";
 
 export default function DashboardPage() {
   const salons = useQuery({ queryKey: ["salons", "mine"], queryFn: () => api<MySalon[]>("/salons/mine") });
@@ -31,7 +33,7 @@ export default function DashboardPage() {
               <CardHeader>
                 <CardTitle>{s.name}</CardTitle>
                 <CardDescription>
-                  /{s.slug} · {s.timezone} · {s.role === "MANAGER" ? "Manager" : "Designer"}
+                  /{s.slug} · {s.timezone} · {rolesLabel(s.roles)}
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -49,15 +51,16 @@ function CreateSalonCard() {
   const timezones = useMemo(() => Intl.supportedValuesOf("timeZone"), []);
   const browserZone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone, []);
 
-  const form = useForm<CreateSalonInput>({
+  // takesAppointments has a schema default, so the form's input type is looser than its output.
+  const form = useForm<z.input<typeof createSalonSchema>, unknown, CreateSalonInput>({
     resolver: zodResolver(createSalonSchema),
-    defaultValues: { name: "", slug: "", timezone: browserZone },
+    defaultValues: { name: "", slug: "", timezone: browserZone, takesAppointments: true },
   });
 
   const create = useMutation({
     mutationFn: (input: CreateSalonInput) => api<MySalon>("/salons", { method: "POST", json: input }),
     onSuccess: () => {
-      form.reset({ name: "", slug: "", timezone: browserZone });
+      form.reset({ name: "", slug: "", timezone: browserZone, takesAppointments: true });
       void queryClient.invalidateQueries({ queryKey: ["salons", "mine"] });
     },
     onError: (err) => setServerError(err instanceof ApiError ? err.message : "Something went wrong"),
@@ -115,6 +118,13 @@ function CreateSalonCard() {
             </select>
             <FieldError message={form.formState.errors.timezone?.message} />
           </div>
+          <label className="flex items-start gap-2 text-sm">
+            <input type="checkbox" className="mt-0.5" {...form.register("takesAppointments")} />
+            <span>
+              I also take appointments myself
+              <span className="block text-xs text-muted-foreground">Solo operators and owner-stylists. You can change this later under Team.</span>
+            </span>
+          </label>
           <FieldError message={serverError ?? undefined} />
           <Button type="submit" disabled={create.isPending}>
             {create.isPending ? "Creating…" : "Create salon"}

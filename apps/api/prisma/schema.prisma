@@ -29,6 +29,7 @@ model User {
   memberships   SalonMembership[]
   refreshTokens RefreshToken[]
   invitesSent   Invitation[]
+  customerOf    Customer[]
   auditActions  AuditLog[]        @relation("AuditActor")
   auditSubject  AuditLog[]        @relation("AuditImpersonated")
 
@@ -54,20 +55,64 @@ model RefreshToken {
 
 // ---------- Tenancy ----------
 
+/// Booking policies live on the salon: slot grid, minimum notice, how far
+/// ahead customers may book, and how late they may self-cancel.
 model Salon {
-  id        String   @id @default(uuid()) @db.Uuid
-  slug      String   @unique
-  name      String
-  timezone  String
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+  id                String   @id @default(uuid()) @db.Uuid
+  slug              String   @unique
+  name              String
+  timezone          String
+  slotIntervalMin   Int      @default(15)
+  leadTimeMin       Int      @default(60)
+  maxAdvanceDays    Int      @default(60)
+  cancelWindowHours Int      @default(24)
+  createdAt         DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime @updatedAt @db.Timestamptz(6)
 
-  memberships SalonMembership[]
-  invitations Invitation[]
-  services    Service[]
-  auditLogs   AuditLog[]
+  memberships     SalonMembership[]
+  invitations     Invitation[]
+  services        Service[]
+  customers       Customer[]
+  appointments    Appointment[]
+  hours           SalonHours[]
+  hoursExceptions SalonHoursException[]
+  conversations   Conversation[]
+  auditLogs       AuditLog[]
 
   @@map("salons")
+}
+
+/// The shop's opening hours. Shared by every manager; designers' personal
+/// hours must fit inside these, and managers themselves simply work them.
+/// Same encoding as AvailabilityRule: weekday 0=Sun…6=Sat, local minutes.
+model SalonHours {
+  id           String @id @default(uuid()) @db.Uuid
+  salonId      String @db.Uuid
+  weekday      Int
+  startMinutes Int
+  endMinutes   Int
+
+  salon Salon @relation(fields: [salonId], references: [id], onDelete: Cascade)
+
+  @@index([salonId, weekday])
+  @@map("salon_hours")
+}
+
+/// A closure or special opening for one local date (holiday, early close).
+model SalonHoursException {
+  id           String        @id @default(uuid()) @db.Uuid
+  salonId      String        @db.Uuid
+  date         DateTime      @db.Date
+  type         ExceptionType
+  startMinutes Int?
+  endMinutes   Int?
+  note         String?
+  createdAt    DateTime      @default(now()) @db.Timestamptz(6)
+
+  salon Salon @relation(fields: [salonId], references: [id], onDelete: Cascade)
+
+  @@index([salonId, date])
+  @@map("salon_hours_exceptions")
 }
 
 enum SalonRole {
@@ -81,21 +126,22 @@ enum MembershipStatus {
   REMOVED
 }
 
-/// A user's role within one salon. Profile fields live here too. Any member
-/// (manager or designer) can own services and hours — owner-stylists are the
-/// norm; acceptsBookings=false hides a member from the public booking page.
+/// A user's capabilities within one salon. Profile fields live here too.
+/// roles is a set: MANAGER administers (team, hours, settings, customer
+/// contact info); DESIGNER is bookable (owns services and personal hours,
+/// appears on the booking page). A solo operator holds both; a front-desk
+/// manager holds only MANAGER; a chair renter only DESIGNER.
 model SalonMembership {
-  id              String           @id @default(uuid()) @db.Uuid
-  salonId         String           @db.Uuid
-  userId          String           @db.Uuid
-  role            SalonRole
-  status          MembershipStatus @default(ACTIVE)
-  displayName     String
-  bio             String?
-  photoUrl        String?
-  acceptsBookings Boolean          @default(true)
-  createdAt       DateTime         @default(now()) @db.Timestamptz(6)
-  updatedAt       DateTime         @updatedAt @db.Timestamptz(6)
+  id          String           @id @default(uuid()) @db.Uuid
+  salonId     String           @db.Uuid
+  userId      String           @db.Uuid
+  roles       SalonRole[]
+  status      MembershipStatus @default(ACTIVE)
+  displayName String
+  bio         String?
+  photoUrl    String?
+  createdAt   DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime         @updatedAt @db.Timestamptz(6)
 
   salon Salon @relation(fields: [salonId], references: [id], onDelete: Cascade)
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -103,6 +149,8 @@ model SalonMembership {
   services               Service[]
   availabilityRules      AvailabilityRule[]
   availabilityExceptions AvailabilityException[]
+  appointments           Appointment[]
+  conversations          Conversation[]
 
   @@unique([salonId, userId])
   @@index([userId])
@@ -113,10 +161,10 @@ model SalonMembership {
 /// raw token appears once in the invite URL. Single use, expires.
 model Invitation {
   id              String    @id @default(uuid()) @db.Uuid
-  salonId         String    @db.Uuid
+  salonId         String      @db.Uuid
   email           String
-  role            SalonRole
-  tokenHash       String    @unique
+  roles           SalonRole[]
+  tokenHash       String      @unique
   invitedByUserId String?   @db.Uuid
   expiresAt       DateTime  @db.Timestamptz(6)
   acceptedAt      DateTime? @db.Timestamptz(6)
@@ -148,12 +196,99 @@ model Service {
   createdAt   DateTime @default(now()) @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt @db.Timestamptz(6)
 
-  salon    Salon           @relation(fields: [salonId], references: [id], onDelete: Cascade)
-  designer SalonMembership @relation(fields: [designerId], references: [id], onDelete: Cascade)
+  salon        Salon           @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  designer     SalonMembership @relation(fields: [designerId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
 
   @@index([salonId])
   @@index([designerId, active])
   @@map("services")
+}
+
+// ---------- Customers & appointments ----------
+
+/// The salon's record of a client. Belongs to the salon, not the designer.
+/// userId links it to an account when the client has one; walk-ins have none.
+/// phone/email are the fields the relay exists to protect — never send them
+/// to a DESIGNER-role caller.
+model Customer {
+  id        String   @id @default(uuid()) @db.Uuid
+  salonId   String   @db.Uuid
+  userId    String?  @db.Uuid
+  name      String
+  email     String?
+  phone     String?
+  notes     String?
+  tags      String[] @default([])
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+
+  salon         Salon          @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  user          User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  appointments  Appointment[]
+  conversations Conversation[]
+
+  @@unique([salonId, userId])
+  @@index([salonId, email])
+  @@index([salonId, phone])
+  @@index([salonId, name])
+  @@map("customers")
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum AppointmentSource {
+  ONLINE
+  STAFF
+}
+
+/// startAt/endAt bound the service itself; blockEndAt = endAt + bufferMin is
+/// the end of the time the designer is actually occupied. It is a stored
+/// column (not an expression) because Postgres index expressions must be
+/// IMMUTABLE and timestamptz + interval is only STABLE. The migration adds an
+/// EXCLUDE constraint on (designerId, tstzrange(startAt, blockEndAt)) for
+/// PENDING/CONFIRMED rows — that constraint, not application code, is what
+/// prevents double booking. Service name/price/duration are snapshotted
+/// because the catalog changes and history must not.
+model Appointment {
+  id                  String            @id @default(uuid()) @db.Uuid
+  salonId             String            @db.Uuid
+  designerId          String            @db.Uuid
+  customerId          String            @db.Uuid
+  serviceId           String?           @db.Uuid
+  startAt             DateTime          @db.Timestamptz(6)
+  endAt               DateTime          @db.Timestamptz(6)
+  blockEndAt          DateTime          @db.Timestamptz(6)
+  bufferMin           Int               @default(0)
+  status              AppointmentStatus @default(CONFIRMED)
+  source              AppointmentSource
+  serviceNameSnapshot String
+  priceCentsSnapshot  Int
+  durationMinSnapshot Int
+  notes               String?
+  internalNotes       String?
+  createdByUserId     String?           @db.Uuid
+  cancelledAt         DateTime?         @db.Timestamptz(6)
+  cancelledByUserId   String?           @db.Uuid
+  cancelReason        String?
+  createdAt           DateTime          @default(now()) @db.Timestamptz(6)
+  updatedAt           DateTime          @updatedAt @db.Timestamptz(6)
+
+  salon    Salon           @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  designer SalonMembership @relation(fields: [designerId], references: [id], onDelete: Restrict)
+  customer Customer        @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  service  Service?        @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  @@index([designerId, startAt])
+  @@index([salonId, startAt])
+  @@index([customerId, startAt])
+  @@map("appointments")
 }
 
 // ---------- Availability ----------
@@ -196,6 +331,56 @@ model AvailabilityException {
 
   @@index([designerId, date])
   @@map("availability_exceptions")
+}
+
+// ---------- Messaging relay ----------
+
+/// One thread per customer × designer within a salon. The relay exists so the
+/// two sides never need each other's contact details: the customer sees the
+/// designer's display name, the designer sees the customer's name. Managers
+/// may write in any thread, shown to the customer as the designer.
+model Conversation {
+  id                 String    @id @default(uuid()) @db.Uuid
+  salonId            String    @db.Uuid
+  customerId         String    @db.Uuid
+  designerId         String    @db.Uuid
+  lastMessageAt      DateTime? @db.Timestamptz(6)
+  customerLastReadAt DateTime? @db.Timestamptz(6)
+  staffLastReadAt    DateTime? @db.Timestamptz(6)
+  createdAt          DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt          DateTime  @updatedAt @db.Timestamptz(6)
+
+  salon    Salon           @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  customer Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  designer SalonMembership @relation(fields: [designerId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@unique([customerId, designerId])
+  @@index([salonId, lastMessageAt])
+  @@index([designerId, lastMessageAt])
+  @@map("conversations")
+}
+
+enum MessageSender {
+  CUSTOMER
+  STAFF
+}
+
+/// actorUserId is who actually typed; sentAsMembershipId is the identity the
+/// customer sees (the thread's designer, even when a manager wrote it).
+model Message {
+  id                 String        @id @default(uuid()) @db.Uuid
+  conversationId     String        @db.Uuid
+  sender             MessageSender
+  body               String
+  actorUserId        String?       @db.Uuid
+  sentAsMembershipId String?       @db.Uuid
+  createdAt          DateTime      @default(now()) @db.Timestamptz(6)
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@map("messages")
 }
 
 // ---------- Audit ----------

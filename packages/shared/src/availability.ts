@@ -85,11 +85,56 @@ export const createAvailabilityExceptionSchema = z
   });
 export type CreateAvailabilityExceptionInput = z.infer<typeof createAvailabilityExceptionSchema>;
 
+/** A bookable member's personal hours; always clamped to the salon's at booking time. */
 export const availabilitySchema = z.object({
   rules: z.array(availabilityRuleSchema),
   exceptions: z.array(availabilityExceptionSchema),
 });
 export type Availability = z.infer<typeof availabilitySchema>;
+
+/** The salon's opening hours use the same shapes as a member's availability. */
+export const salonHoursSchema = z.object({
+  rules: z.array(availabilityRuleSchema),
+  exceptions: z.array(availabilityExceptionSchema),
+});
+export type SalonHours = z.infer<typeof salonHoursSchema>;
+
+// ---------- Window arithmetic (shared by the API engine and the hours editor) ----------
+
+export interface Window {
+  startMinutes: number;
+  endMinutes: number;
+}
+
+/** Overlap of two window lists, e.g. a designer's day ∩ the salon's day. Result is sorted and non-overlapping. */
+export function intersectWindows(a: Window[], b: Window[]): Window[] {
+  const out: Window[] = [];
+  for (const x of a) {
+    for (const y of b) {
+      const start = Math.max(x.startMinutes, y.startMinutes);
+      const end = Math.min(x.endMinutes, y.endMinutes);
+      if (end > start) out.push({ startMinutes: start, endMinutes: end });
+    }
+  }
+  return out.sort((p, q) => p.startMinutes - q.startMinutes);
+}
+
+/** True when `w` lies entirely inside one of `bounds`. */
+export function windowWithin(w: Window, bounds: Window[]): boolean {
+  return bounds.some((b) => w.startMinutes >= b.startMinutes && w.endMinutes <= b.endMinutes);
+}
+
+/** The first weekly rule that falls outside the salon's hours for its weekday, or null. */
+export function findOutsideSalonHours(
+  rules: AvailabilityRuleInput[],
+  salonRules: AvailabilityRuleInput[],
+): { index: number; rule: AvailabilityRuleInput; salonWindows: Window[] } | null {
+  for (let i = 0; i < rules.length; i++) {
+    const salonWindows = salonRules.filter((s) => s.weekday === rules[i].weekday);
+    if (!windowWithin(rules[i], salonWindows)) return { index: i, rule: rules[i], salonWindows };
+  }
+  return null;
+}
 
 /** "09:00" ⇄ 540 helpers for forms. */
 export function minutesToHHMM(m: number): string {

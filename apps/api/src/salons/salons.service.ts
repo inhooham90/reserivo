@@ -1,37 +1,48 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import type { CreateSalonInput, MySalon, PublicSalon, Salon } from '@reserivo/shared';
+import type { CreateSalonInput, MySalon, PublicSalon, Salon, SalonRole, UpdateSalonInput } from '@reserivo/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { SalonHoursService } from '../salon-hours/salon-hours.service.js';
 
 @Injectable()
 export class SalonsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly salonHours: SalonHoursService,
+  ) {}
 
-  /** Creates the salon and makes the creator its first MANAGER, atomically. */
+  /**
+   * Creates the salon with default opening hours and makes the creator its
+   * first MANAGER — and a DESIGNER too when they take appointments themselves
+   * (solo operators, owner-stylists), seeded with the salon's hours.
+   */
   async create(input: CreateSalonInput, creator: { id: string; name: string }): Promise<MySalon> {
     const taken = await this.prisma.salon.findUnique({ where: { slug: input.slug }, select: { id: true } });
     if (taken) throw new ConflictException('That URL is already taken');
 
-    const salon = await this.prisma.salon.create({
-      data: {
-        name: input.name,
-        slug: input.slug,
-        timezone: input.timezone,
-        memberships: {
-          create: { userId: creator.id, role: 'MANAGER', displayName: creator.name },
-        },
-      },
+    const roles: SalonRole[] = input.takesAppointments ? ['MANAGER', 'DESIGNER'] : ['MANAGER'];
+
+    const salon = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.salon.create({
+        data: { name: input.name, slug: input.slug, timezone: input.timezone },
+      });
+      const membership = await tx.salonMembership.create({
+        data: { salonId: created.id, userId: creator.id, roles, displayName: creator.name },
+      });
+      await this.salonHours.seedDefaults(tx, created.id);
+      if (input.takesAppointments) await this.salonHours.seedMemberHours(tx, created.id, membership.id);
+      return created;
     });
-    return { ...this.toSalon(salon), role: 'MANAGER' };
+    return { ...this.toSalon(salon), roles };
   }
 
-  /** Salons the user belongs to, with their role in each — powers the salon switcher. */
+  /** Salons the user belongs to, with their roles in each — powers the salon switcher. */
   async listMine(userId: string): Promise<MySalon[]> {
     const memberships = await this.prisma.salonMembership.findMany({
       where: { userId, status: 'ACTIVE' },
       include: { salon: true },
       orderBy: { salon: { name: 'asc' } },
     });
-    return memberships.map((m) => ({ ...this.toSalon(m.salon), role: m.role }));
+    return memberships.map((m) => ({ ...this.toSalon(m.salon), roles: m.roles }));
   }
 
   async getById(id: string): Promise<Salon> {
@@ -41,16 +52,17 @@ export class SalonsService {
   }
 
   /**
-   * Public lookup for the booking page at /{slug}: the salon, its bookable
-   * members and their active services. Deliberately selects no user fields, so
-   * an email or phone can never ride along.
+   * Public lookup for the booking page at /{slug}: the salon, its opening
+   * hours, its bookable members (DESIGNER role) and their active services.
+   * Deliberately selects no user fields, so an email or phone can never ride along.
    */
   async getBySlug(slug: string): Promise<PublicSalon> {
     const salon = await this.prisma.salon.findUnique({
       where: { slug },
       include: {
+        hours: { orderBy: [{ weekday: 'asc' }, { startMinutes: 'asc' }], select: { weekday: true, startMinutes: true, endMinutes: true } },
         memberships: {
-          where: { status: 'ACTIVE', acceptsBookings: true },
+          where: { status: 'ACTIVE', roles: { has: 'DESIGNER' } },
           orderBy: { displayName: 'asc' },
           select: {
             id: true,
@@ -67,10 +79,36 @@ export class SalonsService {
       },
     });
     if (!salon) throw new NotFoundException();
-    return { ...this.toSalon(salon), designers: salon.memberships };
+    return { ...this.toSalon(salon), hours: salon.hours, designers: salon.memberships };
   }
 
-  private toSalon(s: { id: string; name: string; slug: string; timezone: string; createdAt: Date }): Salon {
-    return { id: s.id, name: s.name, slug: s.slug, timezone: s.timezone, createdAt: s.createdAt.toISOString() };
+  /** Managers edit identity and booking policies. */
+  async update(salonId: string, input: UpdateSalonInput): Promise<Salon> {
+    const salon = await this.prisma.salon.update({ where: { id: salonId }, data: input });
+    return this.toSalon(salon);
+  }
+
+  private toSalon(s: {
+    id: string;
+    name: string;
+    slug: string;
+    timezone: string;
+    slotIntervalMin: number;
+    leadTimeMin: number;
+    maxAdvanceDays: number;
+    cancelWindowHours: number;
+    createdAt: Date;
+  }): Salon {
+    return {
+      id: s.id,
+      name: s.name,
+      slug: s.slug,
+      timezone: s.timezone,
+      slotIntervalMin: s.slotIntervalMin,
+      leadTimeMin: s.leadTimeMin,
+      maxAdvanceDays: s.maxAdvanceDays,
+      cancelWindowHours: s.cancelWindowHours,
+      createdAt: s.createdAt.toISOString(),
+    };
   }
 }

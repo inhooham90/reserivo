@@ -26,7 +26,10 @@ type FormOutput = z.output<typeof formSchema>;
 
 export default function ServicesPage() {
   const { salon, members, me, isManager } = useSalon();
-  const [designerId, setDesignerId] = useState<string>(me?.id ?? members[0]?.id ?? "");
+  const designers = members.filter((m) => m.roles.includes("DESIGNER"));
+  const [designerId, setDesignerId] = useState<string>(
+    me && me.roles.includes("DESIGNER") ? me.id : (designers[0]?.id ?? ""),
+  );
   const [editing, setEditing] = useState<Service | "new" | null>(null);
   const queryClient = useQueryClient();
 
@@ -49,7 +52,7 @@ export default function ServicesPage() {
       <section className="grid gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg">Services</h2>
-          {isManager && members.length > 1 && (
+          {isManager && designers.length > 1 && (
             <select
               className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
               value={designerId}
@@ -58,7 +61,7 @@ export default function ServicesPage() {
                 setEditing(null);
               }}
             >
-              {members.map((m) => (
+              {designers.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.displayName}
                 </option>
@@ -66,6 +69,7 @@ export default function ServicesPage() {
             </select>
           )}
         </div>
+        {designers.length === 0 && <p className="text-muted-foreground">Nobody takes appointments yet — give someone the Designer role from the Team tab.</p>}
         {services.isPending && <p className="text-muted-foreground">Loading…</p>}
         {services.data && mine.length === 0 && (
           <p className="text-muted-foreground">No services yet. Add the first one on the right.</p>

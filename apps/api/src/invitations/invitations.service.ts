@@ -1,10 +1,17 @@
 import { ConflictException, ForbiddenException, GoneException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import type { AcceptInvitationResponse, CreateInvitationInput, Invitation, InvitationPreview } from '@reserivo/shared';
+import type {
+  AcceptInvitationResponse,
+  CreateInvitationInput,
+  Invitation,
+  InvitationPreview,
+  SalonRole,
+} from '@reserivo/shared';
 import { createHash, randomBytes } from 'node:crypto';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import type { Env } from '../config/env.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { SalonHoursService } from '../salon-hours/salon-hours.service.js';
 
 const INVITE_TTL_DAYS = 7;
 
@@ -13,6 +20,7 @@ export class InvitationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService<Env, true>,
+    private readonly salonHours: SalonHoursService,
   ) {}
 
   /**
@@ -38,7 +46,7 @@ export class InvitationsService {
         data: {
           salonId,
           email: input.email,
-          role: input.role,
+          roles: input.roles,
           tokenHash: this.hash(token),
           invitedByUserId: inviter.id,
           expiresAt: new Date(now.getTime() + INVITE_TTL_DAYS * 86_400_000),
@@ -71,7 +79,7 @@ export class InvitationsService {
     return {
       salonName: inv.salon.name,
       salonSlug: inv.salon.slug,
-      role: inv.role,
+      roles: inv.roles,
       email: inv.email,
       expiresAt: inv.expiresAt.toISOString(),
     };
@@ -79,7 +87,8 @@ export class InvitationsService {
 
   /**
    * The link is the secret, but the invitee's account email must also match
-   * so a forwarded link cannot enrol the wrong person.
+   * so a forwarded link cannot enrol the wrong person. Re-joining merges roles
+   * with any earlier (removed) membership.
    */
   async accept(token: string, user: AuthenticatedUser): Promise<AcceptInvitationResponse> {
     const inv = await this.findLive(token);
@@ -92,17 +101,16 @@ export class InvitationsService {
         where: { salonId_userId: { salonId: inv.salonId, userId: user.id } },
       });
 
+      const roles: SalonRole[] = existing ? Array.from(new Set([...existing.roles, ...inv.roles])) : inv.roles;
       const membership = existing
-        ? await tx.salonMembership.update({
-            where: { id: existing.id },
-            data: { status: 'ACTIVE', role: inv.role },
-          })
+        ? await tx.salonMembership.update({ where: { id: existing.id }, data: { status: 'ACTIVE', roles } })
         : await tx.salonMembership.create({
-            data: { salonId: inv.salonId, userId: user.id, role: inv.role, displayName: user.name },
+            data: { salonId: inv.salonId, userId: user.id, roles, displayName: user.name },
           });
 
+      if (roles.includes('DESIGNER')) await this.salonHours.seedMemberHours(tx, inv.salonId, membership.id);
       await tx.invitation.update({ where: { id: inv.id }, data: { acceptedAt: new Date() } });
-      return { salonId: inv.salonId, membershipId: membership.id, role: membership.role };
+      return { salonId: inv.salonId, membershipId: membership.id, roles: membership.roles };
     });
   }
 
@@ -121,17 +129,11 @@ export class InvitationsService {
     return createHash('sha256').update(token).digest('hex');
   }
 
-  private toInvitation(r: {
-    id: string;
-    email: string;
-    role: 'MANAGER' | 'DESIGNER';
-    expiresAt: Date;
-    createdAt: Date;
-  }): Invitation {
+  private toInvitation(r: { id: string; email: string; roles: SalonRole[]; expiresAt: Date; createdAt: Date }): Invitation {
     return {
       id: r.id,
       email: r.email,
-      role: r.role,
+      roles: r.roles,
       expiresAt: r.expiresAt.toISOString(),
       createdAt: r.createdAt.toISOString(),
     };

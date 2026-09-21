@@ -5,3 +5,7 @@ export * from './member';
 export * from './invitation';
 export * from './service';
 export * from './availability';
+export * from './time';
+export * from './appointment';
+export * from './customer';
+export * from './message';

@@ -1,5 +1,13 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { createSalonSchema, type CreateSalonInput, type MySalon, type PublicSalon, type Salon } from '@reserivo/shared';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  createSalonSchema,
+  updateSalonSchema,
+  type CreateSalonInput,
+  type MySalon,
+  type PublicSalon,
+  type Salon,
+  type UpdateSalonInput,
+} from '@reserivo/shared';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { CurrentUser } from '../common/decorators/current-user.decorator.js';
 import { Public } from '../common/decorators/public.decorator.js';
@@ -37,5 +45,14 @@ export class SalonsController {
   @Get(':salonId')
   getOne(@Tenant() tenant: TenantContext): Promise<Salon> {
     return this.salons.getById(tenant.salonId);
+  }
+
+  @SalonRoles('MANAGER')
+  @Patch(':salonId')
+  update(
+    @Tenant() tenant: TenantContext,
+    @Body(new ZodValidationPipe(updateSalonSchema)) body: UpdateSalonInput,
+  ): Promise<Salon> {
+    return this.salons.update(tenant.salonId, body);
   }
 }

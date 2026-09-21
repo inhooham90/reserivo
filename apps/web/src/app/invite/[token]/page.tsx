@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import { roleLabel } from "@/lib/format";
+import { rolesLabel } from "@/lib/format";
 
 /** Landing for an invite link. Public to read; accepting needs a session with the invited email. */
 export default function InvitePage() {
@@ -46,7 +46,7 @@ export default function InvitePage() {
             <CardHeader>
               <CardTitle>Join {preview.data.salonName}</CardTitle>
               <CardDescription>
-                You have been invited as a {roleLabel(preview.data.role).toLowerCase()}. This invite is for{" "}
+                You have been invited as {rolesLabel(preview.data.roles).toLowerCase()}. This invite is for{" "}
                 <span className="font-medium text-foreground">{preview.data.email}</span>.
               </CardDescription>
             </CardHeader>

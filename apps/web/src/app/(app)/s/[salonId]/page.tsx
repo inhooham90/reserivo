@@ -15,18 +15,26 @@ export default function SalonOverviewPage() {
     queryFn: () => api<Service[]>(`/salons/${salon.id}/services`),
   });
 
-  const bookable = members.filter((m) => m.acceptsBookings).length;
+  const bookable = members.filter((m) => m.roles.includes("DESIGNER")).length;
   const activeServices = services.data?.filter((s) => s.active).length ?? 0;
   const base = `/s/${salon.id}`;
 
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <Link href={`${base}/calendar`}>
+        <Card className="h-full border-primary/40 transition-colors hover:bg-accent">
+          <CardHeader>
+            <CardTitle>Today’s calendar</CardTitle>
+            <CardDescription>See bookings, add walk-ins, mark visits complete</CardDescription>
+          </CardHeader>
+        </Card>
+      </Link>
       <Link href={`${base}/team`}>
         <Card className="h-full transition-colors hover:bg-accent">
           <CardHeader>
             <CardTitle>{members.length} on the team</CardTitle>
             <CardDescription>
-              {bookable} bookable · {isManager ? "Invite designers and manage roles" : "See who you work with"}
+              {bookable} take appointments · {isManager ? "Invite people and set roles" : "See who you work with"}
             </CardDescription>
           </CardHeader>
         </Card>

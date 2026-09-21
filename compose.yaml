@@ -57,6 +57,9 @@ services:
       REDIS_URL: redis://redis:6379
       CORS_ORIGIN: http://localhost:3000
       WEB_URL: http://localhost:3000
+      # Email: leave RESEND_API_KEY unset locally and notifications are only logged.
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-Reserivo <onboarding@resend.dev>}
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev-access-secret-change-me}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev-refresh-secret-change-me}
       # Bind mounts from Windows deliver no inotify events; tsc must poll.

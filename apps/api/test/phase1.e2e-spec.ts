@@ -4,7 +4,7 @@ import cookieParser from 'cookie-parser';
 import request from 'supertest';
 import { AppModule } from '../src/app.module.js';
 
-/** Phase 1: team invites, services, hours, and the public catalog. */
+/** Phase 1: team invites, role sets, services, hours, and the public catalog. */
 describe('Phase 1 (e2e)', () => {
   let app: INestApplication;
   const stamp = Date.now();
@@ -37,12 +37,14 @@ describe('Phase 1 (e2e)', () => {
     strToken = (await api().post('/auth/register').send(stranger).expect(201)).body.accessToken;
 
     slug = `phase1-${stamp}`;
+    // A front-desk owner: administers, does not take clients.
     const salon = await api()
       .post('/salons')
       .set(auth(mgrToken))
-      .send({ name: 'Phase One Salon', slug, timezone: 'America/Chicago' })
+      .send({ name: 'Phase One Salon', slug, timezone: 'America/Chicago', takesAppointments: false })
       .expect(201);
     salonId = salon.body.id;
+    expect(salon.body.roles).toEqual(['MANAGER']);
   });
 
   afterAll(async () => {
@@ -54,7 +56,7 @@ describe('Phase 1 (e2e)', () => {
   it('lists the creator as the only member, with email visible to a manager', async () => {
     const res = await api().get(`/salons/${salonId}/members`).set(auth(mgrToken)).expect(200);
     expect(res.body).toHaveLength(1);
-    expect(res.body[0]).toMatchObject({ role: 'MANAGER', displayName: manager.name, email: manager.email });
+    expect(res.body[0]).toMatchObject({ roles: ['MANAGER'], displayName: manager.name, email: manager.email });
     mgrMemberId = res.body[0].id;
   });
 
@@ -62,7 +64,7 @@ describe('Phase 1 (e2e)', () => {
     const res = await api()
       .post(`/salons/${salonId}/invitations`)
       .set(auth(mgrToken))
-      .send({ email: designer.email.toUpperCase(), role: 'DESIGNER' })
+      .send({ email: designer.email.toUpperCase(), roles: ['DESIGNER'] })
       .expect(201);
     expect(res.body.email).toBe(designer.email);
     expect(res.body.inviteUrl).toMatch(/^http:\/\/localhost:3000\/invite\/[A-Za-z0-9_-]{40,}$/);
@@ -73,20 +75,29 @@ describe('Phase 1 (e2e)', () => {
     expect(list.body[0].inviteUrl).toBeUndefined();
   });
 
+  it('rejects an invite with no roles or duplicate roles', async () => {
+    await api().post(`/salons/${salonId}/invitations`).set(auth(mgrToken)).send({ email: 'x@test.local', roles: [] }).expect(400);
+    await api()
+      .post(`/salons/${salonId}/invitations`)
+      .set(auth(mgrToken))
+      .send({ email: 'x@test.local', roles: ['DESIGNER', 'DESIGNER'] })
+      .expect(400);
+  });
+
   it('a non-member cannot create invites', async () => {
     await api()
       .post(`/salons/${salonId}/invitations`)
       .set(auth(strToken))
-      .send({ email: 'x@test.local', role: 'DESIGNER' })
+      .send({ email: 'x@test.local', roles: ['DESIGNER'] })
       .expect(403);
   });
 
-  it('the invite preview is public and never leaks beyond salon/role/email', async () => {
+  it('the invite preview is public and never leaks beyond salon/roles/email', async () => {
     const res = await api().get(`/invitations/${inviteToken}`).expect(200);
     expect(res.body).toEqual({
       salonName: 'Phase One Salon',
       salonSlug: slug,
-      role: 'DESIGNER',
+      roles: ['DESIGNER'],
       email: designer.email,
       expiresAt: expect.any(String),
     });
@@ -98,16 +109,19 @@ describe('Phase 1 (e2e)', () => {
     expect(res.body.message).toContain(designer.email);
   });
 
-  it('the invited designer accepts and becomes an active member', async () => {
+  it('the invited designer accepts, becomes active, and starts on the salon’s hours', async () => {
     const res = await api().post(`/invitations/${inviteToken}/accept`).set(auth(dsgToken)).expect(200);
-    expect(res.body).toMatchObject({ salonId, role: 'DESIGNER' });
+    expect(res.body).toMatchObject({ salonId, roles: ['DESIGNER'] });
     dsgMemberId = res.body.membershipId;
 
     // Single use.
     await api().post(`/invitations/${inviteToken}/accept`).set(auth(dsgToken)).expect(410);
 
     const mine = await api().get('/salons/mine').set(auth(dsgToken)).expect(200);
-    expect(mine.body).toEqual([expect.objectContaining({ id: salonId, role: 'DESIGNER' })]);
+    expect(mine.body).toEqual([expect.objectContaining({ id: salonId, roles: ['DESIGNER'] })]);
+
+    const hours = await api().get(`/salons/${salonId}/members/${dsgMemberId}/availability`).set(auth(dsgToken)).expect(200);
+    expect(hours.body.rules).toHaveLength(6); // seeded from Mon–Sat 9–18 defaults
   });
 
   it('designers see teammates but not their emails', async () => {
@@ -124,13 +138,23 @@ describe('Phase 1 (e2e)', () => {
       .expect(200);
     expect(own.body.bio).toBe('Balayage specialist');
 
-    await api().patch(`/salons/${salonId}/members/${dsgMemberId}`).set(auth(dsgToken)).send({ role: 'MANAGER' }).expect(403);
+    await api().patch(`/salons/${salonId}/members/${dsgMemberId}`).set(auth(dsgToken)).send({ roles: ['MANAGER', 'DESIGNER'] }).expect(403);
     await api().patch(`/salons/${salonId}/members/${mgrMemberId}`).set(auth(dsgToken)).send({ bio: 'nope' }).expect(403);
   });
 
-  it('the last manager cannot be demoted or removed', async () => {
-    await api().patch(`/salons/${salonId}/members/${mgrMemberId}`).set(auth(mgrToken)).send({ role: 'DESIGNER' }).expect(409);
+  it('the last manager cannot lose MANAGER or be removed', async () => {
+    await api().patch(`/salons/${salonId}/members/${mgrMemberId}`).set(auth(mgrToken)).send({ roles: ['DESIGNER'] }).expect(409);
     await api().delete(`/salons/${salonId}/members/${mgrMemberId}`).set(auth(mgrToken)).expect(409);
+  });
+
+  it('a manager-only member has no hours and cannot own services', async () => {
+    const hours = await api().get(`/salons/${salonId}/members/${mgrMemberId}/availability`).set(auth(mgrToken)).expect(409);
+    expect(hours.body.message).toMatch(/does not take appointments/);
+    await api()
+      .post(`/salons/${salonId}/services`)
+      .set(auth(mgrToken))
+      .send({ designerId: mgrMemberId, name: 'Nope', priceCents: 100, durationMin: 30 })
+      .expect(409);
   });
 
   // ---------- Services ----------
@@ -248,24 +272,49 @@ describe('Phase 1 (e2e)', () => {
 
   it('the public page lists bookable members with active services only, and no contact fields', async () => {
     const res = await api().get(`/salons/by-slug/${slug}`).expect(200);
-    const dee = res.body.designers.find((d: { id: string }) => d.id === dsgMemberId);
-    expect(dee).toBeDefined();
+    expect(res.body.designers.map((d: { id: string }) => d.id)).toEqual([dsgMemberId]); // manager-only owner is not listed
+    const dee = res.body.designers[0];
     expect(dee.services.map((s: { name: string }) => s.name)).toEqual(["Men's cut"]); // Balayage was deactivated
     expect(JSON.stringify(res.body)).not.toContain('@test.local');
     expect(JSON.stringify(res.body)).not.toContain('userId');
   });
 
-  it('hiding a member removes them from the public page', async () => {
+  // ---------- Role changes ----------
+
+  it('the owner takes the chair: gaining DESIGNER seeds hours from the salon’s and lists them publicly', async () => {
+    const res = await api()
+      .patch(`/salons/${salonId}/members/${mgrMemberId}`)
+      .set(auth(mgrToken))
+      .send({ roles: ['MANAGER', 'DESIGNER'] })
+      .expect(200);
+    expect(res.body.roles).toEqual(['MANAGER', 'DESIGNER']);
+
+    const hours = await api().get(`/salons/${salonId}/members/${mgrMemberId}/availability`).set(auth(mgrToken)).expect(200);
+    expect(hours.body.rules).toHaveLength(6);
+
+    await api()
+      .post(`/salons/${salonId}/services`)
+      .set(auth(mgrToken))
+      .send({ name: 'Owner cut', priceCents: 9000, durationMin: 60 })
+      .expect(201);
+    const pub = await api().get(`/salons/by-slug/${slug}`).expect(200);
+    expect(pub.body.designers.map((d: { id: string }) => d.id).sort()).toEqual([dsgMemberId, mgrMemberId].sort());
+  });
+
+  it('dropping DESIGNER hides a member from the public page (their services stay put)', async () => {
     await api()
       .patch(`/salons/${salonId}/members/${dsgMemberId}`)
       .set(auth(mgrToken))
-      .send({ acceptsBookings: false })
+      .send({ roles: ['MANAGER'] })
       .expect(200);
-    const res = await api().get(`/salons/by-slug/${slug}`).expect(200);
-    expect(res.body.designers.some((d: { id: string }) => d.id === dsgMemberId)).toBe(false);
+    const pub = await api().get(`/salons/by-slug/${slug}`).expect(200);
+    expect(pub.body.designers.some((d: { id: string }) => d.id === dsgMemberId)).toBe(false);
+    const services = await api().get(`/salons/${salonId}/services`).set(auth(mgrToken)).query({ designerId: dsgMemberId }).expect(200);
+    expect(services.body).toHaveLength(2);
   });
 
   it('removing a member soft-deletes: they lose access but the row survives', async () => {
+    // Dee is now a second manager, so the owner can be left as the only one.
     await api().delete(`/salons/${salonId}/members/${dsgMemberId}`).set(auth(mgrToken)).expect(204);
     await api().get(`/salons/${salonId}`).set(auth(dsgToken)).expect(403);
     const mine = await api().get('/salons/mine').set(auth(dsgToken)).expect(200);

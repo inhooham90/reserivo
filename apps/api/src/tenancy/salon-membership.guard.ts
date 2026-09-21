@@ -16,8 +16,9 @@ export function paramString(value: string | string[] | undefined): string | unde
 
 /**
  * The tenancy boundary. Resolves the caller's ACTIVE membership in `:salonId`
- * and checks its role. Services must take salonId from req.tenant, never from
- * the body, so a caller can only ever touch the salon the guard approved.
+ * and checks that it holds at least one of the required roles. Services must
+ * take salonId from req.tenant, never from the body, so a caller can only ever
+ * touch the salon the guard approved.
  */
 @Injectable()
 export class SalonMembershipGuard implements CanActivate {
@@ -38,11 +39,11 @@ export class SalonMembershipGuard implements CanActivate {
 
     const membership = await this.prisma.salonMembership.findFirst({
       where: { salonId, userId: req.user.id, status: 'ACTIVE' },
-      select: { id: true, role: true, displayName: true },
+      select: { id: true, roles: true, displayName: true },
     });
 
     if (membership) {
-      if (required.length && !required.includes(membership.role)) {
+      if (required.length && !required.some((r) => membership.roles.includes(r))) {
         throw new ForbiddenException('Your role in this salon does not allow that');
       }
       req.tenant = { salonId, membership };

@@ -30,8 +30,12 @@ export class AuthService {
     const existing = await this.prisma.user.findUnique({ where: { email: input.email }, select: { id: true } });
     if (existing) throw new ConflictException('An account with that email already exists');
 
-    const user = await this.prisma.user.create({
-      data: { email: input.email, name: input.name, passwordHash: await hash(input.password) },
+    const passwordHash = await hash(input.password);
+    const user = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.user.create({ data: { email: input.email, name: input.name, passwordHash } });
+      // Guest bookings made with this email become this account's history.
+      await tx.customer.updateMany({ where: { email: input.email, userId: null }, data: { userId: created.id } });
+      return created;
     });
     return this.issueTokens(this.toCurrentUser(user), meta);
   }

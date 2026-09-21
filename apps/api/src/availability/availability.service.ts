@@ -1,26 +1,38 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import type {
-  Availability,
-  AvailabilityException,
-  AvailabilityRule,
-  CreateAvailabilityExceptionInput,
-  ReplaceAvailabilityRulesInput,
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  findOutsideSalonHours,
+  minutesToHHMM,
+  windowWithin,
+  type Availability,
+  type AvailabilityException,
+  type AvailabilityRule,
+  type CreateAvailabilityExceptionInput,
+  type ReplaceAvailabilityRulesInput,
 } from '@reserivo/shared';
 import { MembersService } from '../members/members.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { SalonHoursService } from '../salon-hours/salon-hours.service.js';
 import { assertCanManageMember } from '../tenancy/access.js';
 import type { TenantContext } from '../tenancy/tenant.types.js';
+import { windowsForDate } from './slot-engine.js';
 
+const WEEKDAY = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+/**
+ * A bookable member's personal working hours, bounded by the salon's opening
+ * hours. Only members with the DESIGNER role have them.
+ */
 @Injectable()
 export class AvailabilityService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly members: MembersService,
+    private readonly salonHours: SalonHoursService,
   ) {}
 
   /** Weekly rules plus exceptions from today onward. */
   async get(tenant: TenantContext, designerId: string): Promise<Availability> {
-    await this.members.findActive(tenant.salonId, designerId);
+    await this.members.findDesigner(tenant.salonId, designerId);
     const [rules, exceptions] = await Promise.all([
       this.prisma.availabilityRule.findMany({
         where: { designerId },
@@ -34,10 +46,22 @@ export class AvailabilityService {
     return { rules: rules.map(this.toRule), exceptions: exceptions.map(this.toException) };
   }
 
-  /** Replaces the whole week atomically; the shared schema already rejected overlaps. */
+  /** Replaces the whole week atomically. Every window must sit inside the salon's hours for that weekday. */
   async replaceRules(tenant: TenantContext, designerId: string, input: ReplaceAvailabilityRulesInput): Promise<AvailabilityRule[]> {
     assertCanManageMember(tenant, designerId);
-    await this.members.findActive(tenant.salonId, designerId);
+    await this.members.findDesigner(tenant.salonId, designerId);
+
+    const salonRules = await this.salonHours.rules(tenant.salonId);
+    const outside = findOutsideSalonHours(input.rules, salonRules);
+    if (outside) {
+      const { rule, salonWindows } = outside;
+      const bounds = salonWindows.length
+        ? salonWindows.map((w) => `${minutesToHHMM(w.startMinutes)}–${minutesToHHMM(w.endMinutes)}`).join(', ')
+        : 'closed';
+      throw new BadRequestException(
+        `${WEEKDAY[rule.weekday]} ${minutesToHHMM(rule.startMinutes)}–${minutesToHHMM(rule.endMinutes)} is outside salon hours (${bounds}).`,
+      );
+    }
 
     await this.prisma.$transaction([
       this.prisma.availabilityRule.deleteMany({ where: { designerId } }),
@@ -59,7 +83,18 @@ export class AvailabilityService {
     input: CreateAvailabilityExceptionInput,
   ): Promise<AvailabilityException> {
     assertCanManageMember(tenant, designerId);
-    await this.members.findActive(tenant.salonId, designerId);
+    await this.members.findDesigner(tenant.salonId, designerId);
+
+    if (input.type === 'CUSTOM') {
+      const salon = await this.salonHours.forRange(tenant.salonId, input.date, input.date);
+      const open = windowsForDate(input.date, salon.rules, salon.exceptions);
+      if (!windowWithin({ startMinutes: input.startMinutes!, endMinutes: input.endMinutes! }, open)) {
+        const bounds = open.length
+          ? open.map((w) => `${minutesToHHMM(w.startMinutes)}–${minutesToHHMM(w.endMinutes)}`).join(', ')
+          : 'closed that day';
+        throw new BadRequestException(`Those hours are outside the salon's hours on ${input.date} (${bounds}).`);
+      }
+    }
 
     const row = await this.prisma.availabilityException.create({
       data: {

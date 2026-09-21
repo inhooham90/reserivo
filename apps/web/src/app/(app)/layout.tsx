@@ -32,6 +32,12 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             <Link href="/dashboard" className="font-semibold">
               Reserivo
             </Link>
+            <Link href="/appointments" className="text-muted-foreground hover:text-foreground">
+              My appointments
+            </Link>
+            <Link href="/messages" className="text-muted-foreground hover:text-foreground">
+              Messages
+            </Link>
             {user.isSiteAdmin && (
               <Link href="/admin" className="text-muted-foreground hover:text-foreground">
                 Admin

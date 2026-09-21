@@ -1,10 +1,10 @@
 import { z } from 'zod';
 import { emailSchema } from './auth';
-import { salonRoleSchema } from './roles';
+import { salonRolesSchema } from './roles';
 
 export const createInvitationSchema = z.object({
   email: emailSchema,
-  role: salonRoleSchema,
+  roles: salonRolesSchema,
 });
 export type CreateInvitationInput = z.infer<typeof createInvitationSchema>;
 
@@ -12,7 +12,7 @@ export type CreateInvitationInput = z.infer<typeof createInvitationSchema>;
 export const invitationSchema = z.object({
   id: z.string(),
   email: z.string(),
-  role: salonRoleSchema,
+  roles: salonRolesSchema,
   expiresAt: z.string(),
   createdAt: z.string(),
   /** Only returned once, on creation — the raw token is never stored. */
@@ -24,7 +24,7 @@ export type Invitation = z.infer<typeof invitationSchema>;
 export const invitationPreviewSchema = z.object({
   salonName: z.string(),
   salonSlug: z.string(),
-  role: salonRoleSchema,
+  roles: salonRolesSchema,
   email: z.string(),
   expiresAt: z.string(),
 });
@@ -33,6 +33,6 @@ export type InvitationPreview = z.infer<typeof invitationPreviewSchema>;
 export const acceptInvitationResponseSchema = z.object({
   salonId: z.string(),
   membershipId: z.string(),
-  role: salonRoleSchema,
+  roles: salonRolesSchema,
 });
 export type AcceptInvitationResponse = z.infer<typeof acceptInvitationResponseSchema>;

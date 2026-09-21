@@ -12,9 +12,13 @@ import { cn } from "cn";
 
 const TABS = [
   { href: "", label: "Overview" },
+  { href: "/calendar", label: "Calendar" },
+  { href: "/customers", label: "Customers" },
+  { href: "/messages", label: "Messages" },
   { href: "/team", label: "Team" },
   { href: "/services", label: "Services" },
   { href: "/hours", label: "Hours" },
+  { href: "/settings", label: "Settings" },
 ] as const;
 
 export default function SalonLayout({ children }: { children: ReactNode }) {
@@ -34,7 +38,7 @@ export default function SalonLayout({ children }: { children: ReactNode }) {
   }
 
   const me = members.data.find((m) => m.userId === user?.id) ?? null;
-  const isManager = me ? me.role === "MANAGER" : Boolean(user?.isSiteAdmin);
+  const isManager = me ? me.roles.includes("MANAGER") : Boolean(user?.isSiteAdmin);
   const base = `/s/${salonId}`;
 
   return (

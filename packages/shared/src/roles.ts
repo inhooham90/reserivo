@@ -14,3 +14,12 @@ export const MembershipStatus = {
   REMOVED: 'REMOVED',
 } as const;
 export type MembershipStatus = (typeof MembershipStatus)[keyof typeof MembershipStatus];
+
+/** A member's capabilities: at least one, no duplicates. MANAGER administers; DESIGNER is bookable. */
+export const salonRolesSchema = z
+  .array(salonRoleSchema)
+  .min(1, 'Pick at least one role')
+  .refine((r) => new Set(r).size === r.length, { message: 'Duplicate role' });
+export type SalonRoles = z.infer<typeof salonRolesSchema>;
+
+export const hasRole = (roles: readonly SalonRole[], role: SalonRole): boolean => roles.includes(role);

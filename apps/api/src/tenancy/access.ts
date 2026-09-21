@@ -3,7 +3,7 @@ import type { TenantContext } from './tenant.types.js';
 
 /** Site admins (null membership) are treated as managers everywhere. */
 export function isManager(tenant: TenantContext): boolean {
-  return tenant.membership === null || tenant.membership.role === 'MANAGER';
+  return tenant.membership === null || tenant.membership.roles.includes('MANAGER');
 }
 
 /** Managers may act on any member; everyone else only on themselves. */

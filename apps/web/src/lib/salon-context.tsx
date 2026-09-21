@@ -26,4 +26,5 @@ export const salonKeys = {
   invitations: (id: string) => ["salons", id, "invitations"] as const,
   services: (id: string) => ["salons", id, "services"] as const,
   availability: (id: string, memberId: string) => ["salons", id, "availability", memberId] as const,
+  hours: (id: string) => ["salons", id, "hours"] as const,
 };

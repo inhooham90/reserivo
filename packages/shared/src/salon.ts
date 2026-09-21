@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { salonRoleSchema } from './roles';
+import { salonRolesSchema } from './roles';
 
 /** URL-safe identifier used at /{slug}. Lowercase letters, digits, single hyphens. */
 export const salonSlugSchema = z
@@ -21,37 +21,62 @@ export const timezoneSchema = z.string().refine(
   { message: 'Unknown time zone' },
 );
 
+/** Booking policies, editable by managers. Defaults match the Prisma schema. */
+export const salonPoliciesSchema = z.object({
+  /** Slot grid in minutes. */
+  slotIntervalMin: z.number().int().min(5).max(60).multipleOf(5),
+  /** Minimum notice for an online booking, in minutes. */
+  leadTimeMin: z.number().int().min(0).max(7 * 24 * 60),
+  /** How far ahead customers may book. */
+  maxAdvanceDays: z.number().int().min(1).max(365),
+  /** How many hours before the start a customer may still self-cancel. */
+  cancelWindowHours: z.number().int().min(0).max(24 * 14),
+});
+export type SalonPolicies = z.infer<typeof salonPoliciesSchema>;
+
 export const createSalonSchema = z.object({
   name: z.string().trim().min(1).max(120),
   slug: salonSlugSchema,
   timezone: timezoneSchema,
+  /** Solo operators and owner-stylists: the creator is also a bookable designer. */
+  takesAppointments: z.boolean().default(true),
 });
 export type CreateSalonInput = z.infer<typeof createSalonSchema>;
 
-export const salonSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  slug: z.string(),
-  timezone: z.string(),
-  createdAt: z.string(),
-});
+export const updateSalonSchema = z
+  .object({ name: z.string().trim().min(1).max(120), timezone: timezoneSchema })
+  .extend(salonPoliciesSchema.shape)
+  .partial();
+export type UpdateSalonInput = z.infer<typeof updateSalonSchema>;
+
+/** Every salon payload carries its policies; the booking UI needs them too. */
+export const salonSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    slug: z.string(),
+    timezone: z.string(),
+    createdAt: z.string(),
+  })
+  .extend(salonPoliciesSchema.shape);
 export type Salon = z.infer<typeof salonSchema>;
 
 export const salonMembershipSchema = z.object({
   id: z.string(),
   salonId: z.string(),
   userId: z.string(),
-  role: salonRoleSchema,
+  roles: salonRolesSchema,
   displayName: z.string(),
 });
 export type SalonMembership = z.infer<typeof salonMembershipSchema>;
 
 /** What a logged-in user sees in their salon switcher. */
-export const mySalonSchema = salonSchema.extend({ role: salonRoleSchema });
+export const mySalonSchema = salonSchema.extend({ roles: salonRolesSchema });
 export type MySalon = z.infer<typeof mySalonSchema>;
 
-/** The booking page payload: salon + bookable team + their live services. No contact fields, ever. */
+/** The booking page payload: salon + opening hours + bookable team + their live services. No contact fields, ever. */
 export const publicSalonSchema = salonSchema.extend({
+  hours: z.array(z.object({ weekday: z.number().int(), startMinutes: z.number().int(), endMinutes: z.number().int() })),
   designers: z.array(
     z.object({
       id: z.string(),

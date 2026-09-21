@@ -1,5 +1,5 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import type { CreateServiceInput, Service, UpdateServiceInput } from '@reserivo/shared';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BLOCKING_STATUSES, type CreateServiceInput, type Service, type UpdateServiceInput } from '@reserivo/shared';
 import { MembersService } from '../members/members.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { assertCanManageMember } from '../tenancy/access.js';
@@ -28,7 +28,7 @@ export class ServicesService {
     const designerId = input.designerId ?? tenant.membership?.id;
     if (!designerId) throw new BadRequestException('designerId is required');
     assertCanManageMember(tenant, designerId);
-    await this.members.findActive(tenant.salonId, designerId);
+    await this.members.findDesigner(tenant.salonId, designerId);
 
     const { designerId: _ignored, ...data } = input;
     const row = await this.prisma.service.create({ data: { ...data, salonId: tenant.salonId, designerId } });
@@ -42,10 +42,19 @@ export class ServicesService {
     return this.toService(row);
   }
 
-  /** Hard delete for now; Phase 2 will refuse when appointments reference the service. */
+  /**
+   * Deleting is refused while upcoming appointments reference the service —
+   * deactivate instead. Past appointments keep their snapshots (FK is SetNull).
+   */
   async remove(tenant: TenantContext, id: string): Promise<void> {
     const existing = await this.findInSalon(tenant.salonId, id);
     assertCanManageMember(tenant, existing.designerId);
+    const upcoming = await this.prisma.appointment.count({
+      where: { serviceId: id, status: { in: [...BLOCKING_STATUSES] }, startAt: { gte: new Date() } },
+    });
+    if (upcoming > 0) {
+      throw new ConflictException(`This service has ${upcoming} upcoming appointment(s). Deactivate it instead.`);
+    }
     await this.prisma.service.delete({ where: { id } });
   }
 

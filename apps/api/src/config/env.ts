@@ -6,6 +6,10 @@ const envSchema = z.object({
   DATABASE_URL: z.url(),
   REDIS_URL: z.url().optional(),
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
+  /** Email delivery. Unset RESEND_API_KEY → notifications are logged, not sent. */
+  // Compose passes an empty string when the variable is unset; treat that as absent.
+  RESEND_API_KEY: z.preprocess((v) => (v === '' ? undefined : v), z.string().min(1).optional()),
+  EMAIL_FROM: z.string().default('Reserivo <onboarding@resend.dev>'),
   /** Public web origin, used to build links we hand to users (invites). */
   WEB_URL: z.url().default('http://localhost:3000'),
   JWT_ACCESS_SECRET: z.string().min(16),

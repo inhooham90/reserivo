@@ -6,7 +6,7 @@ export interface TenantContext {
   /** Null when a site admin is accessing a salon they hold no membership in. */
   membership: {
     id: string;
-    role: SalonRole;
+    roles: SalonRole[];
     displayName: string;
   } | null;
 }

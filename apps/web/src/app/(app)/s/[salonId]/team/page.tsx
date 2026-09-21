@@ -1,17 +1,10 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  createInvitationSchema,
-  type CreateInvitationInput,
-  type Invitation,
-  type Member,
-  type UpdateMemberInput,
-} from "@reserivo/shared";
+import { emailSchema, type CreateInvitationInput, type Invitation, type Member, type SalonRole, type UpdateMemberInput } from "@reserivo/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { FieldError } from "@/components/field-error";
+import { RolePicker } from "@/components/role-picker";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { api, ApiError } from "@/lib/api";
-import { roleLabel } from "@/lib/format";
+import { rolesLabel } from "@/lib/format";
 import { salonKeys, useSalon } from "@/lib/salon-context";
 
 export default function TeamPage() {
@@ -43,17 +36,7 @@ export default function TeamPage() {
   );
 }
 
-function MemberCard({
-  member,
-  canEdit,
-  isManager,
-  salonId,
-}: {
-  member: Member;
-  canEdit: boolean;
-  isManager: boolean;
-  salonId: string;
-}) {
+function MemberCard({ member, canEdit, isManager, salonId }: { member: Member; canEdit: boolean; isManager: boolean; salonId: string }) {
   const [editing, setEditing] = useState(false);
   const queryClient = useQueryClient();
   const invalidate = () => queryClient.invalidateQueries({ queryKey: salonKeys.members(salonId) });
@@ -69,8 +52,7 @@ function MemberCard({
         <div>
           <CardTitle className="flex items-center gap-2">
             {member.displayName}
-            <Badge variant={member.role === "MANAGER" ? "default" : "secondary"}>{roleLabel(member.role)}</Badge>
-            {!member.acceptsBookings && <Badge variant="outline">Not bookable</Badge>}
+            <Badge variant={member.roles.includes("MANAGER") ? "default" : "secondary"}>{rolesLabel(member.roles)}</Badge>
           </CardTitle>
           <CardDescription>
             {member.email ?? ""}
@@ -112,31 +94,22 @@ function MemberCard({
   );
 }
 
-function MemberForm({
-  member,
-  isManager,
-  salonId,
-  onSaved,
-}: {
-  member: Member;
-  isManager: boolean;
-  salonId: string;
-  onSaved: () => void;
-}) {
+function MemberForm({ member, isManager, salonId, onSaved }: { member: Member; isManager: boolean; salonId: string; onSaved: () => void }) {
   const queryClient = useQueryClient();
   const [displayName, setDisplayName] = useState(member.displayName);
   const [bio, setBio] = useState(member.bio ?? "");
-  const [acceptsBookings, setAcceptsBookings] = useState(member.acceptsBookings);
-  const [role, setRole] = useState(member.role);
+  const [roles, setRoles] = useState<SalonRole[]>(member.roles);
 
   const save = useMutation({
-    mutationFn: (input: UpdateMemberInput) =>
-      api<Member>(`/salons/${salonId}/members/${member.id}`, { method: "PATCH", json: input }),
+    mutationFn: (input: UpdateMemberInput) => api<Member>(`/salons/${salonId}/members/${member.id}`, { method: "PATCH", json: input }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: salonKeys.members(salonId) });
+      void queryClient.invalidateQueries({ queryKey: ["salons", salonId, "availability"] });
       onSaved();
     },
   });
+
+  const rolesChanged = roles.length !== member.roles.length || roles.some((r) => !member.roles.includes(r));
 
   return (
     <form
@@ -146,8 +119,7 @@ function MemberForm({
         save.mutate({
           displayName: displayName.trim(),
           bio: bio.trim() || null,
-          acceptsBookings,
-          ...(isManager ? { role } : {}),
+          ...(isManager && rolesChanged ? { roles } : {}),
         });
       }}
     >
@@ -159,26 +131,17 @@ function MemberForm({
         <Label htmlFor={`bio-${member.id}`}>Bio</Label>
         <Textarea id={`bio-${member.id}`} value={bio} onChange={(e) => setBio(e.target.value)} rows={3} />
       </div>
-      <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" checked={acceptsBookings} onChange={(e) => setAcceptsBookings(e.target.checked)} />
-        Shown on the booking page
-      </label>
       {isManager && (
         <div className="grid gap-1.5">
-          <Label htmlFor={`role-${member.id}`}>Role</Label>
-          <select
-            id={`role-${member.id}`}
-            className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-            value={role}
-            onChange={(e) => setRole(e.target.value as Member["role"])}
-          >
-            <option value="DESIGNER">Designer</option>
-            <option value="MANAGER">Manager</option>
-          </select>
+          <Label>Roles</Label>
+          <RolePicker idPrefix={`roles-${member.id}`} value={roles} onChange={setRoles} />
+          {rolesChanged && !member.roles.includes("DESIGNER") && roles.includes("DESIGNER") && (
+            <p className="text-xs text-muted-foreground">Their hours will start as a copy of the salon hours.</p>
+          )}
         </div>
       )}
       <FieldError message={save.error instanceof ApiError ? save.error.message : undefined} />
-      <Button type="submit" size="sm" disabled={save.isPending}>
+      <Button type="submit" size="sm" disabled={save.isPending || roles.length === 0}>
         {save.isPending ? "Saving…" : "Save"}
       </Button>
     </form>
@@ -187,20 +150,19 @@ function MemberForm({
 
 function InviteCard({ salonId }: { salonId: string }) {
   const queryClient = useQueryClient();
+  const [email, setEmail] = useState("");
+  const [roles, setRoles] = useState<SalonRole[]>(["DESIGNER"]);
+  const [error, setError] = useState<string | null>(null);
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const form = useForm<CreateInvitationInput>({
-    resolver: zodResolver(createInvitationSchema),
-    defaultValues: { email: "", role: "DESIGNER" },
-  });
 
   const invite = useMutation({
-    mutationFn: (input: CreateInvitationInput) =>
-      api<Invitation>(`/salons/${salonId}/invitations`, { method: "POST", json: input }),
+    mutationFn: (input: CreateInvitationInput) => api<Invitation>(`/salons/${salonId}/invitations`, { method: "POST", json: input }),
     onSuccess: (inv) => {
       setInviteUrl(inv.inviteUrl ?? null);
       setCopied(false);
-      form.reset({ email: "", role: "DESIGNER" });
+      setEmail("");
+      setRoles(["DESIGNER"]);
       void queryClient.invalidateQueries({ queryKey: salonKeys.invitations(salonId) });
     },
   });
@@ -212,25 +174,32 @@ function InviteCard({ salonId }: { salonId: string }) {
         <CardDescription>They accept the link with an account that uses this email.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={form.handleSubmit((v) => invite.mutate(v))} className="grid gap-3" noValidate>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            setError(null);
+            const parsed = emailSchema.safeParse(email);
+            if (!parsed.success) {
+              setError("Enter a valid email");
+              return;
+            }
+            if (roles.length === 0) return;
+            invite.mutate({ email: parsed.data, roles });
+          }}
+          className="grid gap-3"
+          noValidate
+        >
           <div className="grid gap-1.5">
             <Label htmlFor="inv-email">Email</Label>
-            <Input id="inv-email" type="email" {...form.register("email")} />
-            <FieldError message={form.formState.errors.email?.message} />
+            <Input id="inv-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <FieldError message={error ?? undefined} />
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="inv-role">Role</Label>
-            <select
-              id="inv-role"
-              className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-              {...form.register("role")}
-            >
-              <option value="DESIGNER">Designer</option>
-              <option value="MANAGER">Manager</option>
-            </select>
+            <Label>Roles</Label>
+            <RolePicker idPrefix="inv" value={roles} onChange={setRoles} />
           </div>
           <FieldError message={invite.error instanceof ApiError ? invite.error.message : undefined} />
-          <Button type="submit" size="sm" disabled={invite.isPending}>
+          <Button type="submit" size="sm" disabled={invite.isPending || roles.length === 0}>
             {invite.isPending ? "Creating…" : "Create invite link"}
           </Button>
         </form>
@@ -238,11 +207,7 @@ function InviteCard({ salonId }: { salonId: string }) {
           <div className="mt-4 grid gap-2 rounded-md border bg-muted/50 p-3 text-sm">
             <p className="text-muted-foreground">Share this link — it works once and expires in 7 days.</p>
             <code className="break-all">{inviteUrl}</code>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => navigator.clipboard.writeText(inviteUrl).then(() => setCopied(true))}
-            >
+            <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(inviteUrl).then(() => setCopied(true))}>
               {copied ? "Copied" : "Copy link"}
             </Button>
           </div>
@@ -273,7 +238,7 @@ function PendingInvitations({ salonId }: { salonId: string }) {
         {pending.data.map((inv) => (
           <div key={inv.id} className="flex items-center justify-between gap-2">
             <span>
-              {inv.email} <span className="text-muted-foreground">· {roleLabel(inv.role)}</span>
+              {inv.email} <span className="text-muted-foreground">· {rolesLabel(inv.roles)}</span>
             </span>
             <Button size="xs" variant="ghost" onClick={() => revoke.mutate(inv.id)} disabled={revoke.isPending}>
               Revoke
