@@ -38,7 +38,13 @@ export default function MyAppointmentsPage() {
         <h1 className="text-xl">Upcoming</h1>
         {appts.isPending && <p className="text-muted-foreground">Loading…</p>}
         {appts.data && upcoming.length === 0 && (
-          <p className="text-muted-foreground">Nothing booked. Open a salon’s booking link to make an appointment.</p>
+          <p className="text-muted-foreground">
+            Nothing booked. Open a salon’s booking link to make an appointment, or{" "}
+            <Link href="/settings" className="underline">
+              set up your own salon
+            </Link>
+            .
+          </p>
         )}
         {upcoming.map((a) => (
           <Card key={a.id}>

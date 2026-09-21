@@ -11,7 +11,9 @@ const SECTIONS = [
   { href: "/team", label: "Team", hint: "Designers, roles, invitations" },
   { href: "/services", label: "Services", hint: "What you offer and what it costs" },
   { href: "/hours", label: "Hours", hint: "Opening hours and each designer's week" },
-  { href: "/salons", label: "Your salons", hint: "Switch between them, or start another" },
+  // Absolute: switching salons cannot be scoped to the one you are leaving,
+  // and the page has to open with no salon at all.
+  { href: "/settings", label: "Your salons", hint: "Switch between them, or start another", absolute: true },
 ] as const;
 
 export default function SettingsLayout({ children }: { children: ReactNode }) {
@@ -23,7 +25,7 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
     <div className="grid gap-6 md:grid-cols-[220px_1fr]">
       <nav aria-label="Settings sections" className="grid content-start gap-1">
         {SECTIONS.map((s) => {
-          const href = base + s.href;
+          const href = "absolute" in s ? s.href : base + s.href;
           // The index section would otherwise match every sibling.
           const active = s.href === "" ? pathname === base : pathname.startsWith(href);
           return (

@@ -52,9 +52,11 @@ See README.md for how to run things. This file is the non-obvious stuff.
 
 ## Information architecture
 
-- **Signing in lands on a schedule, not a dashboard.** `/dashboard` is a redirector: it sends staff to `/s/{id}/calendar` (the salon they last used, remembered in `localStorage` via `lib/current-salon.ts` and always re-validated against `/salons/mine`), and renders the first-run create-a-salon screen for anyone with no membership. Don't turn it back into a landing page.
+- **Signing in lands on a schedule, not a dashboard.** `/dashboard` is a redirector: it sends staff to `/s/{id}/calendar` (the salon they last used, remembered in `localStorage` via `lib/current-salon.ts` and always re-validated against `/salons/mine`), and anyone with no membership to `/appointments`. Don't turn it back into a landing page.
+- **`/settings` is top-level on purpose, and it is the only way a first salon gets created.** Everything under `/s/{salonId}` needs a salon to scope to, so a brand-new account could reach none of it; the account would be able to book appointments and nothing else. Keep "Your salons" off the salon-scoped tree. `/s/{id}/settings/salons` is a redirect kept for old links. (`settings` is already in `RESERVED_SLUGS`.)
+- **Settings live behind a header menu, not a tab.** `SettingsMenu` in `components/layout/` is in the app header: the current salon's sections, then "Your salons". Configuring a salon is a once-a-year job and should not compete with the schedule, but it has to be reachable from every page including ones with no salon. It resolves the salon from the URL, falling back to the first — **never from `localStorage` during render**, which would differ between server and client and trip hydration.
 - **Salon tabs are day-to-day only**: Schedule, Customers, Messages, Settings. Anything configured once — team, services, hours, salon info, switching or creating salons — lives under `/s/{id}/settings/*` with its own side nav.
-- **The header salon switcher only appears with more than one salon**, so single-salon users never see it. Settings → Your salons is the full version.
+- **The header salon switcher only appears with more than one salon**, so single-salon users never see it. `/settings` is the full version.
 
 ## Legal pages and SMS compliance
 

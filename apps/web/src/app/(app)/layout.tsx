@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
+import { SettingsMenu } from "@/components/layout/settings-menu";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -54,8 +55,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               </Link>
             )}
           </nav>
-          <div className="flex items-center gap-3 text-sm">
-            <span className="text-muted-foreground">{user.name}</span>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="hidden text-muted-foreground sm:inline">{user.name}</span>
+            <SettingsMenu />
             <Button variant="outline" size="sm" onClick={() => void logout().then(() => router.replace("/login"))}>
               Sign out
             </Button>
