@@ -1,0 +1,19 @@
+{
+  "name": "reserivo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "docker compose up",
+    "build:shared": "npm run build -w @reserivo/shared",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "db:migrate": "docker compose exec api npx prisma migrate dev",
+    "db:studio": "npm run -w api prisma:studio"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

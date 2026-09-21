@@ -1,32 +1,107 @@
 services:
-  web:
-    build:
-      context: ./apps/web
-      dockerfile: Dockerfile.dev
-    ports:
-      - "3000:3000"
+  postgres:
+    image: postgres:17-alpine
     environment:
-      WATCHPACK_POLLING: "true"
-      NEXT_PUBLIC_API_URL: "http://localhost:3001"
+      POSTGRES_USER: reserivo
+      POSTGRES_PASSWORD: reserivo
+      POSTGRES_DB: reserivo
+    ports:
+      - "5433:5432"  # 5433 on the host: a native Postgres often owns 5432
     volumes:
-      - ./apps/web:/app
-      - web_node_modules:/app/node_modules
-    depends_on:
-      - api
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reserivo -d reserivo"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Watches packages/shared and rebuilds dist/ on the bind mount, which api and
+  # web both read. Restart api after shared changes (nest's tsc watch does not
+  # re-resolve node_modules).
+  shared:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile.dev
+    command: ["npm", "run", "dev", "-w", "@reserivo/shared", "--prefix", "/app"]
+    working_dir: /app
+    environment:
+      TSC_WATCHFILE: DynamicPriorityPolling
+      TSC_WATCHDIRECTORY: RecursiveDirectoryUsingDynamicPriorityPolling
+    volumes:
+      - .:/app
+      - root_node_modules:/app/node_modules
+      - shared_node_modules:/app/packages/shared/node_modules
 
   api:
     build:
-      context: ./apps/api
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: apps/api/Dockerfile.dev
     ports:
       - "3001:3001"
     environment:
       PORT: "3001"
-      CHOKIDAR_USEPOLLING: "true"
+      NODE_ENV: development
+      DATABASE_URL: postgresql://reserivo:reserivo@postgres:5432/reserivo
+      REDIS_URL: redis://redis:6379
+      CORS_ORIGIN: http://localhost:3000
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev-access-secret-change-me}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev-refresh-secret-change-me}
+      # Bind mounts from Windows deliver no inotify events; tsc must poll.
+      TSC_WATCHFILE: DynamicPriorityPolling
+      TSC_WATCHDIRECTORY: RecursiveDirectoryUsingDynamicPriorityPolling
     volumes:
-      - ./apps/api:/app
-      - api_node_modules:/app/node_modules
+      - .:/app
+      - root_node_modules:/app/node_modules
+      - api_node_modules:/app/apps/api/node_modules
+      - shared_node_modules:/app/packages/shared/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      shared:
+        condition: service_started
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile.dev
+    # Turbopack cannot poll and Windows bind mounts emit no inotify events, so
+    # dev runs on webpack with WATCHPACK_POLLING. Drop --webpack on Linux/WSL.
+    command: ["sh", "-c", "npm run build -w @reserivo/shared --prefix /app && npm run dev -- --webpack --hostname 0.0.0.0"]
+    ports:
+      - "3000:3000"
+    environment:
+      WATCHPACK_POLLING: "true"
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      API_URL_INTERNAL: http://api:3001
+    volumes:
+      - .:/app
+      - root_node_modules:/app/node_modules
+      - web_node_modules:/app/apps/web/node_modules
+      - shared_node_modules:/app/packages/shared/node_modules
+      - web_next:/app/apps/web/.next
+    depends_on:
+      - api
+      - shared
 
 volumes:
-  web_node_modules:
+  postgres_data:
+  redis_data:
+  root_node_modules:
   api_node_modules:
+  web_node_modules:
+  shared_node_modules:
+  web_next:

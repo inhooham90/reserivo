@@ -1,15 +1,20 @@
+# Build context is the repo root (see compose.yaml).
 FROM node:24-bookworm
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY package.json package-lock.json ./
+COPY apps/api/package.json apps/api/
+COPY apps/web/package.json apps/web/
+COPY packages/shared/package.json packages/shared/
 RUN npm ci
 
 COPY . .
+RUN npm run build -w @reserivo/shared
 
+WORKDIR /app/apps/web
 ENV HOSTNAME=0.0.0.0
 ENV WATCHPACK_POLLING=true
-
 EXPOSE 3000
 
-CMD ["npm", "run", "dev", "--", "--hostname", "0.0.0.0"]
+CMD ["sh", "-c", "npm run build -w @reserivo/shared --prefix /app && npm run dev -- --hostname 0.0.0.0"]

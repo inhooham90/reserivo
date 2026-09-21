@@ -1,0 +1,19 @@
+# Dependencies are installed inside the image; never ship host node_modules
+# (Windows npm creates .bin symlinks Docker's context loader rejects).
+**/node_modules
+**/dist
+**/.next
+**/coverage
+**/*.tsbuildinfo
+**/.env
+**/.env.*
+!**/.env.example
+.git
+.gitignore
+**/Dockerfile*
+.dockerignore
+compose*.yaml
+**/README.md
+**/CLAUDE.md
+**/AGENTS.md
+apps/api/src/generated

@@ -1,12 +1,24 @@
+# Build context is the repo root (see compose.yaml) so the workspace lockfile
+# and packages/shared are available.
 FROM node:24-bookworm
 
 WORKDIR /app
 
-COPY package*.json ./
+# Copy only manifests first so `npm ci` is cached until a dependency changes.
+COPY package.json package-lock.json ./
+COPY apps/api/package.json apps/api/
+COPY apps/web/package.json apps/web/
+COPY packages/shared/package.json packages/shared/
 RUN npm ci
 
 COPY . .
 
+# The Prisma client is generated in CMD, where DATABASE_URL is available.
+RUN npm run build -w @reserivo/shared
+
+WORKDIR /app/apps/api
 EXPOSE 3001
 
-CMD ["npm", "run", "start:dev"]
+# Rebuild shared on start: the bind mount hides the image's dist, and the
+# `shared` compose service takes over watching from there.
+CMD ["sh", "-c", "npm run build -w @reserivo/shared --prefix /app && npx prisma generate && npx prisma migrate deploy && npm run start:dev"]
