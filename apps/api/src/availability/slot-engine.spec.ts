@@ -1,6 +1,6 @@
 import { intersectWindows, localToUtc, utcToLocal } from '@reserivo/shared';
 import { describe, expect, it } from 'vitest';
-import { computeSlots, effectiveWindows, windowsForDate } from './slot-engine.js';
+import { computeSlots, effectiveWindows, windowsForDate, type SlotEngineInput } from './slot-engine.js';
 
 const LA = 'America/Los_Angeles';
 const nineToFive = [1, 2, 3, 4, 5].map((weekday) => ({ weekday, startMinutes: 540, endMinutes: 1020 }));
@@ -112,7 +112,7 @@ describe('computeSlots', () => {
   });
 
   it('removes slots that clash with busy intervals, including the new slot’s buffer', () => {
-    const busy = [{ startAt: localToUtc('2026-03-10', 720, LA), endAt: localToUtc('2026-03-10', 780, LA) }]; // 12:00–13:00
+    const busy = [{ startAt: localToUtc('2026-03-10', 720, LA), endAt: localToUtc('2026-03-10', 780, LA), sharable: false }]; // 12:00–13:00
     const plain = mins(computeSlots({ ...base, date: '2026-03-10', busy }));
     expect(plain).not.toContain(720);
     expect(plain).toContain(660); // 11:00–12:00 touches but does not overlap
@@ -165,7 +165,7 @@ describe('fitting a service into the gap before an existing appointment', () => 
     timezone: LA,
     salonRules: [{ weekday: 2, startMinutes: 540, endMinutes: 1080 }],
     salonExceptions: [],
-    busy: [{ startAt: localToUtc('2026-03-10', 615, LA), endAt: localToUtc('2026-03-10', 645, LA) }],
+    busy: [{ startAt: localToUtc('2026-03-10', 615, LA), endAt: localToUtc('2026-03-10', 645, LA), sharable: false }],
     slotIntervalMin: 15,
   };
   const before1015 = (durationMin: number, bufferMin: number) =>
@@ -183,5 +183,44 @@ describe('fitting a service into the gap before an existing appointment', () => 
 
   it('the buffer alone can decide it: the same perm without one also fits at 9:15', () => {
     expect(before1015(60, 0)).toEqual([540, 555]);
+  });
+});
+
+/**
+ * Double booking. A service marked sharable — a colour, a perm — has processing
+ * time in it, so another appointment may sit on top of it. The engine is
+ * deliberately stricter than the database: a hands-on appointment blocks the
+ * slot whatever is being booked, and the stack has a ceiling.
+ */
+describe('computeSlots with sharable appointments', () => {
+  const at = (from: number, to: number, sharable: boolean) => ({
+    startAt: localToUtc('2026-03-10', from, LA),
+    endAt: localToUtc('2026-03-10', to, LA),
+    sharable,
+  });
+  const day = (busy: ReturnType<typeof at>[], over?: Partial<SlotEngineInput>) =>
+    mins(computeSlots({ ...base, date: '2026-03-10', busy, ...over }));
+
+  it('offers a slot on top of a sharable appointment', () => {
+    // A colour runs 12:00–14:00 but the designer is free while it develops.
+    expect(day([at(720, 840, true)])).toContain(720);
+  });
+
+  it('still refuses a slot on top of a hands-on appointment', () => {
+    expect(day([at(720, 840, false)])).not.toContain(720);
+  });
+
+  it('refuses to stack a third appointment on two sharable ones', () => {
+    expect(day([at(720, 840, true), at(720, 840, true)])).not.toContain(720);
+    // The ceiling is per instant, so the untouched hours are unaffected.
+    expect(day([at(720, 840, true), at(720, 840, true)])).toContain(660);
+  });
+
+  it('counts a hands-on appointment as blocking even when a sharable one is also there', () => {
+    expect(day([at(720, 840, true), at(720, 780, false)])).not.toContain(720);
+  });
+
+  it('honours an explicit ceiling of one, which disables sharing entirely', () => {
+    expect(day([at(720, 840, true)], { maxConcurrent: 1 })).not.toContain(720);
   });
 });

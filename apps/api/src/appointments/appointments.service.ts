@@ -8,6 +8,7 @@ import {
 import {
   BLOCKING_STATUSES,
   localToUtc,
+  completableFrom,
   noShowMarkableFrom,
   NO_SHOW_GRACE_MIN,
   utcToLocal,
@@ -35,6 +36,11 @@ const DOUBLE_BOOKING_CONSTRAINT = 'appointments_no_double_booking';
  * confirmed address — otherwise signing up as someone@example.com would hand
  * over that person's guest bookings.
  */
+/** Wall-clock time in the salon's zone, for messages staff will read. */
+function formatLocalTime(at: Date, timezone: string): string {
+  return new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', timeZone: timezone }).format(at);
+}
+
 export function ownedBy(user: AuthenticatedUser) {
   return user.emailVerified ? { OR: [{ userId: user.id }, { email: user.email }] } : { userId: user.id };
 }
@@ -58,6 +64,9 @@ type ApptRow = {
   serviceNameSnapshot: string;
   priceCentsSnapshot: number;
   durationMinSnapshot: number;
+  allowsDoubleBooking: boolean;
+  paymentMethod: 'CARD' | 'CASH' | 'GIFT_CARD' | 'MOBILE_PAY' | 'OTHER' | null;
+  tipCents: number | null;
   notes: string | null;
   internalNotes: string | null;
   cancelReason: string | null;
@@ -173,7 +182,15 @@ export class AppointmentsService {
   async staffAvailability(tenant: TenantContext, query: AvailabilityQuery): Promise<AvailabilityResponse> {
     const salon = await this.salonById(tenant.salonId);
     const service = await this.serviceInSalon(salon.id, query.serviceId, query.designerId);
-    return this.slots.compute({ salon, designerId: query.designerId, service, from: query.from, days: query.days, mode: 'staff' });
+    return this.slots.compute({
+      salon,
+      designerId: query.designerId,
+      service,
+      from: query.from,
+      days: query.days,
+      mode: 'staff',
+      excludeAppointmentId: query.excludeAppointmentId,
+    });
   }
 
   /** Everyone on the team sees the calendar; only managers see contact fields. */
@@ -239,23 +256,41 @@ export class AppointmentsService {
       throw new ConflictException('An appointment can only be set back to confirmed to undo a no-show');
     }
 
+    // You cannot have finished a haircut that has not started.
+    if (input.status === 'COMPLETED') {
+      const completeFrom = completableFrom(row.startAt);
+      if (new Date() < completeFrom) {
+        throw new ConflictException(
+          `This appointment starts at ${formatLocalTime(completeFrom, row.salon.timezone)} — it cannot be completed before then.`,
+        );
+      }
+    }
+
     // Someone ten minutes late has not missed their appointment.
     if (input.status === 'NO_SHOW') {
       const markableFrom = noShowMarkableFrom(row.startAt);
       if (new Date() < markableFrom) {
-        const at = new Intl.DateTimeFormat('en-US', {
-          hour: 'numeric',
-          minute: '2-digit',
-          timeZone: row.salon.timezone,
-        }).format(markableFrom);
+        const at = formatLocalTime(markableFrom, row.salon.timezone);
         throw new ConflictException(
           `Too early to call this a no-show — you can from ${at}, ${NO_SHOW_GRACE_MIN} minutes after the start time.`,
         );
       }
     }
 
+    // What they paid and tipped are notes on a finished appointment, so they
+    // only make sense once it is one. Null clears a mistaken entry.
+    if (input.paymentMethod !== undefined || input.tipCents !== undefined) {
+      const completed = input.status === 'COMPLETED' || (!input.status && row.status === 'COMPLETED');
+      if (!completed) {
+        const what = input.paymentMethod !== undefined ? 'A payment method' : 'A tip';
+        throw new ConflictException(`${what} can only be recorded on a completed appointment`);
+      }
+    }
+
     const data: Record<string, unknown> = {};
     if (input.internalNotes !== undefined) data.internalNotes = input.internalNotes;
+    if (input.paymentMethod !== undefined) data.paymentMethod = input.paymentMethod;
+    if (input.tipCents !== undefined) data.tipCents = input.tipCents;
     if (input.startAt) {
       const startAt = new Date(input.startAt);
       data.startAt = startAt;
@@ -290,7 +325,14 @@ export class AppointmentsService {
     salonId: string;
     designerId: string;
     customerId: string;
-    service: { id: string; name: string; priceCents: number; durationMin: number; bufferMin: number };
+    service: {
+      id: string;
+      name: string;
+      priceCents: number;
+      durationMin: number;
+      bufferMin: number;
+      allowsDoubleBooking: boolean;
+    };
     startAt: Date;
     source: 'ONLINE' | 'STAFF';
     notes?: string | null;
@@ -313,6 +355,9 @@ export class AppointmentsService {
           serviceNameSnapshot: args.service.name,
           priceCentsSnapshot: args.service.priceCents,
           durationMinSnapshot: args.service.durationMin,
+          // Snapshotted like the price: changing the service later must not
+          // silently move an existing appointment in or out of the constraint.
+          allowsDoubleBooking: args.service.allowsDoubleBooking,
           notes: args.notes ?? null,
           internalNotes: args.internalNotes ?? null,
           createdByUserId: args.createdByUserId,
@@ -403,6 +448,9 @@ export class AppointmentsService {
       serviceName: r.serviceNameSnapshot,
       priceCents: r.priceCentsSnapshot,
       durationMin: r.durationMinSnapshot,
+      allowsDoubleBooking: r.allowsDoubleBooking,
+      paymentMethod: r.paymentMethod,
+      tipCents: r.tipCents,
       customer: {
         id: r.customer.id,
         name: r.customer.name,

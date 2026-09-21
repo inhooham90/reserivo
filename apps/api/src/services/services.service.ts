@@ -1,5 +1,12 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { BLOCKING_STATUSES, type CreateServiceInput, type Service, type UpdateServiceInput } from '@reserivo/shared';
+import {
+  assertDoubleBookingAllowed,
+  BLOCKING_STATUSES,
+  canAllowDoubleBooking,
+  type CreateServiceInput,
+  type Service,
+  type UpdateServiceInput,
+} from '@reserivo/shared';
 import { MembersService } from '../members/members.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { assertCanManageMember } from '../tenancy/access.js';
@@ -38,7 +45,20 @@ export class ServicesService {
   async update(tenant: TenantContext, id: string, input: UpdateServiceInput): Promise<Service> {
     const existing = await this.findInSalon(tenant.salonId, id);
     assertCanManageMember(tenant, existing.designerId);
-    const row = await this.prisma.service.update({ where: { id }, data: input });
+
+    // The update is partial, so validate the *resulting* service, not the patch.
+    const durationMin = input.durationMin ?? existing.durationMin;
+    const data: UpdateServiceInput = { ...input };
+    if (input.allowsDoubleBooking !== undefined) {
+      const problem = assertDoubleBookingAllowed(durationMin, input.allowsDoubleBooking);
+      if (problem) throw new BadRequestException(problem);
+    } else if (existing.allowsDoubleBooking && !canAllowDoubleBooking(durationMin)) {
+      // Shortening a service past the threshold leaves the flag meaningless
+      // rather than wrong, so drop it instead of refusing the edit.
+      data.allowsDoubleBooking = false;
+    }
+
+    const row = await this.prisma.service.update({ where: { id }, data });
     return this.toService(row);
   }
 
@@ -75,6 +95,7 @@ export class ServicesService {
     durationMin: number;
     bufferMin: number;
     active: boolean;
+    allowsDoubleBooking: boolean;
     sortOrder: number;
     createdAt: Date;
     updatedAt: Date;

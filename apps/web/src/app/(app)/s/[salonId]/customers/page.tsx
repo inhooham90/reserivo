@@ -133,9 +133,18 @@ function CustomerRecord({ id }: { id: string }) {
             </p>
           )}
           <FieldError message={message.error instanceof ApiError ? message.error.message : undefined} />
-          <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+          <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3 lg:grid-cols-5">
             <Stat label="Visits" value={String(c.stats.visits)} />
             <Stat label="Spent" value={formatCents(c.stats.spentCents)} />
+            <Stat
+              label="Avg tip"
+              value={c.stats.avgTipPct === null ? "—" : `${c.stats.avgTipPct}%`}
+              hint={
+                c.stats.tippedVisits === 0
+                  ? "No tips recorded"
+                  : `${formatCents(c.stats.tipCents)} over ${c.stats.tippedVisits} visit${c.stats.tippedVisits === 1 ? "" : "s"}`
+              }
+            />
             <Stat label="No-shows" value={String(c.stats.noShows)} />
             <Stat label="Upcoming" value={String(c.stats.upcoming)} />
           </dl>
@@ -161,6 +170,7 @@ function CustomerRecord({ id }: { id: string }) {
                   <span className="text-muted-foreground">
                     {" "}
                     · {h.serviceName} with {h.designerName} · {formatCents(h.priceCents)}
+                    {h.tipCents !== null && ` + ${formatCents(h.tipCents)} tip`}
                   </span>
                 </span>
                 <Badge variant={h.status === "CONFIRMED" ? "default" : "outline"}>{statusLabel(h.status)}</Badge>
@@ -173,11 +183,13 @@ function CustomerRecord({ id }: { id: string }) {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="rounded-lg border px-3 py-2">
       <dt className="text-xs text-muted-foreground">{label}</dt>
       <dd className="text-lg">{value}</dd>
+      {/* An average off one visit is noise, so always say what it is built on. */}
+      {hint && <dd className="text-xs text-muted-foreground">{hint}</dd>}
     </div>
   );
 }

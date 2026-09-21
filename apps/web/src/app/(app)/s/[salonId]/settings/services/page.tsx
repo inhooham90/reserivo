@@ -1,10 +1,10 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createServiceSchema, type Service } from "@reserivo/shared";
+import { canAllowDoubleBooking, createServiceSchema, DOUBLE_BOOKING_MIN_DURATION_MIN, type Service } from "@reserivo/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { FieldError } from "@/components/field-error";
 import { Badge } from "@/components/ui/badge";
@@ -81,6 +81,7 @@ export default function ServicesPage() {
                 <CardTitle className="flex items-center gap-2">
                   {s.name}
                   {!s.active && <Badge variant="outline">Hidden</Badge>}
+                  {s.allowsDoubleBooking && <Badge variant="outline">Double booking</Badge>}
                 </CardTitle>
                 <CardDescription>
                   {formatCents(s.priceCents)} · {formatDuration(s.durationMin)}
@@ -156,8 +157,18 @@ function ServiceForm({
           durationMin: service.durationMin,
           bufferMin: service.bufferMin,
           active: service.active,
+          allowsDoubleBooking: service.allowsDoubleBooking,
         }
-      : { name: "", category: "", description: "", priceDollars: 0, durationMin: 60, bufferMin: 0, active: true },
+      : {
+          name: "",
+          category: "",
+          description: "",
+          priceDollars: 0,
+          durationMin: 60,
+          bufferMin: 0,
+          active: true,
+          allowsDoubleBooking: false,
+        },
   });
 
   const save = useMutation({
@@ -177,14 +188,28 @@ function ServiceForm({
   });
 
   const err = form.formState.errors;
+  // Sharing only makes sense once a service is long enough to have downtime,
+  // so the option follows whatever duration is currently typed in.
+  const typedDuration = useWatch({ control: form.control, name: "durationMin" });
+  const canShare = canAllowDoubleBooking(Number(typedDuration) || 0);
   return (
     <Card>
       <CardHeader>
         <CardTitle>{service ? "Edit service" : "New service"}</CardTitle>
-        <CardDescription>Durations in 5-minute steps. Buffer is cleanup time after.</CardDescription>
+        <CardDescription>
+          Durations in 5-minute steps. Buffer is cleanup time after. Over {DOUBLE_BOOKING_MIN_DURATION_MIN} minutes you
+          can allow double booking.
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={form.handleSubmit((v) => save.mutate(v))} className="grid gap-3" noValidate>
+        <form
+          onSubmit={form.handleSubmit((v) =>
+            // The box is hidden below the threshold, so never send a stale tick.
+            save.mutate({ ...v, allowsDoubleBooking: canShare && v.allowsDoubleBooking }),
+          )}
+          className="grid gap-3"
+          noValidate
+        >
           <div className="grid gap-1.5">
             <Label htmlFor="svc-name">Name</Label>
             <Input id="svc-name" {...form.register("name")} />
@@ -219,6 +244,18 @@ function ServiceForm({
             <input type="checkbox" {...form.register("active")} />
             Bookable on the public page
           </label>
+          {canShare && (
+            <div className="grid gap-1 rounded-md border border-border bg-muted/40 p-3">
+              <label className="flex items-start gap-2 text-sm">
+                <input type="checkbox" className="mt-1" {...form.register("allowsDoubleBooking")} />
+                <span>Allow double booking?</span>
+              </label>
+              <p className="pl-6 text-xs text-muted-foreground">
+                For services with waiting time in them, like colour or a perm. Someone else can be booked over this
+                one, up to two clients at a time.
+              </p>
+            </div>
+          )}
           <FieldError message={save.error instanceof ApiError ? save.error.message : undefined} />
           <div className="flex gap-2">
             <Button type="submit" disabled={save.isPending}>

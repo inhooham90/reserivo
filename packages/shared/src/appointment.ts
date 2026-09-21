@@ -32,6 +32,51 @@ export function noShowMarkableFrom(startAt: string | Date): Date {
   return new Date(new Date(startAt).getTime() + NO_SHOW_GRACE_MIN * 60_000);
 }
 
+/**
+ * How the customer paid, recorded when staff complete an appointment. Optional
+ * throughout: null means nobody wrote it down, not that the bill is unpaid.
+ */
+export const PaymentMethod = {
+  CARD: 'CARD',
+  CASH: 'CASH',
+  GIFT_CARD: 'GIFT_CARD',
+  MOBILE_PAY: 'MOBILE_PAY',
+  OTHER: 'OTHER',
+} as const;
+export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod];
+export const paymentMethodSchema = z.enum([
+  PaymentMethod.CARD,
+  PaymentMethod.CASH,
+  PaymentMethod.GIFT_CARD,
+  PaymentMethod.MOBILE_PAY,
+  PaymentMethod.OTHER,
+]);
+
+/** Display order is how often a salon reaches for each one. */
+export const PAYMENT_METHODS: readonly PaymentMethod[] = [
+  PaymentMethod.CARD,
+  PaymentMethod.CASH,
+  PaymentMethod.GIFT_CARD,
+  PaymentMethod.MOBILE_PAY,
+  PaymentMethod.OTHER,
+];
+export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  CARD: 'Card',
+  CASH: 'Cash',
+  GIFT_CARD: 'Gift card',
+  MOBILE_PAY: 'Mobile pay',
+  OTHER: 'Other',
+};
+
+/**
+ * The instant from which this appointment may be marked complete. A service
+ * that has not started cannot have been delivered, so the gate is the start
+ * time itself — no grace, unlike a no-show.
+ */
+export function completableFrom(startAt: string | Date): Date {
+  return new Date(startAt);
+}
+
 // ---------- Availability queries ----------
 
 export const availabilityQuerySchema = z.object({
@@ -40,6 +85,13 @@ export const availabilityQuerySchema = z.object({
   from: localDateSchema,
   /** How many days from `from`, inclusive. */
   days: z.coerce.number().int().min(1).max(31).default(7),
+  /**
+   * Staff only: leave this appointment out of the busy set. Rescheduling asks
+   * "where could this go?", and an appointment always collides with itself —
+   * without this you could not nudge one by fifteen minutes. The public route
+   * ignores it, so it can never be used to surface someone else's slot.
+   */
+  excludeAppointmentId: z.uuid().optional(),
 });
 export type AvailabilityQuery = z.infer<typeof availabilityQuerySchema>;
 
@@ -142,6 +194,10 @@ export const updateAppointmentSchema = z
     internalNotes: z.string().trim().max(1000).nullable(),
     /** Reschedule. Re-checked against the exclusion constraint. */
     startAt: z.iso.datetime(),
+    /** Accepted when completing, or afterwards to correct the record. Null clears it. */
+    paymentMethod: paymentMethodSchema.nullable(),
+    /** Tip in cents, same rules as paymentMethod. Null clears it; 0 records "no tip". */
+    tipCents: z.number().int().min(0).max(1_000_000).nullable(),
   })
   .partial();
 export type UpdateAppointmentInput = z.infer<typeof updateAppointmentSchema>;
@@ -159,6 +215,12 @@ export const staffAppointmentSchema = z.object({
   serviceName: z.string(),
   priceCents: z.number().int(),
   durationMin: z.number().int(),
+  /** Snapshot: other appointments may overlap this one. */
+  allowsDoubleBooking: z.boolean(),
+  /** How the customer paid. Null when nobody recorded it. */
+  paymentMethod: paymentMethodSchema.nullable(),
+  /** Tip in cents. Null when nobody recorded one, 0 when they recorded none. */
+  tipCents: z.number().int().nullable(),
   customer: z.object({
     id: z.string(),
     name: z.string(),

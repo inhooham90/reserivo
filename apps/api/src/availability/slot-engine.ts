@@ -18,11 +18,23 @@ export interface ExceptionLike {
   endMinutes: number | null;
 }
 
-/** A blocked interval on the designer's timeline; endAt already includes any buffer. */
+/** An occupied interval on the designer's timeline; endAt already includes any buffer. */
 export interface BusyInterval {
   startAt: Date;
   endAt: Date;
+  /**
+   * The appointment may share its time — a long service with processing in it.
+   * Hands-on appointments (false) block the slot outright.
+   */
+  sharable: boolean;
 }
+
+/**
+ * How many appointments a designer may hold at one moment through *public*
+ * booking. Two is the real-world ceiling: one client processing, one in the
+ * chair. Staff can still stack further by hand, deliberately.
+ */
+export const MAX_CONCURRENT_APPOINTMENTS = 2;
 
 export type { Window };
 
@@ -41,6 +53,8 @@ export interface SlotEngineInput {
   memberRules?: RuleLike[];
   memberExceptions?: ExceptionLike[];
   busy: BusyInterval[];
+  /** Concurrency ceiling; defaults to MAX_CONCURRENT_APPOINTMENTS. */
+  maxConcurrent?: number;
   durationMin: number;
   bufferMin: number;
   slotIntervalMin: number;
@@ -80,6 +94,7 @@ export function effectiveWindows(input: Pick<SlotEngineInput, 'date' | 'salonRul
 
 export function computeSlots(input: SlotEngineInput): EngineSlot[] {
   const { date, timezone, durationMin, bufferMin, slotIntervalMin, notBefore } = input;
+  const maxConcurrent = input.maxConcurrent ?? MAX_CONCURRENT_APPOINTMENTS;
   const blockMs = (durationMin + bufferMin) * 60_000;
   const slots: EngineSlot[] = [];
 
@@ -90,8 +105,13 @@ export function computeSlots(input: SlotEngineInput): EngineSlot[] {
       if (notBefore && startAt < notBefore) continue;
 
       const blockEnd = new Date(startAt.getTime() + blockMs);
-      const clashes = input.busy.some((b) => b.startAt < blockEnd && startAt < b.endAt);
-      if (clashes) continue;
+      const overlapping = input.busy.filter((b) => b.startAt < blockEnd && startAt < b.endAt);
+      // A hands-on appointment blocks the slot whatever we are trying to book:
+      // the engine is deliberately stricter than the database here, so nobody
+      // stacks a long service on top of an hour the designer is already working.
+      if (overlapping.some((b) => !b.sharable)) continue;
+      // Otherwise every overlap is sharable, but the stack still has a ceiling.
+      if (overlapping.length + 1 > maxConcurrent) continue;
 
       slots.push({ startAt, startMinutes: t });
     }

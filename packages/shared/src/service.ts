@@ -1,5 +1,14 @@
 import { z } from 'zod';
 
+/**
+ * A service has to be longer than this before it can be marked
+ * double-bookable. The point of the flag is processing time — colour
+ * developing, a perm setting — and a short service has none.
+ */
+export const DOUBLE_BOOKING_MIN_DURATION_MIN = 35;
+
+export const canAllowDoubleBooking = (durationMin: number): boolean => durationMin > DOUBLE_BOOKING_MIN_DURATION_MIN;
+
 /** Prices are integer cents (USD for now); durations are whole minutes. */
 export const serviceSchema = z.object({
   id: z.string(),
@@ -12,6 +21,8 @@ export const serviceSchema = z.object({
   durationMin: z.number().int(),
   bufferMin: z.number().int(),
   active: z.boolean(),
+  /** Another appointment may share this time — the designer is not hands-on throughout. */
+  allowsDoubleBooking: z.boolean(),
   sortOrder: z.number().int(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -29,8 +40,20 @@ export const createServiceSchema = z.object({
   durationMin: z.number().int().min(5).max(600).multipleOf(5),
   bufferMin: z.number().int().min(0).max(120).multipleOf(5).default(0),
   active: z.boolean().default(true),
+  allowsDoubleBooking: z.boolean().default(false),
 });
 export type CreateServiceInput = z.infer<typeof createServiceSchema>;
+
+/** Rejects the flag on a service too short to have any downtime in it. */
+export function assertDoubleBookingAllowed(durationMin: number, allowsDoubleBooking: boolean | undefined): string | null {
+  if (!allowsDoubleBooking || canAllowDoubleBooking(durationMin)) return null;
+  return `Only services longer than ${DOUBLE_BOOKING_MIN_DURATION_MIN} minutes can be double booked`;
+}
+
+export const createServiceInputSchema = createServiceSchema.superRefine((v, ctx) => {
+  const problem = assertDoubleBookingAllowed(v.durationMin, v.allowsDoubleBooking);
+  if (problem) ctx.addIssue({ code: 'custom', message: problem, path: ['allowsDoubleBooking'] });
+});
 
 export const updateServiceSchema = createServiceSchema.omit({ designerId: true }).partial().extend({
   sortOrder: z.number().int().min(0).optional(),

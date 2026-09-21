@@ -91,6 +91,7 @@ export class CustomersService {
         status: true,
         serviceNameSnapshot: true,
         priceCentsSnapshot: true,
+        tipCents: true,
         designerId: true,
         designer: { select: { displayName: true } },
       },
@@ -98,6 +99,14 @@ export class CustomersService {
 
     const now = Date.now();
     const completed = appts.filter((a) => a.status === 'COMPLETED');
+    // A percentage needs both a recorded tip and something to be a percentage
+    // *of*, so a comped visit is left out rather than counted as a 0% tip.
+    const tipped = completed.filter((a) => a.tipCents !== null && a.priceCentsSnapshot > 0);
+    // The mean of each visit's percentage, not total tips over total spend —
+    // otherwise one expensive colour would drown out a year of haircuts.
+    const avgTipPct = tipped.length
+      ? Math.round((tipped.reduce((sum, a) => sum + (a.tipCents! / a.priceCentsSnapshot) * 100, 0) / tipped.length) * 10) / 10
+      : null;
     const past = appts.filter((a) => a.startAt.getTime() < now);
     return {
       ...this.toCustomer(row, isManager(tenant)),
@@ -107,6 +116,9 @@ export class CustomersService {
         cancellations: appts.filter((a) => a.status === 'CANCELLED').length,
         upcoming: appts.filter((a) => a.startAt.getTime() >= now && BLOCKING_STATUSES.includes(a.status)).length,
         spentCents: completed.reduce((sum, a) => sum + a.priceCentsSnapshot, 0),
+        tipCents: completed.reduce((sum, a) => sum + (a.tipCents ?? 0), 0),
+        tippedVisits: tipped.length,
+        avgTipPct,
         firstVisitAt: completed.at(-1)?.startAt.toISOString() ?? null,
         lastVisitAt: past.find((a) => a.status === 'COMPLETED')?.startAt.toISOString() ?? null,
       },
@@ -116,6 +128,7 @@ export class CustomersService {
         status: a.status,
         serviceName: a.serviceNameSnapshot,
         priceCents: a.priceCentsSnapshot,
+        tipCents: a.tipCents,
         designerId: a.designerId,
         designerName: a.designer.displayName,
       })),

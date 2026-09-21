@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
 import {
-  createServiceSchema,
+  createServiceInputSchema,
   updateServiceSchema,
   type CreateServiceInput,
   type Service,
@@ -24,7 +24,7 @@ export class ServicesController {
   @Post()
   create(
     @Tenant() tenant: TenantContext,
-    @Body(new ZodValidationPipe(createServiceSchema)) body: CreateServiceInput,
+    @Body(new ZodValidationPipe(createServiceInputSchema)) body: CreateServiceInput,
   ): Promise<Service> {
     return this.services.create(tenant, body);
   }

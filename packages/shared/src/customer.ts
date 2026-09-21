@@ -53,6 +53,15 @@ export const customerDetailSchema = customerSchema.extend({
     cancellations: z.number().int(),
     upcoming: z.number().int(),
     spentCents: z.number().int(),
+    /** Tips recorded across those visits, in cents. */
+    tipCents: z.number().int(),
+    /** How many completed visits have a tip recorded — the sample behind avgTipPct. */
+    tippedVisits: z.number().int(),
+    /**
+     * Mean of each visit's tip as a percentage of that visit's price, so one
+     * expensive service cannot dominate. Null until a tip has been recorded.
+     */
+    avgTipPct: z.number().nullable(),
     firstVisitAt: z.string().nullable(),
     lastVisitAt: z.string().nullable(),
   }),
@@ -63,6 +72,7 @@ export const customerDetailSchema = customerSchema.extend({
       status: appointmentStatusSchema,
       serviceName: z.string(),
       priceCents: z.number().int(),
+      tipCents: z.number().int().nullable(),
       designerId: z.string(),
       designerName: z.string(),
     }),

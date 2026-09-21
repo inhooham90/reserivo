@@ -221,6 +221,9 @@ model Service {
   durationMin Int
   bufferMin   Int      @default(0)
   active      Boolean  @default(true)
+  /// Lets another appointment share this time: long services have processing
+  /// gaps where the designer is free. Only meaningful above ~35 minutes.
+  allowsDoubleBooking Boolean @default(false)
   sortOrder   Int      @default(0)
   createdAt   DateTime @default(now()) @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt @db.Timestamptz(6)
@@ -280,6 +283,18 @@ enum AppointmentSource {
   STAFF
 }
 
+/// How the customer settled up. Recorded when staff complete an appointment,
+/// and optional — a salon that does not want to track it can ignore it, and
+/// null means "not recorded" rather than "unpaid". This is a bookkeeping note,
+/// not a payment: nothing here moves money.
+enum PaymentMethod {
+  CARD
+  CASH
+  GIFT_CARD
+  MOBILE_PAY
+  OTHER
+}
+
 /// startAt/endAt bound the service itself; blockEndAt = endAt + bufferMin is
 /// the end of the time the designer is actually occupied. It is a stored
 /// column (not an expression) because Postgres index expressions must be
@@ -298,6 +313,10 @@ model Appointment {
   endAt               DateTime          @db.Timestamptz(6)
   blockEndAt          DateTime          @db.Timestamptz(6)
   bufferMin           Int               @default(0)
+  /// Snapshot of the service flag. The exclusion constraint below only indexes
+  /// rows where this is false, so two ordinary appointments still cannot
+  /// overlap, while a double-bookable one may share its time with anything.
+  allowsDoubleBooking Boolean           @default(false)
   status              AppointmentStatus @default(CONFIRMED)
   source              AppointmentSource
   serviceNameSnapshot String
@@ -306,6 +325,12 @@ model Appointment {
   notes               String?
   internalNotes       String?
   createdByUserId     String?           @db.Uuid
+  /// Only ever set on a COMPLETED appointment. See the PaymentMethod enum.
+  paymentMethod       PaymentMethod?
+  /// Tip in integer cents, on a COMPLETED appointment only. Null means nobody
+  /// recorded one; 0 means a recorded tip of nothing. The percentage a salon
+  /// cares about is always against priceCentsSnapshot, never the tip alone.
+  tipCents            Int?
   cancelledAt         DateTime?         @db.Timestamptz(6)
   cancelledByUserId   String?           @db.Uuid
   cancelReason        String?

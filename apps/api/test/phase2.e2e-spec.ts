@@ -283,7 +283,17 @@ describe('Phase 2 (e2e)', () => {
       .expect(200);
     expect(moved.body).toMatchObject({ startAt: at(900), endAt: at(960) });
 
-    await api().patch(`/salons/${salonId}/appointments/${staffApptId}`).set(auth(mgrToken)).send({ status: 'COMPLETED' }).expect(200);
+    // Completing is gated on the start time, so walk it back into the past first.
+    await api()
+      .patch(`/salons/${salonId}/appointments/${staffApptId}`)
+      .set(auth(mgrToken))
+      .send({ startAt: at(900, addDays(todayIn(LA), -1)) })
+      .expect(200);
+    await api()
+      .patch(`/salons/${salonId}/appointments/${staffApptId}`)
+      .set(auth(mgrToken))
+      .send({ status: 'COMPLETED' })
+      .expect(200);
     const dead = await api()
       .patch(`/salons/${salonId}/appointments/${staffApptId}`)
       .set(auth(mgrToken))

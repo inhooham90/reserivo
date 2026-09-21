@@ -20,6 +20,8 @@ export interface SlotsRequest {
   days: number;
   /** public = customer rules (lead time, max advance, no past); staff = hours and conflicts only. */
   mode: 'public' | 'staff';
+  /** Staff only: an appointment to leave out of the busy set, so it can be moved within its own span. */
+  excludeAppointmentId?: string;
   now?: Date;
 }
 
@@ -71,12 +73,17 @@ export class SlotsService {
           status: { in: [...BLOCKING_STATUSES] },
           startAt: { lt: rangeEnd },
           blockEndAt: { gt: rangeStart },
+          ...(req.mode === 'staff' && req.excludeAppointmentId ? { id: { not: req.excludeAppointmentId } } : {}),
         },
-        select: { startAt: true, blockEndAt: true },
+        select: { startAt: true, blockEndAt: true, allowsDoubleBooking: true },
       }),
     ]);
 
-    const busy: BusyInterval[] = appointments.map((a) => ({ startAt: a.startAt, endAt: a.blockEndAt }));
+    const busy: BusyInterval[] = appointments.map((a) => ({
+      startAt: a.startAt,
+      endAt: a.blockEndAt,
+      sharable: a.allowsDoubleBooking,
+    }));
     const memberExceptions = exceptions.map((e) => ({
       date: e.date.toISOString().slice(0, 10),
       type: e.type,
