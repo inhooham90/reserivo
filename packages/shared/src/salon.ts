@@ -28,6 +28,7 @@ const RESERVED_SLUGS = new Set([
   'reset-password',
   's',
   'settings',
+  'sms',
   'terms',
   'verify-email',
   'zh',

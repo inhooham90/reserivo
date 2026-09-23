@@ -19,6 +19,9 @@ export function PublicFooter() {
       <Link href="/privacy" className="underline">
         Privacy
       </Link>
+      <Link href="/sms" className="underline">
+        Text reminders
+      </Link>
       <a href={`mailto:${LEGAL.supportEmail}`} className="underline">
         Contact
       </a>

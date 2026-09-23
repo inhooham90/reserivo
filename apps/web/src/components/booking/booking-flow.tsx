@@ -20,6 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { RatingSummary } from "@/components/rating/stars";
+import { SmsConsent } from "@/components/booking/sms-consent";
 import { useFormat } from "@/lib/use-format";
 import { cn } from "cn";
 
@@ -305,38 +306,7 @@ function Details({
                 <FieldError message={fieldError("phone")} />
               </div>
             </div>
-            {/*
-              Always rendered, so the opt-in is plainly visible to anyone reading
-              the page — including a carrier reviewing the A2P campaign — and only
-              enabled once there is a number to send to. Never pre-ticked: consent
-              has to be given, not withdrawn. The wording carries the disclosures
-              US carriers expect, and must stay in step with what is filed with them.
-            */}
-            <label className="flex items-start gap-2 text-sm">
-              <input
-                type="checkbox"
-                className="mt-1"
-                checked={smsConsent}
-                disabled={!phone.trim()}
-                onChange={(e) => setSmsConsent(e.target.checked)}
-              />
-              <span className={cn(!phone.trim() && "text-muted-foreground")}>
-                Text me a reminder before my appointment.
-                <span className="block text-xs text-muted-foreground">
-                  {!phone.trim() && "Add a mobile number above to turn this on. "}
-                  Reserivo appointment reminders only, never marketing. 1–2 messages per appointment. Message and data
-                  rates may apply. Reply STOP to unsubscribe, HELP for help. See our{" "}
-                  <Link href="/terms" target="_blank" className="underline">
-                    Terms
-                  </Link>{" "}
-                  and{" "}
-                  <Link href="/privacy" target="_blank" className="underline">
-                    Privacy Policy
-                  </Link>
-                  .
-                </span>
-              </span>
-            </label>
+            <SmsConsent checked={smsConsent} onChange={setSmsConsent} hasPhone={Boolean(phone.trim())} />
             <div className="grid gap-1.5">
               <Label htmlFor="bk-notes">Anything the stylist should know? (optional)</Label>
               <Textarea id="bk-notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />

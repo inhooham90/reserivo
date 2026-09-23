@@ -19,6 +19,14 @@ export default function Home() {
           Sign in
         </Button>
       </div>
+      <p className="max-w-md text-sm text-muted-foreground">
+        Clients book from a page of your own and get a confirmation straight away, plus an appointment reminder by
+        email — and by{" "}
+        <Link href="/sms" className="underline">
+          text
+        </Link>
+        , if they ask for one.
+      </p>
       <PublicFooter />
     </main>
   );
