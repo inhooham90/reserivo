@@ -111,10 +111,10 @@ export default function SmsPage() {
       <p>Sample messages, exactly as sent:</p>
       <ul>
         <li>
-          Glow Salon: reminder, your Women’s Cut with Mia is tomorrow (Thu, 2:30 PM). Reply STOP to opt out.
+          Glow Salon (via Reserivo): reminder, your Women’s Cut with Mia is tomorrow (Thu, 2:30 PM). Reply STOP to opt out.
         </li>
         <li>
-          Glow Salon: reminder, your Balayage with Mia is in 2h (Thu, 2:30 PM). Reply STOP to opt out.
+          Glow Salon (via Reserivo): reminder, your Balayage with Mia is in 2h (Thu, 2:30 PM). Reply STOP to opt out.
         </li>
       </ul>
 

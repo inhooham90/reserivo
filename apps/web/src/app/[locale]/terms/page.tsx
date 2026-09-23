@@ -56,10 +56,60 @@ export default function TermsPage() {
         <li>Do not scrape, resell or rebrand the service without our written agreement</li>
       </ul>
 
+      {/*
+        These are the SMS program terms a carrier looks for when it opens the
+        Terms URL filed with the A2P 10DLC campaign — frequency, rates, STOP,
+        HELP, carrier non-liability. They must agree with the consent checkbox
+        and the privacy policy; see deploy/A2P-10DLC.md.
+      */}
       <h2>6. Text messages</h2>
       <p>
-        Text reminders are sent only to clients who opted in when booking. The messaging features of {LEGAL.product}{" "}
-        may not be used for marketing. We may suspend messaging for an account that breaks this.
+        {LEGAL.product} sends appointment reminders by text. The program is operated by {LEGAL.legalName} on behalf of
+        the salon you booked with, and messages identify both.
+      </p>
+      <p>
+        <strong>Opting in.</strong> Reminders are sent only to clients who gave a mobile number while booking and
+        ticked the reminder box on the booking page, which is never pre-ticked. Consent is not a condition of booking
+        or of any service: your appointment is made whether or not you tick it.
+      </p>
+      <p>
+        <strong>What is sent, and how often.</strong> Appointment reminders only — never marketing, promotions or
+        sales. One to two messages per appointment you book. This is not a recurring subscription; messages stop when
+        your appointments do.
+      </p>
+      <p>
+        <strong>Cost.</strong> Message and data rates may apply. {LEGAL.product} does not charge for reminders, but
+        your mobile carrier may charge you to receive them, according to your plan.
+      </p>
+      <p>
+        <strong>Stopping them.</strong> Reply <strong>STOP</strong> to any message to end them immediately; we also
+        clear the consent held on your record. Reply <strong>HELP</strong> for help, or email{" "}
+        <a href={`mailto:${LEGAL.supportEmail}`} className="underline">
+          {LEGAL.supportEmail}
+        </a>
+        . You can also untick the reminder box the next time you book, or ask the salon.
+      </p>
+      <p>
+        <strong>Delivery.</strong> Carriers do not guarantee delivery, and neither do we. {LEGAL.legalName} is not
+        liable for a reminder that arrives late or not at all, and a missed reminder does not change the terms of your
+        appointment with the salon.
+      </p>
+      <p>
+        How your number is handled is set out in our{" "}
+        <Link href="/privacy" className="underline">
+          Privacy Policy
+        </Link>
+        ; the program is described in full at{" "}
+        <Link href="/sms" className="underline">
+          reserivo.com/sms
+        </Link>
+        . We do not sell, rent or share mobile numbers, or the fact that you consented, with third parties for their
+        own marketing.
+      </p>
+      <p>
+        <strong>If you run a salon:</strong> the messaging features of {LEGAL.product} may not be used for marketing,
+        and you may not add a client’s number on their behalf. We may suspend messaging for an account that breaks
+        this.
       </p>
 
       <h2>7. Fees</h2>

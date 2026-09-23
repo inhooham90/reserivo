@@ -1,10 +1,10 @@
 # A2P 10DLC campaign registration
 
 What is filed with Twilio for the campaign, kept here so it can be diffed against
-the two texts it has to agree with: the consent checkbox
-(`apps/web/src/components/booking/sms-consent.tsx`) and the "Text messages"
-section of the privacy policy (`apps/web/src/app/[locale]/privacy/page.tsx`).
-Change one and change all three.
+the texts it has to agree with: the consent checkbox
+(`apps/web/src/components/booking/sms-consent.tsx`), the "Text messages"
+section of the privacy policy, section 6 of the terms, and the message body
+built in `RemindersService.smsBody`. Change one and change them all.
 
 ## Why the first submission was rejected (error 30909, September 2026)
 
@@ -20,13 +20,19 @@ from the submitted URL to the consent language. Nothing was wrong with the flow;
 it simply could not be found.
 
 **The fix is `https://reserivo.com/sms`** — public, no login, linked from the
-footer of every public page and from the home page. It describes every opt-in
+home page and from the footer of the home page and every salon booking page. It describes every opt-in
 path in full and renders the same checkbox component the booking form uses, so
 what a reviewer reads cannot drift from what a client sees.
 
 ## Campaign fields
 
-**Campaign type:** Low Volume Mixed / Customer Care (appointment reminders).
+**Campaign type:** Low Volume Mixed if under ~6,000 messages/day, otherwise
+Customer Care. Appointment reminders fit either.
+
+**Declarations:** no embedded links, no embedded phone numbers, no age-gated
+content, no direct lending, no affiliate marketing. All true of the bodies in
+`RemindersService.smsBody` — adding a link to a reminder later makes the filing
+wrong.
 
 **Campaign description**
 
@@ -84,14 +90,51 @@ what a reviewer reads cannot drift from what a client sees.
 
 **Sample messages** (the exact format built in `RemindersService.smsBody`)
 
-> Glow Salon: reminder, your Women's Cut with Mia is tomorrow (Thu, 2:30 PM). Reply STOP to opt out.
+> Glow Salon (via Reserivo): reminder, your Women's Cut with Mia is tomorrow (Thu, 2:30 PM). Reply STOP to opt out.
 
-> Glow Salon: reminder, your Balayage with Mia is in 2h (Thu, 2:30 PM). Reply STOP to opt out.
+> Glow Salon (via Reserivo): reminder, your Balayage with Mia is in 2h (Thu, 2:30 PM). Reply STOP to opt out.
+
+## Why the messages say "(via Reserivo)"
+
+Reserivo is a platform: it texts on behalf of many salons, but the campaign is
+registered to one brand. A reviewer comparing a sample message against the
+registered brand has to find the brand in it, and `Glow Salon: reminder, …`
+does not contain it. The two clean answers are to send under Reserivo's brand
+and name Reserivo in the body, or to register every salon as its own brand and
+campaign — a brand, an EIN and a campaign per salon. We took the first.
+
+It costs 15 characters against a 160-character segment. Overflow into a second
+segment was already possible with a long enough salon, service and designer
+name; this makes it likelier without introducing it. If it starts costing real
+money, truncate in `smsBody` rather than dropping the brand.
+
+## Brand, not just campaign
+
+The campaign sits under a brand, and a campaign cannot outrun a brand's
+problems:
+
+- Legal name, EIN and address must match the IRS CP-575 character for
+  character. `lib/legal.ts` is what the website shows; it has to agree.
+- An unvetted brand is throughput-capped whatever the campaign says.
+- Verify the brand status is approved before resubmitting the campaign, or the
+  campaign is reviewed against a brand that is not ready.
+
+## After approval
+
+Approval routes nothing by itself. The numbers still have to be attached to the
+Messaging Service the campaign is linked to.
 
 ## Before resubmitting
 
 - [ ] `https://reserivo.com/sms` returns 200 and shows the checkbox.
-- [ ] The checkbox wording on `/sms` matches this file and the privacy policy.
-- [ ] `https://reserivo.com/terms` and `/privacy` return 200.
-- [ ] Optionally, a live salon booking page a reviewer can walk end to end, cited
-      in the Call-to-Action as a worked example.
+- [ ] `https://reserivo.com/terms` and `/privacy` return 200, and the home page
+      describes the business and links to `/sms`.
+- [ ] The consent wording is identical in all four places: the `SmsConsent`
+      component, the privacy policy's "Text messages", terms section 6, and this
+      file.
+- [ ] The sample messages above match what `RemindersService.smsBody` builds,
+      including "(via Reserivo)".
+- [ ] Brand status is approved, with legal name, EIN and address matching the
+      CP-575.
+- [ ] Optionally, a live salon booking page a reviewer can walk end to end,
+      cited in the Call-to-Action as a worked example.
