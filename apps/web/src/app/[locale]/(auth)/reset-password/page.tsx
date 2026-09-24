@@ -3,6 +3,7 @@
 import { passwordSchema, type AuthResponse } from "@reserivo/shared";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Suspense, useState } from "react";
 import { FieldError } from "@/components/field-error";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,8 @@ function ResetPassword() {
   const token = useSearchParams().get("token") ?? "";
   const router = useRouter();
   const { acceptSession } = useAuth();
+  const t = useTranslations("auth.reset");
+  const common = useTranslations("common");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -42,7 +45,7 @@ function ResetPassword() {
       acceptSession(result);
       router.replace("/dashboard");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Something went wrong");
+      setError(err instanceof ApiError ? err.message : common("somethingWrong"));
       setBusy(false);
     }
   };
@@ -51,15 +54,15 @@ function ResetPassword() {
     <main className="flex flex-1 items-center justify-center p-6">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Choose a new password</CardTitle>
-          <CardDescription>This also signs out anywhere else you’re logged in.</CardDescription>
+          <CardTitle>{t("title")}</CardTitle>
+          <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent>
           {!token ? (
             <div className="grid gap-3 text-sm">
-              <p className="text-destructive">This link is missing its token. Request a new one.</p>
+              <p className="text-destructive">{t("missingToken")}</p>
               <Link href="/forgot-password" className="underline">
-                Send another link
+                {t("sendAnother")}
               </Link>
             </div>
           ) : (
@@ -71,7 +74,7 @@ function ResetPassword() {
               }}
             >
               <div className="grid gap-1.5">
-                <Label htmlFor="rp-password">New password</Label>
+                <Label htmlFor="rp-password">{t("newPassword")}</Label>
                 <Input
                   id="rp-password"
                   type="password"
@@ -82,11 +85,11 @@ function ResetPassword() {
                 <FieldError message={error ?? undefined} />
               </div>
               <Button type="submit" disabled={busy}>
-                {busy ? "Saving…" : "Set new password"}
+                {busy ? t("submitting") : t("submit")}
               </Button>
               <p className="text-center text-sm text-muted-foreground">
                 <Link href="/forgot-password" className="underline">
-                  Link expired? Send another
+                  {t("expired")}
                 </Link>
               </p>
             </form>

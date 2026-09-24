@@ -4,6 +4,7 @@ import type { AuthResponse } from "@reserivo/shared";
 import { useMutation } from "@tanstack/react-query";
 import { Link } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Suspense, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +23,8 @@ export default function VerifyEmailPage() {
 function VerifyEmail() {
   const token = useSearchParams().get("token") ?? "";
   const { acceptSession } = useAuth();
+  const t = useTranslations("auth.verify");
+  const common = useTranslations("common");
 
   const verify = useMutation({
     mutationFn: () => api<AuthResponse>("/auth/verify-email", { method: "POST", json: { token } }),
@@ -40,35 +43,38 @@ function VerifyEmail() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>
-            {verify.isSuccess ? "Email confirmed" : verify.isError || !token ? "That link didn’t work" : "Confirming your email…"}
+            {verify.isSuccess ? t("confirmed") : verify.isError || !token ? t("failed") : t("confirming")}
           </CardTitle>
           <CardDescription>
             {verify.isSuccess
-              ? "Any bookings you made as a guest with this address are now on your account."
+              ? t("confirmedBody")
               : verify.isError || !token
-                ? "Confirmation links work once and expire after a day."
-                : "One moment."}
+                ? t("failedBody")
+                : t("oneMoment")}
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 text-sm">
           {verify.isError && (
             <p className="text-destructive">
-              {verify.error instanceof ApiError ? verify.error.message : "Something went wrong."}
+              {verify.error instanceof ApiError ? verify.error.message : common("somethingWrong")}
             </p>
           )}
           {verify.isSuccess ? (
             <div className="flex gap-2">
               <Button nativeButton={false} render={<Link href="/appointments" />}>
-                See my appointments
+                {t("seeAppointments")}
               </Button>
             </div>
           ) : (
             (verify.isError || !token) && (
               <p className="text-muted-foreground">
-                Sign in and we’ll offer to send a fresh one.{" "}
-                <Link href="/login" className="underline">
-                  Sign in
-                </Link>
+                {t.rich("freshOne", {
+                  link: (chunks) => (
+                    <Link href="/login" className="underline">
+                      {chunks}
+                    </Link>
+                  ),
+                })}
               </p>
             )
           )}

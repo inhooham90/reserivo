@@ -43,9 +43,16 @@ services:
       # Must be the browser-facing origins, or cookies and CORS will not line up.
       CORS_ORIGIN: ${WEB_URL:?set WEB_URL}
       WEB_URL: ${WEB_URL}
+      # Where Gmail and Yahoo POST a one-click unsubscribe. Same origin the web bundle calls.
+      PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?set NEXT_PUBLIC_API_URL to the public API origin}
       SITE_ADMIN_EMAILS: ${SITE_ADMIN_EMAILS:-}
       RESEND_API_KEY: ${RESEND_API_KEY:?set RESEND_API_KEY so confirmations and resets can be delivered}
       EMAIL_FROM: ${EMAIL_FROM:?set EMAIL_FROM to an address on a domain verified with Resend}
+      # Optional: without both, campaigns are logged instead of sent. Set them
+      # to a *separate* key and a separate verified subdomain — sharing the
+      # transactional sender is how one salon's blast breaks password resets.
+      RESEND_MARKETING_API_KEY: ${RESEND_MARKETING_API_KEY:-}
+      EMAIL_MARKETING_FROM: ${EMAIL_MARKETING_FROM:-}
       # Optional: leave unset and reminders go out by email only.
       TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
       TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}

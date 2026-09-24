@@ -3,6 +3,7 @@
 import type { MySalon } from "@reserivo/shared";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { CreateSalonCard } from "@/components/salon/create-salon-card";
 import { Button } from "@/components/ui/button";
@@ -19,20 +20,22 @@ import { useFormat } from "@/lib/use-format";
  */
 export default function YourSalonsPage() {
   const f = useFormat();
+  const t = useTranslations("settings.yourSalons");
+  const common = useTranslations("common");
   const [creating, setCreating] = useState(false);
   const salons = useQuery({ queryKey: ["salons", "mine"], queryFn: () => api<MySalon[]>("/salons/mine") });
 
-  if (salons.isPending) return <p className="text-muted-foreground">Loading…</p>;
+  if (salons.isPending) return <p className="text-muted-foreground">{common("loading")}</p>;
 
   if (salons.isError) {
     return (
       <Card className="mx-auto mt-8 max-w-md">
         <CardHeader>
-          <CardTitle>Couldn’t load your salons</CardTitle>
-          <CardDescription>Check your connection and try again.</CardDescription>
+          <CardTitle>{t("loadFailed")}</CardTitle>
+          <CardDescription>{t("checkConnection")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button onClick={() => void salons.refetch()}>Retry</Button>
+          <Button onClick={() => void salons.refetch()}>{t("retry")}</Button>
         </CardContent>
       </Card>
     );
@@ -46,15 +49,17 @@ export default function YourSalonsPage() {
     return (
       <div className="mx-auto grid max-w-lg gap-4">
         <CreateSalonCard
-          title="Set up your salon"
-          description="Your booking page, your team and your hours all hang off this. You can change any of it later."
+          title={t("setUpTitle")}
+          description={t("setUpHint")}
         />
         <p className="text-sm text-muted-foreground">
-          Just here to book an appointment?{" "}
-          <Link href="/appointments" className="underline">
-            Your appointments
-          </Link>{" "}
-          has everything you have booked.
+          {t.rich("justBooking", {
+            link: (chunks) => (
+              <Link href="/appointments" className="underline">
+                {chunks}
+              </Link>
+            ),
+          })}
         </p>
       </div>
     );
@@ -64,8 +69,8 @@ export default function YourSalonsPage() {
     <div className="grid gap-4">
       <Card>
         <CardHeader>
-          <CardTitle>Your salons</CardTitle>
-          <CardDescription>Opening one takes you to its schedule.</CardDescription>
+          <CardTitle>{t("title")}</CardTitle>
+          <CardDescription>{t("hint")}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-2">
           {list.map((s) => (
@@ -78,10 +83,10 @@ export default function YourSalonsPage() {
               </span>
               <span className="flex items-center gap-2">
                 <Button size="sm" variant="outline" nativeButton={false} render={<Link href={`/s/${s.id}/settings`} />}>
-                  Settings
+                  {t("settings")}
                 </Button>
                 <Button size="sm" nativeButton={false} render={<Link href={`/s/${s.id}/calendar`} />}>
-                  Open
+                  {t("open")}
                 </Button>
               </span>
             </div>
@@ -93,7 +98,7 @@ export default function YourSalonsPage() {
         <CreateSalonCard onCancel={() => setCreating(false)} />
       ) : (
         <Button className="justify-self-start" onClick={() => setCreating(true)}>
-          Create another salon
+          {t("createAnother")}
         </Button>
       )}
     </div>

@@ -44,14 +44,20 @@ export default function TermsPage() {
           Having a lawful basis to hold your clients’ information, and answering their requests about it — the client
           records in your salon are yours
         </li>
-        <li>Only sending messages to clients who have agreed to receive them</li>
+        <li>
+          Contacting clients only as sections 6 and 7 allow — texts only where the client asked for them, email only
+          to your own clients and never after they unsubscribe
+        </li>
         <li>Your own obligations to your clients, including anything you promise them</li>
       </ul>
 
       <h2>5. Acceptable use</h2>
       <ul>
         <li>Do not use {LEGAL.product} unlawfully, or to harass anyone</li>
-        <li>Do not send spam or unsolicited marketing through the platform</li>
+        <li>
+          Do not send spam through the platform. A salon may email its own clients under section 7; it may not email
+          people it has no relationship with, buy or rent a list, or send to anyone who has unsubscribed
+        </li>
         <li>Do not try to reach another salon’s data, or interfere with the service or its security</li>
         <li>Do not scrape, resell or rebrand the service without our written agreement</li>
       </ul>
@@ -107,49 +113,72 @@ export default function TermsPage() {
         own marketing.
       </p>
       <p>
-        <strong>If you run a salon:</strong> the messaging features of {LEGAL.product} may not be used for marketing,
-        and you may not add a client’s number on their behalf. We may suspend messaging for an account that breaks
-        this.
+        <strong>If you run a salon:</strong> the <em>text messaging</em> features of {LEGAL.product} may not be used
+        for marketing, and you may not add a client’s number on their behalf. We may suspend texting for an account
+        that breaks this. Email is different and is covered by section 7.
       </p>
 
-      <h2>7. Fees</h2>
+      <h2>7. Email to your clients</h2>
+      <p>
+        A salon on {LEGAL.product} may email the clients it holds records for — an offer, a change of hours, news.
+        Unlike text messages, this is email the client can stop at any time rather than something they had to ask for
+        first.
+      </p>
+      <p>
+        <strong>Who may be emailed.</strong> Only clients of your own salon who gave an email address and have not
+        unsubscribed. You may not import or buy a list, and you may not email someone who left.
+      </p>
+      <p>
+        <strong>Unsubscribing.</strong> Every campaign carries an unsubscribe link and {LEGAL.legalName}’s postal
+        address, added by us and not removable. We honour an unsubscribe immediately and centrally: once someone
+        unsubscribes from your salon, no campaign of yours can reach them again. It does not stop their booking
+        confirmations or appointment reminders, which are not marketing.
+      </p>
+      <p>
+        <strong>If you run a salon:</strong> the content is yours and so is the responsibility for it — including
+        having a lawful basis to contact your clients and honouring anything you promise them. There is a limit on how
+        many clients one salon may email in a day, because every salon shares the same sending reputation. We may
+        suspend email for an account that generates complaints, and we may refuse a campaign.
+      </p>
+
+      <h2>8. Fees</h2>
       <p>
         {LEGAL.product} is currently provided free of charge while the service is in its early stage. If we introduce
         fees we will give account holders notice beforehand, and you may stop using the service rather than accept
         them.
       </p>
 
-      <h2>8. Availability and changes</h2>
+      <h2>9. Availability and changes</h2>
       <p>
         We aim to keep {LEGAL.product} running and to give notice of planned downtime, but we do not guarantee
         uninterrupted service. We may add, change or withdraw features as the product develops.
       </p>
 
-      <h2>9. No warranty</h2>
+      <h2>10. No warranty</h2>
       <p>
         {LEGAL.product} is provided “as is”, without warranties of any kind so far as the law allows. We do not
         warrant that it will be free of errors or interruptions.
       </p>
 
-      <h2>10. Limitation of liability</h2>
+      <h2>11. Limitation of liability</h2>
       <p>
         To the extent the law allows, {LEGAL.legalName} is not liable for indirect or consequential losses, lost
         profits, lost bookings, or loss of data. Nothing here excludes liability that cannot lawfully be excluded.
       </p>
 
-      <h2>11. Ending it</h2>
+      <h2>12. Ending it</h2>
       <p>
         You may stop using {LEGAL.product} at any time. We may suspend or close an account that breaches these terms,
         and will explain why where we can.
       </p>
 
-      <h2>12. Changes to these terms</h2>
+      <h2>13. Changes to these terms</h2>
       <p>
         We will post any change here and update the date at the top. Significant changes will be sent to account
         holders directly.
       </p>
 
-      <h2>13. Governing law</h2>
+      <h2>14. Governing law</h2>
       <p>These terms are governed by the laws of {LEGAL.jurisdiction}.</p>
 
       <h2>Contact</h2>

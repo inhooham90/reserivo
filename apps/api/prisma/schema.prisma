@@ -40,6 +40,7 @@ model User {
   customerOf    Customer[]
   auditActions  AuditLog[]        @relation("AuditActor")
   auditSubject  AuditLog[]        @relation("AuditImpersonated")
+  emailCampaigns EmailCampaign[]
 
   @@map("users")
 }
@@ -113,6 +114,7 @@ model Salon {
 
   @@map("salons")
   designerRatings DesignerRating[]
+  emailCampaigns  EmailCampaign[]
 }
 
 /// The shop's opening hours. Shared by every manager; designers' personal
@@ -265,20 +267,57 @@ model Customer {
   /// US law (TCPA) requires express consent before texting someone
   /// automatically. Null means no consent on file, so we never text them.
   smsConsentAt DateTime? @db.Timestamptz(6)
-  createdAt    DateTime  @default(now()) @db.Timestamptz(6)
-  updatedAt    DateTime  @updatedAt @db.Timestamptz(6)
+  /// The mirror image of smsConsentAt, and deliberately so: null here means we
+  /// MAY email them. Texting is opt-in (TCPA) and marketing email is opt-out
+  /// (CAN-SPAM), so the two fields cannot share a shape without one of them
+  /// lying about the law it encodes. Set the instant someone unsubscribes.
+  emailOptOutAt DateTime? @db.Timestamptz(6)
+  /// Addresses the unsubscribe link in every campaign. Stable and reusable,
+  /// unlike UserToken and Invitation, because CAN-SPAM requires an unsubscribe
+  /// to keep working for at least 30 days after the message was sent.
+  unsubscribeToken String   @unique @default(uuid())
+  createdAt        DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime @updatedAt @db.Timestamptz(6)
 
-  salon         Salon          @relation(fields: [salonId], references: [id], onDelete: Cascade)
-  user          User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  salon         Salon                    @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  user          User?                    @relation(fields: [userId], references: [id], onDelete: SetNull)
   appointments  Appointment[]
   conversations Conversation[]
   ratings       DesignerRating[]
+  campaignSends EmailCampaignRecipient[]
 
   @@unique([salonId, userId])
   @@index([salonId, email])
   @@index([salonId, phone])
   @@index([salonId, name])
   @@map("customers")
+}
+
+/// How wide an address-level opt-out reaches. Narrower than either — one
+/// salon's list — is Customer.emailOptOutAt, not a row here.
+enum EmailSuppressionScope {
+  /// Promotional email from every salon, including salons booked with later.
+  MARKETING
+  /// Every email, bookings included. Sign-in and reset links still go out:
+  /// the person asked for those, and withholding them locks them out.
+  ALL
+}
+
+/// An opt-out that belongs to an email address rather than to a salon's record
+/// of a client. One person is a separate Customer row at every salon, and a
+/// guest has no User, so the address is the only thing that spans them.
+///
+/// Keyed by the lowercased address. Only ever written through an unsubscribe
+/// token, which arrived in that inbox — so writing it proves control of the
+/// address, which is the rule ownedBy() enforces elsewhere. No row means no
+/// address-level opt-out.
+model EmailSuppression {
+  email     String                @id
+  scope     EmailSuppressionScope
+  createdAt DateTime              @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime              @updatedAt @db.Timestamptz(6)
+
+  @@map("email_suppressions")
 }
 
 enum AppointmentStatus {
@@ -421,6 +460,73 @@ model AppointmentReminder {
 
   @@unique([appointmentId, hoursBefore, channel])
   @@map("appointment_reminders")
+}
+
+// ---------- Email campaigns ----------
+
+enum EmailCampaignStatus {
+  QUEUED
+  SENDING
+  SENT
+}
+
+/// One email a salon sent to its own clients. The salon is the sender of
+/// record; we are the platform that delivers it, which is why the audience is
+/// snapshotted here rather than recomputed — a sent campaign must always be
+/// able to say who it went to, even after the tags have moved on.
+model EmailCampaign {
+  id              String              @id @default(uuid()) @db.Uuid
+  salonId         String              @db.Uuid
+  /// The manager who sent it. Kept for attribution and as the Reply-To.
+  createdByUserId String?             @db.Uuid
+  subject         String
+  body            String
+  /// CampaignAudience as filed at send time. See packages/shared/src/campaign.ts.
+  audience        Json
+  status          EmailCampaignStatus @default(QUEUED)
+  recipientCount  Int                 @default(0)
+  sentCount       Int                 @default(0)
+  failedCount     Int                 @default(0)
+  createdAt       DateTime            @default(now()) @db.Timestamptz(6)
+  completedAt     DateTime?           @db.Timestamptz(6)
+
+  salon      Salon                    @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  createdBy  User?                    @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+  recipients EmailCampaignRecipient[]
+
+  @@index([salonId, createdAt])
+  @@map("email_campaigns")
+}
+
+enum EmailCampaignRecipientStatus {
+  PENDING
+  SENDING
+  SENT
+  FAILED
+  SKIPPED
+}
+
+/// One row per person a campaign is addressed to, written before anything is
+/// sent. The unique index is the idempotency guarantee, exactly as it is for
+/// AppointmentReminder: the sweep claims a row by moving it out of PENDING, so
+/// a second tick — or a second dyno — loses the race instead of emailing
+/// somebody twice. email is snapshotted because the address may change, and a
+/// delivery record has to say where it actually went.
+model EmailCampaignRecipient {
+  id         String                       @id @default(uuid()) @db.Uuid
+  campaignId String                       @db.Uuid
+  customerId String                       @db.Uuid
+  email      String
+  status     EmailCampaignRecipientStatus @default(PENDING)
+  error      String?
+  sentAt     DateTime?                    @db.Timestamptz(6)
+
+  campaign EmailCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  customer Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, customerId])
+  @@index([status])
+  @@map("email_campaign_recipients")
 }
 
 // ---------- Messaging relay ----------

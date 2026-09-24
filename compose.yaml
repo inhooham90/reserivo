@@ -57,11 +57,17 @@ services:
       REDIS_URL: redis://redis:6379
       CORS_ORIGIN: http://localhost:3000
       WEB_URL: http://localhost:3000
+      PUBLIC_API_URL: http://localhost:3001
       # Accounts that always hold site admin (comma-separated). Grant-only.
       SITE_ADMIN_EMAILS: ${SITE_ADMIN_EMAILS:-james@akkija.com}
       # Email: leave RESEND_API_KEY unset locally and notifications are only logged.
       RESEND_API_KEY: ${RESEND_API_KEY:-}
       EMAIL_FROM: ${EMAIL_FROM:-Reserivo <onboarding@resend.dev>}
+      # Campaign email sends on its own key and its own verified subdomain, so a
+      # salon's complaint rate cannot reach the reputation carrying password
+      # resets. Unset locally: campaigns are logged, same as notifications.
+      RESEND_MARKETING_API_KEY: ${RESEND_MARKETING_API_KEY:-}
+      EMAIL_MARKETING_FROM: ${EMAIL_MARKETING_FROM:-}
       # SMS stays dark until all three are set (and the number is A2P 10DLC registered).
       TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
       TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}

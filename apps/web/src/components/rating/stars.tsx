@@ -1,6 +1,7 @@
 "use client";
 
 import { RATING_MAX_STARS, type DesignerRating } from "@reserivo/shared";
+import { useTranslations } from "next-intl";
 import { cn } from "cn";
 
 /**
@@ -36,10 +37,11 @@ export function Stars({ value, className }: { value: number; className?: string 
  * rather than as a claim that someone gave them four stars.
  */
 export function RatingSummary({ rating, className }: { rating: DesignerRating; className?: string }) {
+  const t = useTranslations("rating");
   const label =
     rating.count === null
-      ? `Rated ${rating.stars} out of ${RATING_MAX_STARS}`
-      : `Rated ${rating.stars} out of ${RATING_MAX_STARS} from ${rating.count} ${rating.count === 1 ? "client" : "clients"}`;
+      ? t("rated", { stars: rating.stars, max: RATING_MAX_STARS })
+      : t("ratedFrom", { stars: rating.stars, max: RATING_MAX_STARS, count: rating.count });
 
   return (
     <span className={cn("flex items-center gap-1.5 text-sm", className)} title={label}>

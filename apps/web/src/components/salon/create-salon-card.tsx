@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createSalonSchema, type CreateSalonInput, type MySalon } from "@reserivo/shared";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -21,6 +22,8 @@ import { api, ApiError } from "@/lib/api";
 export function CreateSalonCard({ title, description, onCancel }: { title?: string; description?: string; onCancel?: () => void }) {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const t = useTranslations("settings.createSalon");
+  const common = useTranslations("common");
   const [serverError, setServerError] = useState<string | null>(null);
   const timezones = useMemo(() => Intl.supportedValuesOf("timeZone"), []);
   const browserZone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone, []);
@@ -37,7 +40,7 @@ export function CreateSalonCard({ title, description, onCancel }: { title?: stri
       void queryClient.invalidateQueries({ queryKey: ["salons", "mine"] });
       router.push(`/s/${salon.id}/calendar`);
     },
-    onError: (err) => setServerError(err instanceof ApiError ? err.message : "Something went wrong"),
+    onError: (err) => setServerError(err instanceof ApiError ? err.message : common("somethingWrong")),
   });
 
   // Suggest a link from the name until the user edits the link themselves.
@@ -46,8 +49,8 @@ export function CreateSalonCard({ title, description, onCancel }: { title?: stri
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{title ?? "Create a salon"}</CardTitle>
-        <CardDescription>{description ?? "You become its first manager."}</CardDescription>
+        <CardTitle>{title ?? t("title")}</CardTitle>
+        <CardDescription>{description ?? t("description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form
@@ -59,7 +62,7 @@ export function CreateSalonCard({ title, description, onCancel }: { title?: stri
           noValidate
         >
           <div className="grid gap-1.5">
-            <Label htmlFor="salon-name">Name</Label>
+            <Label htmlFor="salon-name">{t("name")}</Label>
             <Input
               id="salon-name"
               {...form.register("name", {
@@ -71,7 +74,7 @@ export function CreateSalonCard({ title, description, onCancel }: { title?: stri
             <FieldError message={form.formState.errors.name?.message} />
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="salon-slug">Booking URL</Label>
+            <Label htmlFor="salon-slug">{t("url")}</Label>
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
               <span>/</span>
               <Input id="salon-slug" {...form.register("slug")} />
@@ -79,7 +82,7 @@ export function CreateSalonCard({ title, description, onCancel }: { title?: stri
             <FieldError message={form.formState.errors.slug?.message} />
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="salon-tz">Time zone</Label>
+            <Label htmlFor="salon-tz">{t("timezone")}</Label>
             <select id="salon-tz" className="h-9 rounded-md border border-input bg-transparent px-3 text-sm" {...form.register("timezone")}>
               {timezones.map((tz) => (
                 <option key={tz} value={tz}>
@@ -92,20 +95,18 @@ export function CreateSalonCard({ title, description, onCancel }: { title?: stri
           <label className="flex items-start gap-2 text-sm">
             <input type="checkbox" className="mt-0.5" {...form.register("takesAppointments")} />
             <span>
-              I also take appointments myself
-              <span className="block text-xs text-muted-foreground">
-                Solo operators and owner-stylists. You can change this later under Settings → Team.
-              </span>
+              {t("takesAppointments")}
+              <span className="block text-xs text-muted-foreground">{t("takesHint")}</span>
             </span>
           </label>
           <FieldError message={serverError ?? undefined} />
           <div className="flex gap-2">
             <Button type="submit" disabled={create.isPending}>
-              {create.isPending ? "Creating…" : "Create salon"}
+              {create.isPending ? t("creating") : t("create")}
             </Button>
             {onCancel && (
               <Button type="button" variant="ghost" onClick={onCancel}>
-                Cancel
+                {common("cancel")}
               </Button>
             )}
           </div>

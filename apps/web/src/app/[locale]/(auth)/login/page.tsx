@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginInput } from "@reserivo/shared";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Suspense, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { FieldError } from "@/components/field-error";
 import { Button } from "@/components/ui/button";
@@ -11,11 +12,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ApiError } from "@/lib/api";
+import { LEGAL } from "@/lib/legal";
 import { useAuth } from "@/lib/auth";
 import { useNextPath } from "@/lib/use-next-path";
 
 function LoginForm() {
   const { login } = useAuth();
+  const t = useTranslations("auth");
+  const common = useTranslations("common");
   const router = useRouter();
   const nextPath = useNextPath();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -27,7 +31,7 @@ function LoginForm() {
       await login(values);
       router.replace(nextPath);
     } catch (err) {
-      setServerError(err instanceof ApiError ? err.message : "Something went wrong");
+      setServerError(err instanceof ApiError ? err.message : common("somethingWrong"));
     }
   });
 
@@ -35,35 +39,38 @@ function LoginForm() {
     <main className="flex flex-1 items-center justify-center p-6">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Sign in</CardTitle>
-          <CardDescription>Welcome back to Reserivo.</CardDescription>
+          <CardTitle>{t("login.title")}</CardTitle>
+          <CardDescription>{t("login.description", { product: LEGAL.product })}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="grid gap-4" noValidate>
             <div className="grid gap-1.5">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("email")}</Label>
               <Input id="email" type="email" autoComplete="email" {...form.register("email")} />
               <FieldError message={form.formState.errors.email?.message} />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("password")}</Label>
               <Input id="password" type="password" autoComplete="current-password" {...form.register("password")} />
               <FieldError message={form.formState.errors.password?.message} />
             </div>
             <FieldError message={serverError ?? undefined} />
             <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? "Signing in…" : "Sign in"}
+              {form.formState.isSubmitting ? t("login.submitting") : t("login.submit")}
             </Button>
             <p className="text-center text-sm text-muted-foreground">
               <Link href="/forgot-password" className="underline">
-                Forgot your password?
+                {t("login.forgot")}
               </Link>
             </p>
             <p className="text-center text-sm text-muted-foreground">
-              New here?{" "}
-              <Link href="/register" className="underline">
-                Create an account
-              </Link>
+              {t.rich("login.newHere", {
+                link: (chunks) => (
+                  <Link href="/register" className="underline">
+                    {chunks}
+                  </Link>
+                ),
+              })}
             </p>
           </form>
         </CardContent>

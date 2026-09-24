@@ -6,7 +6,8 @@ export interface RenderedEmail {
   html: string;
 }
 
-const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+/** Exported for the campaign template, which needs the same escaping but its own shell. */
+export const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
 function when(startAt: string, timezone: string): string {
   return new Intl.DateTimeFormat('en-US', {

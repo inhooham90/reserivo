@@ -4,7 +4,9 @@ import type { AuditPage } from "@reserivo/shared";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Link } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Suspense, useState } from "react";
+import { useFormat } from "@/lib/use-format";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +24,9 @@ export default function AuditLogPage() {
 /** Who did what, and — when someone was acting as another user — who really did it. */
 function AuditLog() {
   const params = useSearchParams();
+  const t = useTranslations("admin.log");
+  const common = useTranslations("common");
+  const f = useFormat();
   const salonId = params.get("salonId") ?? "";
   const [entityType, setEntityType] = useState("");
   const [impersonatedOnly, setImpersonatedOnly] = useState(false);
@@ -45,14 +50,14 @@ function AuditLog() {
   return (
     <div className="grid gap-4">
       <div>
-        <h1 className="text-xl">Audit log</h1>
+        <h1 className="text-xl">{t("title")}</h1>
         <p className="text-sm text-muted-foreground">
-          Every change, newest first.{" "}
+          {t("everyChange")}{" "}
           {salonId && (
             <>
-              Filtered to one salon.{" "}
+              {t("filtered")}{" "}
               <Link href="/admin/audit" className="underline">
-                Show all
+                {t("showAll")}
               </Link>
             </>
           )}
@@ -61,39 +66,39 @@ function AuditLog() {
 
       <div className="flex flex-wrap items-end gap-4">
         <div className="grid gap-1.5">
-          <Label htmlFor="al-entity">Entity</Label>
+          <Label htmlFor="al-entity">{t("entity")}</Label>
           <Input
             id="al-entity"
             className="w-48"
-            placeholder="salons, appointments…"
+            placeholder={t("entityPlaceholder")}
             value={entityType}
             onChange={(e) => setEntityType(e.target.value.trim())}
           />
         </div>
         <label className="flex items-center gap-2 pb-2 text-sm">
           <input type="checkbox" checked={impersonatedOnly} onChange={(e) => setImpersonatedOnly(e.target.checked)} />
-          Acting as someone else only
+          {t("impersonatedOnly")}
         </label>
       </div>
 
-      {log.isPending && <p className="text-muted-foreground">Loading…</p>}
-      {entries.length === 0 && log.isSuccess && <p className="text-muted-foreground">Nothing recorded yet.</p>}
+      {log.isPending && <p className="text-muted-foreground">{common("loading")}</p>}
+      {entries.length === 0 && log.isSuccess && <p className="text-muted-foreground">{t("nothing")}</p>}
 
       <div className="overflow-x-auto rounded-xl border bg-card">
         <table className="w-full min-w-[720px] text-sm">
           <thead className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
-              <th className="px-4 py-2 font-medium">When</th>
-              <th className="px-4 py-2 font-medium">Who</th>
-              <th className="px-4 py-2 font-medium">Action</th>
-              <th className="px-4 py-2 font-medium">Where</th>
+              <th className="px-4 py-2 font-medium">{t("when")}</th>
+              <th className="px-4 py-2 font-medium">{t("who")}</th>
+              <th className="px-4 py-2 font-medium">{t("action")}</th>
+              <th className="px-4 py-2 font-medium">{t("where")}</th>
             </tr>
           </thead>
           <tbody className="divide-y">
             {entries.map((e) => (
               <tr key={e.id} className={e.impersonated ? "bg-destructive/5" : undefined}>
                 <td className="whitespace-nowrap px-4 py-2 align-top text-xs text-muted-foreground">
-                  {new Date(e.createdAt).toLocaleString(undefined, {
+                  {new Date(e.createdAt).toLocaleString(f.locale, {
                     month: "short",
                     day: "numeric",
                     hour: "numeric",
@@ -110,7 +115,7 @@ function AuditLog() {
                     <span className="text-muted-foreground">—</span>
                   )}
                   {e.impersonated && (
-                    <span className="block text-xs text-destructive">acting as {e.impersonated.name}</span>
+                    <span className="block text-xs text-destructive">{t("actingAs", { name: e.impersonated.name })}</span>
                   )}
                 </td>
                 <td className="px-4 py-2 align-top">
@@ -123,7 +128,7 @@ function AuditLog() {
                   )}
                   {e.after != null && (
                     <details className="mt-1">
-                      <summary className="cursor-pointer text-xs text-muted-foreground">payload</summary>
+                      <summary className="cursor-pointer text-xs text-muted-foreground">{t("payload")}</summary>
                       <pre className="mt-1 max-w-md overflow-x-auto rounded bg-muted p-2 text-[11px]">
                         {JSON.stringify(e.after, null, 2)}
                       </pre>
@@ -148,12 +153,12 @@ function AuditLog() {
 
       {log.hasNextPage && (
         <Button variant="outline" className="justify-self-start" disabled={log.isFetchingNextPage} onClick={() => void log.fetchNextPage()}>
-          {log.isFetchingNextPage ? "Loading…" : "Load more"}
+          {log.isFetchingNextPage ? common("loading") : t("loadMore")}
         </Button>
       )}
-      {entries.length > 0 && !log.hasNextPage && <p className="text-xs text-muted-foreground">End of the log.</p>}
+      {entries.length > 0 && !log.hasNextPage && <p className="text-xs text-muted-foreground">{t("end")}</p>}
       <Badge variant="outline" className="justify-self-start">
-        {entries.length} shown
+        {t("shown", { count: entries.length })}
       </Badge>
     </div>
   );

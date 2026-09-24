@@ -3,7 +3,7 @@
 import type { Customer, CustomerDetail, Thread, UpdateCustomerInput } from "@reserivo/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { Suspense, useState } from "react";
 import { FieldError } from "@/components/field-error";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +42,12 @@ function Customers() {
   return (
     <div className="grid gap-4 lg:grid-cols-[320px_1fr]">
       <aside className="grid gap-3 self-start">
+        {/* Managers only: emailing clients needs their addresses, which designers never see. */}
+        {isManager && (
+          <Button variant="outline" nativeButton={false} render={<Link href={`/s/${salon.id}/customers/campaigns`} />}>
+            Email your clients
+          </Button>
+        )}
         <Input placeholder={isManager ? "Search name, phone or email…" : "Search by name…"} value={q} onChange={(e) => setQ(e.target.value)} />
         <Input placeholder="Filter by tag" value={tag} onChange={(e) => setTag(e.target.value.trim().toLowerCase())} />
         {list.isPending && <p className="text-sm text-muted-foreground">Loading…</p>}

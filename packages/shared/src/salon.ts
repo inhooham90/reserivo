@@ -30,6 +30,7 @@ const RESERVED_SLUGS = new Set([
   'settings',
   'sms',
   'terms',
+  'u',
   'verify-email',
   'zh',
 ]);

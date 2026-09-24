@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { canAllowDoubleBooking, createServiceSchema, DOUBLE_BOOKING_MIN_DURATION_MIN, type Service } from "@reserivo/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
@@ -27,6 +28,9 @@ type FormOutput = z.output<typeof formSchema>;
 export default function ServicesPage() {
   const { salon, members, me, isManager } = useSalon();
   const f = useFormat();
+  const t = useTranslations("settings.services");
+  const settings = useTranslations("settings");
+  const common = useTranslations("common");
   const designers = members.filter((m) => m.roles.includes("DESIGNER"));
   const [designerId, setDesignerId] = useState<string>(
     me && me.roles.includes("DESIGNER") ? me.id : (designers[0]?.id ?? ""),
@@ -52,7 +56,7 @@ export default function ServicesPage() {
     <div className="grid gap-6 md:grid-cols-[1fr_380px]">
       <section className="grid gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg">Services</h2>
+          <h2 className="text-lg">{t("title")}</h2>
           {isManager && designers.length > 1 && (
             <select
               className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
@@ -70,10 +74,10 @@ export default function ServicesPage() {
             </select>
           )}
         </div>
-        {designers.length === 0 && <p className="text-muted-foreground">Nobody takes appointments yet — give someone the Designer role from the Team tab.</p>}
-        {services.isPending && <p className="text-muted-foreground">Loading…</p>}
+        {designers.length === 0 && <p className="text-muted-foreground">{settings("noDesigners")}</p>}
+        {services.isPending && <p className="text-muted-foreground">{common("loading")}</p>}
         {services.data && mine.length === 0 && (
-          <p className="text-muted-foreground">No services yet. Add the first one on the right.</p>
+          <p className="text-muted-foreground">{t("none")}</p>
         )}
         {mine.map((s) => (
           <Card key={s.id} className={s.active ? "" : "opacity-60"}>
@@ -81,29 +85,29 @@ export default function ServicesPage() {
               <div>
                 <CardTitle className="flex items-center gap-2">
                   {s.name}
-                  {!s.active && <Badge variant="outline">Hidden</Badge>}
-                  {s.allowsDoubleBooking && <Badge variant="outline">Double booking</Badge>}
+                  {!s.active && <Badge variant="outline">{t("hidden")}</Badge>}
+                  {s.allowsDoubleBooking && <Badge variant="outline">{t("doubleBooking")}</Badge>}
                 </CardTitle>
                 <CardDescription>
                   {f.cents(s.priceCents)} · {f.duration(s.durationMin)}
-                  {s.bufferMin ? ` + ${s.bufferMin} min buffer` : ""}
+                  {s.bufferMin ? ` ${t("buffer", { duration: f.duration(s.bufferMin) })}` : ""}
                   {s.category ? ` · ${s.category}` : ""}
                 </CardDescription>
               </div>
               {canEdit && (
                 <div className="flex shrink-0 gap-2">
                   <Button size="sm" variant="outline" onClick={() => setEditing(s)}>
-                    Edit
+                    {t("edit")}
                   </Button>
                   <Button
                     size="sm"
                     variant="destructive"
                     disabled={remove.isPending}
                     onClick={() => {
-                      if (confirm(`Delete "${s.name}"?`)) remove.mutate(s.id);
+                      if (confirm(t("confirmDelete", { name: s.name }))) remove.mutate(s.id);
                     }}
                   >
-                    Delete
+                    {t("delete")}
                   </Button>
                 </div>
               )}
@@ -126,7 +130,7 @@ export default function ServicesPage() {
               onCancel={() => setEditing(null)}
             />
           ) : (
-            <Button onClick={() => setEditing("new")}>Add a service</Button>
+            <Button onClick={() => setEditing("new")}>{t("add")}</Button>
           )}
         </aside>
       )}
@@ -147,6 +151,8 @@ function ServiceForm({
   onDone: () => void;
   onCancel: () => void;
 }) {
+  const t = useTranslations("settings.services");
+  const common = useTranslations("common");
   const form = useForm<FormInput, unknown, FormOutput>({
     resolver: zodResolver(formSchema),
     defaultValues: service
@@ -196,11 +202,8 @@ function ServiceForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{service ? "Edit service" : "New service"}</CardTitle>
-        <CardDescription>
-          Durations in 5-minute steps. Buffer is cleanup time after. Over {DOUBLE_BOOKING_MIN_DURATION_MIN} minutes you
-          can allow double booking.
-        </CardDescription>
+        <CardTitle>{service ? t("editTitle") : t("newTitle")}</CardTitle>
+        <CardDescription>{t("formHint", { min: DOUBLE_BOOKING_MIN_DURATION_MIN })}</CardDescription>
       </CardHeader>
       <CardContent>
         <form
@@ -212,58 +215,55 @@ function ServiceForm({
           noValidate
         >
           <div className="grid gap-1.5">
-            <Label htmlFor="svc-name">Name</Label>
+            <Label htmlFor="svc-name">{t("name")}</Label>
             <Input id="svc-name" {...form.register("name")} />
             <FieldError message={err.name?.message} />
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="svc-category">Category</Label>
-            <Input id="svc-category" placeholder="Cut, Color, Nails…" {...form.register("category")} />
+            <Label htmlFor="svc-category">{t("category")}</Label>
+            <Input id="svc-category" placeholder={t("categoryPlaceholder")} {...form.register("category")} />
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div className="grid gap-1.5">
-              <Label htmlFor="svc-price">Price ($)</Label>
+              <Label htmlFor="svc-price">{t("price")}</Label>
               <Input id="svc-price" type="number" step="0.01" min="0" {...form.register("priceDollars", { valueAsNumber: true })} />
               <FieldError message={err.priceDollars?.message} />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="svc-duration">Minutes</Label>
+              <Label htmlFor="svc-duration">{t("minutes")}</Label>
               <Input id="svc-duration" type="number" step="5" min="5" {...form.register("durationMin", { valueAsNumber: true })} />
               <FieldError message={err.durationMin?.message} />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="svc-buffer">Buffer</Label>
+              <Label htmlFor="svc-buffer">{t("bufferLabel")}</Label>
               <Input id="svc-buffer" type="number" step="5" min="0" {...form.register("bufferMin", { valueAsNumber: true })} />
               <FieldError message={err.bufferMin?.message} />
             </div>
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="svc-desc">Description</Label>
+            <Label htmlFor="svc-desc">{t("description")}</Label>
             <Textarea id="svc-desc" rows={3} {...form.register("description")} />
           </div>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" {...form.register("active")} />
-            Bookable on the public page
+            {t("bookable")}
           </label>
           {canShare && (
             <div className="grid gap-1 rounded-md border border-border bg-muted/40 p-3">
               <label className="flex items-start gap-2 text-sm">
                 <input type="checkbox" className="mt-1" {...form.register("allowsDoubleBooking")} />
-                <span>Allow double booking?</span>
+                <span>{t("allowDouble")}</span>
               </label>
-              <p className="pl-6 text-xs text-muted-foreground">
-                For services with waiting time in them, like colour or a perm. Someone else can be booked over this
-                one, up to two clients at a time.
-              </p>
+              <p className="pl-6 text-xs text-muted-foreground">{t("allowDoubleHint")}</p>
             </div>
           )}
           <FieldError message={save.error instanceof ApiError ? save.error.message : undefined} />
           <div className="flex gap-2">
             <Button type="submit" disabled={save.isPending}>
-              {save.isPending ? "Saving…" : service ? "Save changes" : "Add service"}
+              {save.isPending ? t("saving") : service ? t("saveChanges") : t("addService")}
             </Button>
             <Button type="button" variant="ghost" onClick={onCancel}>
-              Cancel
+              {common("cancel")}
             </Button>
           </div>
         </form>

@@ -2,6 +2,7 @@
 
 import { updateSalonSchema, type Salon, type UpdateSalonInput } from "@reserivo/shared";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { FieldError } from "@/components/field-error";
 import { Button } from "@/components/ui/button";
@@ -15,14 +16,12 @@ import { salonKeys, useSalon } from "@/lib/salon-context";
 /** At most three may be picked; the shared schema enforces the same. */
 const REMINDER_CHOICES = [48, 24, 2] as const;
 
-const reminderLabel = (hours: number) => {
-  if (hours < 24) return hours + " hours before";
-  const days = hours / 24;
-  return days === 1 ? "1 day before" : days + " days before";
-};
 
 export default function SettingsPage() {
   const { salon, isManager } = useSalon();
+  const t = useTranslations("settings.salon");
+  const reminderLabel = (hours: number) =>
+    hours < 24 ? t("reminderHours", { hours }) : t("reminderDays", { days: hours / 24 });
   const queryClient = useQueryClient();
   const timezones = useMemo(() => Intl.supportedValuesOf("timeZone"), []);
 
@@ -62,16 +61,16 @@ export default function SettingsPage() {
     <div className="grid gap-6 md:grid-cols-2">
       <Card>
         <CardHeader>
-          <CardTitle>Salon</CardTitle>
-          <CardDescription>Your booking link stays /{salon.slug}.</CardDescription>
+          <CardTitle>{t("title")}</CardTitle>
+          <CardDescription>{t("linkStays", { slug: salon.slug })}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
           <div className="grid gap-1.5">
-            <Label htmlFor="st-name">Name</Label>
+            <Label htmlFor="st-name">{t("name")}</Label>
             <Input id="st-name" value={form.name} disabled={!isManager} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="st-tz">Time zone</Label>
+            <Label htmlFor="st-tz">{t("timezone")}</Label>
             <select
               id="st-tz"
               className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
@@ -83,20 +82,20 @@ export default function SettingsPage() {
                 <option key={tz} value={tz}>{tz}</option>
               ))}
             </select>
-            <p className="text-xs text-muted-foreground">Working hours are wall-clock times in this zone.</p>
+            <p className="text-xs text-muted-foreground">{t("timezoneHint")}</p>
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Booking policies</CardTitle>
-          <CardDescription>What customers may do on the public page.</CardDescription>
+          <CardTitle>{t("policies")}</CardTitle>
+          <CardDescription>{t("policiesHint")}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-1.5">
-              <Label htmlFor="st-slot">Slot grid (min)</Label>
+              <Label htmlFor="st-slot">{t("slotGrid")}</Label>
               <select
                 id="st-slot"
                 className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
@@ -110,24 +109,21 @@ export default function SettingsPage() {
               </select>
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="st-lead">Minimum notice (min)</Label>
+              <Label htmlFor="st-lead">{t("leadTime")}</Label>
               <Input id="st-lead" type="number" min={0} step={15} value={form.leadTimeMin} disabled={!isManager} onChange={num("leadTimeMin")} />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="st-adv">Book up to (days ahead)</Label>
+              <Label htmlFor="st-adv">{t("maxAdvance")}</Label>
               <Input id="st-adv" type="number" min={1} max={365} value={form.maxAdvanceDays} disabled={!isManager} onChange={num("maxAdvanceDays")} />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="st-cancel">Free cancel until (hours before)</Label>
+              <Label htmlFor="st-cancel">{t("cancelWindow")}</Label>
               <Input id="st-cancel" type="number" min={0} max={336} value={form.cancelWindowHours} disabled={!isManager} onChange={num("cancelWindowHours")} />
             </div>
           </div>
           <div className="grid gap-2 border-t pt-4">
-            <Label>Reminders</Label>
-            <p className="text-xs text-muted-foreground">
-              When to remind a customer before their appointment. Always by email; also by text once that customer has
-              agreed to one and SMS is switched on for the platform.
-            </p>
+            <Label>{t("reminders")}</Label>
+            <p className="text-xs text-muted-foreground">{t("remindersHint")}</p>
             {REMINDER_CHOICES.map((hours) => (
               <label key={hours} className="flex items-center gap-2 text-sm">
                 <input
@@ -147,7 +143,7 @@ export default function SettingsPage() {
               </label>
             ))}
             {form.reminderHoursBefore.length === 0 && (
-              <p className="text-xs text-muted-foreground">No reminders will be sent.</p>
+              <p className="text-xs text-muted-foreground">{t("noReminders")}</p>
             )}
           </div>
 
@@ -155,7 +151,7 @@ export default function SettingsPage() {
             <>
               <FieldError message={error ?? (save.error instanceof ApiError ? save.error.message : undefined)} />
               <Button onClick={submit} disabled={save.isPending} className="justify-self-start">
-                {save.isPending ? "Saving…" : save.isSuccess && !save.isPending ? "Saved" : "Save settings"}
+                {save.isPending ? t("saving") : save.isSuccess && !save.isPending ? t("saved") : t("save")}
               </Button>
             </>
           )}

@@ -1,6 +1,8 @@
 "use client";
 
 import type { SalonRole } from "@reserivo/shared";
+import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/use-format";
 
 /** Two capability checkboxes. At least one must stay on; the API enforces the same. */
 export function RolePicker({
@@ -14,6 +16,8 @@ export function RolePicker({
   disabled?: boolean;
   idPrefix: string;
 }) {
+  const f = useFormat();
+  const t = useTranslations("settings.roles");
   const toggle = (role: SalonRole) => (checked: boolean) => {
     const next = checked ? Array.from(new Set([...value, role])) : value.filter((r) => r !== role);
     onChange(next);
@@ -30,8 +34,8 @@ export function RolePicker({
           onChange={(e) => toggle("MANAGER")(e.target.checked)}
         />
         <span>
-          <span className="font-medium">Manager</span>
-          <span className="block text-xs text-muted-foreground">Team, salon hours, settings, customer contact details</span>
+          <span className="font-medium">{f.role("MANAGER")}</span>
+          <span className="block text-xs text-muted-foreground">{t("managerHint")}</span>
         </span>
       </label>
       <label className="flex items-start gap-2">
@@ -44,11 +48,11 @@ export function RolePicker({
           onChange={(e) => toggle("DESIGNER")(e.target.checked)}
         />
         <span>
-          <span className="font-medium">Designer</span>
-          <span className="block text-xs text-muted-foreground">Takes appointments: own services and hours, shown on the booking page</span>
+          <span className="font-medium">{f.role("DESIGNER")}</span>
+          <span className="block text-xs text-muted-foreground">{t("designerHint")}</span>
         </span>
       </label>
-      {value.length === 0 && <p className="text-xs text-destructive">Pick at least one.</p>}
+      {value.length === 0 && <p className="text-xs text-destructive">{t("pickOne")}</p>}
     </div>
   );
 }

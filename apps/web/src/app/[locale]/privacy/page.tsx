@@ -40,6 +40,10 @@ export default function PrivacyPage() {
         <li>Notes you add when booking, and notes the salon keeps about you</li>
         <li>Messages exchanged with the salon through {LEGAL.product}</li>
         <li>Whether you agreed to text reminders, and when</li>
+        <li>
+          Whether you unsubscribed from a salon’s emails, from every salon’s promotions, or from all our email, and
+          when
+        </li>
       </ul>
 
       <h2>Text messages</h2>
@@ -82,10 +86,46 @@ export default function PrivacyPage() {
         for. Within a salon, contact details are visible to its managers only.
       </p>
 
+      <h2>Email from the salon</h2>
+      <p>
+        Separately from booking confirmations and reminders, the salon you booked with may email you about the salon —
+        an offer, a change of opening hours, news. Only salons you have a record with can do this; nobody buys or
+        rents a list, and {LEGAL.product} never emails you on its own behalf about anything other than your account.
+      </p>
+      <p>
+        <strong>How you stop it.</strong> Every one of those emails carries an unsubscribe link at the bottom, along
+        with our postal address. One click stops that salon’s emails, immediately and for good, and you never need an
+        account or a password to do it. The page the link opens lets you go further if you want to:
+      </p>
+      <ul>
+        <li>
+          <strong>Promotions from every salon on {LEGAL.product}</strong>, including salons you book with later. We
+          keep that choice against your email address, so it applies wherever you book.
+        </li>
+        <li>
+          <strong>Every email from {LEGAL.product}</strong>, including confirmations, changes and reminders for
+          appointments you book. Sign-in and password-reset emails you ask for are still sent, because without them
+          you could not get back into your account.
+        </li>
+      </ul>
+      <p>
+        Unsubscribing from one salon, or from every salon’s promotions, does <strong>not</strong> stop confirmations,
+        changes or reminders for appointments you book. Those are part of the booking, not marketing, and you would
+        not want to lose them. Text reminders are separate: reply STOP to any of them.
+      </p>
+      <p>
+        <strong>We do not sell, rent or share email addresses with third parties for their own marketing.</strong> Your
+        address goes to our email provider for the sole purpose of delivering the message.
+      </p>
+
       <h2>Why we use it</h2>
       <ul>
         <li>To take and manage bookings, and to show salons their schedule</li>
         <li>To send booking confirmations, changes and reminders</li>
+        <li>
+          To let the salon you booked with email you about the salon itself, until you unsubscribe — see “Email from
+          the salon” above
+        </li>
         <li>To let clients and salons message each other without exchanging personal contact details</li>
         <li>To keep accounts secure and investigate misuse</li>
         <li>To meet our legal and accounting obligations</li>
@@ -125,6 +165,10 @@ export default function PrivacyPage() {
       <ul>
         <li>Ask for a copy of the information we hold about you, or ask us to correct or delete it</li>
         <li>Withdraw consent to text reminders at any time</li>
+        <li>
+          Unsubscribe from one salon’s emails, from every salon’s promotions, or from all our email, at any time, using
+          the link in any of them
+        </li>
         <li>
           If you are a salon client, you can also ask the salon directly — it is their record, and we will help them
           act on your request

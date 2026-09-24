@@ -4,6 +4,7 @@ import type { AdminUserDetail } from "@reserivo/shared";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { FieldError } from "@/components/field-error";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +16,8 @@ import { useFormat } from "@/lib/use-format";
 
 export default function AdminUserPage() {
   const f = useFormat();
+  const t = useTranslations("admin");
+  const common = useTranslations("common");
   const { userId } = useParams<{ userId: string }>();
   const router = useRouter();
   const { impersonate } = useAuth();
@@ -27,14 +30,14 @@ export default function AdminUserPage() {
     onSuccess: () => router.replace("/dashboard"),
   });
 
-  if (user.isPending) return <p className="text-muted-foreground">Loading…</p>;
-  if (user.isError) return <p className="text-destructive">No such user.</p>;
+  if (user.isPending) return <p className="text-muted-foreground">{common("loading")}</p>;
+  if (user.isError) return <p className="text-destructive">{t("user.notFound")}</p>;
   const u = user.data;
 
   return (
     <div className="grid gap-4">
       <Link href="/admin" className="text-sm text-muted-foreground underline">
-        ← All users
+        ← {t("user.back")}
       </Link>
 
       <Card>
@@ -42,18 +45,18 @@ export default function AdminUserPage() {
           <div>
             <CardTitle className="flex items-center gap-2">
               {u.name}
-              {u.isSiteAdmin && <Badge variant="outline">Site admin</Badge>}
+              {u.isSiteAdmin && <Badge variant="outline">{t("siteAdmin")}</Badge>}
             </CardTitle>
             <CardDescription>
               {u.email}
-              {u.phone ? ` · ${u.phone}` : ""} · joined{" "}
+              {u.phone ? ` · ${u.phone}` : ""} ·{" "}
               {/* A user belongs to no salon, so the only honest zone is the admin's own. */}
-              {f.inTz(u.createdAt, Intl.DateTimeFormat().resolvedOptions().timeZone, "dateWithYear")}
+              {t("user.joined", { date: f.inTz(u.createdAt, Intl.DateTimeFormat().resolvedOptions().timeZone, "dateWithYear") })}
             </CardDescription>
           </div>
           {u.canImpersonate && !confirming && (
             <Button size="sm" variant="outline" className="shrink-0" onClick={() => setConfirming(true)}>
-              Act as {u.name.split(" ")[0]}
+              {t("user.actAs", { name: u.name.split(" ")[0] })}
             </Button>
           )}
         </CardHeader>
@@ -62,16 +65,18 @@ export default function AdminUserPage() {
             {confirming && (
               <div className="grid gap-2 rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm">
                 <p>
-                  You will use Reserivo as <span className="font-medium">{u.name}</span> and see exactly what they see. Everything
-                  you do is written to the audit log under your own account. Your session stays underneath — press Stop in the red
-                  banner to come back.
+                  {t.rich("user.confirm", {
+                    product: "Reserivo",
+                    name: u.name,
+                    b: (chunks) => <span className="font-medium">{chunks}</span>,
+                  })}
                 </p>
                 <div className="flex gap-2">
                   <Button size="sm" variant="destructive" disabled={actAs.isPending} onClick={() => actAs.mutate()}>
-                    {actAs.isPending ? "Switching…" : `Yes, act as ${u.name}`}
+                    {actAs.isPending ? t("user.switching") : t("user.confirmYes", { name: u.name })}
                   </Button>
                   <Button size="sm" variant="ghost" onClick={() => setConfirming(false)}>
-                    Cancel
+                    {common("cancel")}
                   </Button>
                 </div>
               </div>
@@ -82,7 +87,7 @@ export default function AdminUserPage() {
         {!u.canImpersonate && (
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              {u.isSiteAdmin ? "Site admins cannot act as one another." : "This is you."}
+              {u.isSiteAdmin ? t("user.cannotAdmins") : t("user.isYou")}
             </p>
           </CardContent>
         )}
@@ -90,8 +95,8 @@ export default function AdminUserPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Works at</CardTitle>
-          <CardDescription>{u.memberships.length === 0 ? "Not a member of any salon." : "Salon memberships"}</CardDescription>
+          <CardTitle>{t("user.worksAt")}</CardTitle>
+          <CardDescription>{u.memberships.length === 0 ? t("user.noMemberships") : t("user.memberships")}</CardDescription>
         </CardHeader>
         <CardContent>
           <ul className="divide-y text-sm">
@@ -101,11 +106,11 @@ export default function AdminUserPage() {
                   <Link href={`/admin/salons/${m.salonId}`} className="font-medium underline">
                     {m.salonName}
                   </Link>
-                  <span className="text-muted-foreground"> · as {m.displayName}</span>
+                  <span className="text-muted-foreground"> · {t("user.asName", { name: m.displayName })}</span>
                 </span>
                 <span className="flex items-center gap-2">
                   <Badge variant="secondary">{f.roles(m.roles)}</Badge>
-                  {m.status !== "ACTIVE" && <Badge variant="outline">{m.status.toLowerCase()}</Badge>}
+                  {m.status !== "ACTIVE" && <Badge variant="outline">{t(`status.${m.status as "INVITED" | "ACTIVE" | "REMOVED"}`)}</Badge>}
                 </span>
               </li>
             ))}
@@ -115,8 +120,8 @@ export default function AdminUserPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Books at</CardTitle>
-          <CardDescription>{u.customerOf.length === 0 ? "No client records." : "Salons holding a client record"}</CardDescription>
+          <CardTitle>{t("user.booksAt")}</CardTitle>
+          <CardDescription>{u.customerOf.length === 0 ? t("user.noClients") : t("user.clientRecords")}</CardDescription>
         </CardHeader>
         <CardContent>
           <ul className="divide-y text-sm">
@@ -126,7 +131,7 @@ export default function AdminUserPage() {
                   {c.salonName}
                 </Link>
                 <span className="text-muted-foreground">
-                  {c.appointments} appointment{c.appointments === 1 ? "" : "s"}
+                  {t("user.appointments", { count: c.appointments })}
                 </span>
               </li>
             ))}

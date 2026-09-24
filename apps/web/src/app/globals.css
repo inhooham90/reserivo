@@ -169,6 +169,13 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Browsers break Korean between any two syllables, which splits words in
+     half at line ends ("모 / 두"). Korean wraps at spaces, like English does.
+     Chinese has no spaces between words, so it keeps the default. */
+  :lang(ko) {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
   /* Editorial voice: page headings in the serif, tight tracking. Card titles stay sans. */
   h1,
   h2,

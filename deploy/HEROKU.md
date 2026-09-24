@@ -65,6 +65,7 @@ $vars = @(
   "JWT_ACCESS_SECRET=$acc",
   "JWT_REFRESH_SECRET=$ref",
   "WEB_URL=https://reserivo.com",
+  "PUBLIC_API_URL=https://api.reserivo.com",
   "CORS_ORIGIN=https://reserivo.com,https://www.reserivo.com",
   "SITE_ADMIN_EMAILS=james@akkija.com",
   "RESEND_API_KEY=re_your_key_here",
@@ -82,7 +83,9 @@ environments. Rotating either signs everyone out.
 `CORS_ORIGIN` is a comma-separated allowlist and must name **every** origin a
 browser will load the app from. Miss `www` and the site looks fine until
 someone types it, then every API call fails. `WEB_URL` stays a single canonical
-origin because it builds the invite links people receive.
+origin because it builds the invite links people receive. `PUBLIC_API_URL` is
+the API's own public origin; campaign emails put it in the one-click
+`List-Unsubscribe` header, which Gmail and Yahoo POST to directly.
 
 `DATABASE_SSL=no-verify` is required. Heroku Postgres demands TLS but presents a
 certificate signed by its own CA, which Node will not trust. This encrypts the

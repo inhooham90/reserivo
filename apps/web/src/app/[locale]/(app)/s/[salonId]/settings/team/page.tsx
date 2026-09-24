@@ -2,6 +2,7 @@
 
 import { emailSchema, type CreateInvitationInput, type Invitation, type Member, type SalonRole, type UpdateMemberInput } from "@reserivo/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { FieldError } from "@/components/field-error";
 import { RolePicker } from "@/components/role-picker";
@@ -17,11 +18,12 @@ import { salonKeys, useSalon } from "@/lib/salon-context";
 
 export default function TeamPage() {
   const { salon, members, me, isManager } = useSalon();
+  const t = useTranslations("settings.team");
 
   return (
     <div className="grid gap-6 md:grid-cols-[1fr_360px]">
       <section className="grid gap-3">
-        <h2 className="text-lg">Members</h2>
+        <h2 className="text-lg">{t("members")}</h2>
         {members.map((m) => (
           <MemberCard key={m.id} member={m} canEdit={isManager || me?.id === m.id} isManager={isManager} salonId={salon.id} />
         ))}
@@ -38,6 +40,7 @@ export default function TeamPage() {
 
 function MemberCard({ member, canEdit, isManager, salonId }: { member: Member; canEdit: boolean; isManager: boolean; salonId: string }) {
   const f = useFormat();
+  const t = useTranslations("settings.team");
   const [editing, setEditing] = useState(false);
   const queryClient = useQueryClient();
   const invalidate = () => queryClient.invalidateQueries({ queryKey: salonKeys.members(salonId) });
@@ -64,7 +67,7 @@ function MemberCard({ member, canEdit, isManager, salonId }: { member: Member; c
         {canEdit && (
           <div className="flex shrink-0 gap-2">
             <Button size="sm" variant="outline" onClick={() => setEditing((v) => !v)}>
-              {editing ? "Close" : "Edit"}
+              {editing ? t("close") : t("edit")}
             </Button>
             {isManager && (
               <Button
@@ -72,10 +75,10 @@ function MemberCard({ member, canEdit, isManager, salonId }: { member: Member; c
                 variant="destructive"
                 disabled={remove.isPending}
                 onClick={() => {
-                  if (confirm(`Remove ${member.displayName} from the salon?`)) remove.mutate();
+                  if (confirm(t("confirmRemove", { name: member.displayName }))) remove.mutate();
                 }}
               >
-                Remove
+                {t("remove")}
               </Button>
             )}
           </div>
@@ -83,7 +86,7 @@ function MemberCard({ member, canEdit, isManager, salonId }: { member: Member; c
       </CardHeader>
       {remove.isError && (
         <CardContent>
-          <FieldError message={remove.error instanceof ApiError ? remove.error.message : "Could not remove"} />
+          <FieldError message={remove.error instanceof ApiError ? remove.error.message : t("removeFailed")} />
         </CardContent>
       )}
       {editing && (
@@ -97,6 +100,7 @@ function MemberCard({ member, canEdit, isManager, salonId }: { member: Member; c
 
 function MemberForm({ member, isManager, salonId, onSaved }: { member: Member; isManager: boolean; salonId: string; onSaved: () => void }) {
   const queryClient = useQueryClient();
+  const t = useTranslations("settings.team");
   const [displayName, setDisplayName] = useState(member.displayName);
   const [bio, setBio] = useState(member.bio ?? "");
   const [roles, setRoles] = useState<SalonRole[]>(member.roles);
@@ -125,25 +129,25 @@ function MemberForm({ member, isManager, salonId, onSaved }: { member: Member; i
       }}
     >
       <div className="grid gap-1.5">
-        <Label htmlFor={`dn-${member.id}`}>Display name</Label>
+        <Label htmlFor={`dn-${member.id}`}>{t("displayName")}</Label>
         <Input id={`dn-${member.id}`} value={displayName} onChange={(e) => setDisplayName(e.target.value)} required />
       </div>
       <div className="grid gap-1.5">
-        <Label htmlFor={`bio-${member.id}`}>Bio</Label>
+        <Label htmlFor={`bio-${member.id}`}>{t("bio")}</Label>
         <Textarea id={`bio-${member.id}`} value={bio} onChange={(e) => setBio(e.target.value)} rows={3} />
       </div>
       {isManager && (
         <div className="grid gap-1.5">
-          <Label>Roles</Label>
+          <Label>{t("roles")}</Label>
           <RolePicker idPrefix={`roles-${member.id}`} value={roles} onChange={setRoles} />
           {rolesChanged && !member.roles.includes("DESIGNER") && roles.includes("DESIGNER") && (
-            <p className="text-xs text-muted-foreground">Their hours will start as a copy of the salon hours.</p>
+            <p className="text-xs text-muted-foreground">{t("hoursSeeded")}</p>
           )}
         </div>
       )}
       <FieldError message={save.error instanceof ApiError ? save.error.message : undefined} />
       <Button type="submit" size="sm" disabled={save.isPending || roles.length === 0}>
-        {save.isPending ? "Saving…" : "Save"}
+        {save.isPending ? t("saving") : t("save")}
       </Button>
     </form>
   );
@@ -151,6 +155,7 @@ function MemberForm({ member, isManager, salonId, onSaved }: { member: Member; i
 
 function InviteCard({ salonId }: { salonId: string }) {
   const queryClient = useQueryClient();
+  const t = useTranslations("settings.team");
   const [email, setEmail] = useState("");
   const [roles, setRoles] = useState<SalonRole[]>(["DESIGNER"]);
   const [error, setError] = useState<string | null>(null);
@@ -171,8 +176,8 @@ function InviteCard({ salonId }: { salonId: string }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Invite someone</CardTitle>
-        <CardDescription>They accept the link with an account that uses this email.</CardDescription>
+        <CardTitle>{t("inviteTitle")}</CardTitle>
+        <CardDescription>{t("inviteHint")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form
@@ -181,7 +186,7 @@ function InviteCard({ salonId }: { salonId: string }) {
             setError(null);
             const parsed = emailSchema.safeParse(email);
             if (!parsed.success) {
-              setError("Enter a valid email");
+              setError(t("invalidEmail"));
               return;
             }
             if (roles.length === 0) return;
@@ -191,25 +196,25 @@ function InviteCard({ salonId }: { salonId: string }) {
           noValidate
         >
           <div className="grid gap-1.5">
-            <Label htmlFor="inv-email">Email</Label>
+            <Label htmlFor="inv-email">{t("email")}</Label>
             <Input id="inv-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
             <FieldError message={error ?? undefined} />
           </div>
           <div className="grid gap-1.5">
-            <Label>Roles</Label>
+            <Label>{t("roles")}</Label>
             <RolePicker idPrefix="inv" value={roles} onChange={setRoles} />
           </div>
           <FieldError message={invite.error instanceof ApiError ? invite.error.message : undefined} />
           <Button type="submit" size="sm" disabled={invite.isPending || roles.length === 0}>
-            {invite.isPending ? "Creating…" : "Create invite link"}
+            {invite.isPending ? t("creating") : t("createInvite")}
           </Button>
         </form>
         {inviteUrl && (
           <div className="mt-4 grid gap-2 rounded-md border bg-muted/50 p-3 text-sm">
-            <p className="text-muted-foreground">Share this link — it works once and expires in 7 days.</p>
+            <p className="text-muted-foreground">{t("share")}</p>
             <code className="break-all">{inviteUrl}</code>
             <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(inviteUrl).then(() => setCopied(true))}>
-              {copied ? "Copied" : "Copy link"}
+              {copied ? t("copied") : t("copy")}
             </Button>
           </div>
         )}
@@ -220,6 +225,7 @@ function InviteCard({ salonId }: { salonId: string }) {
 
 function PendingInvitations({ salonId }: { salonId: string }) {
   const f = useFormat();
+  const t = useTranslations("settings.team");
   const queryClient = useQueryClient();
   const pending = useQuery({
     queryKey: salonKeys.invitations(salonId),
@@ -234,7 +240,7 @@ function PendingInvitations({ salonId }: { salonId: string }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Pending invites</CardTitle>
+        <CardTitle>{t("pending")}</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-2 text-sm">
         {pending.data.map((inv) => (
@@ -243,7 +249,7 @@ function PendingInvitations({ salonId }: { salonId: string }) {
               {inv.email} <span className="text-muted-foreground">· {f.roles(inv.roles)}</span>
             </span>
             <Button size="xs" variant="ghost" onClick={() => revoke.mutate(inv.id)} disabled={revoke.isPending}>
-              Revoke
+              {t("revoke")}
             </Button>
           </div>
         ))}

@@ -63,7 +63,7 @@ It reads everything from the environment and refuses to start if a secret is mis
 | `POSTGRES_USER`, `POSTGRES_PASSWORD` | Database credentials |
 | `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` | Two different long random strings. Rotating either signs everyone out |
 | `WEB_URL` | Public origin of the web app; also the CORS allow-list |
-| `NEXT_PUBLIC_API_URL` | Public origin of the API. **Baked into the browser bundle at build time** — changing it needs a web rebuild |
+| `NEXT_PUBLIC_API_URL` | Public origin of the API. The API also reads it as `PUBLIC_API_URL` for the one-click unsubscribe header. **Baked into the browser bundle at build time** — changing it needs a web rebuild |
 | `RESEND_API_KEY`, `EMAIL_FROM` | Required in production: confirmations and password resets are undeliverable without them. `EMAIL_FROM` must be on a domain verified with Resend |
 | `SITE_ADMIN_EMAILS` | Optional; see below |
 

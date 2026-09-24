@@ -1,14 +1,15 @@
 "use client";
 
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { cn } from "cn";
 
 const TABS = [
-  { href: "/admin", label: "Overview" },
-  { href: "/admin/audit", label: "Audit log" },
+  { href: "/admin", label: "overview" },
+  { href: "/admin/audit", label: "audit" },
 ] as const;
 
 /**
@@ -20,6 +21,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const { status, user, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const t = useTranslations("admin");
+  const nav = useTranslations("nav");
+  const common = useTranslations("common");
 
   useEffect(() => {
     if (status === "anonymous") router.replace("/login?next=/admin");
@@ -27,7 +31,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   }, [status, user, router]);
 
   if (status !== "authenticated" || !user?.isSiteAdmin || user.actorUserId) {
-    return <div className="flex flex-1 items-center justify-center text-muted-foreground">Loading…</div>;
+    return <div className="flex flex-1 items-center justify-center text-muted-foreground">{common("loading")}</div>;
   }
 
   return (
@@ -36,28 +40,28 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
           <nav className="flex items-center gap-4 text-sm">
             <Link href="/admin" className="font-semibold">
-              Reserivo <span className="text-muted-foreground">admin</span>
+              Reserivo <span className="text-muted-foreground">{t("brand")}</span>
             </Link>
-            {TABS.map((t) => (
+            {TABS.map((tab) => (
               <Link
-                key={t.href}
-                href={t.href}
+                key={tab.href}
+                href={tab.href}
                 className={cn(
                   "transition-colors",
-                  pathname === t.href ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                  pathname === tab.href ? "text-foreground" : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                {t.label}
+                {t(tab.label)}
               </Link>
             ))}
           </nav>
           <div className="flex items-center gap-3 text-sm">
             <Link href="/dashboard" className="text-muted-foreground hover:text-foreground">
-              Back to app
+              {t("backToApp")}
             </Link>
             <span className="text-muted-foreground">{user.email}</span>
             <Button variant="outline" size="sm" onClick={() => void logout().then(() => router.replace("/login"))}>
-              Sign out
+              {nav("signOut")}
             </Button>
           </div>
         </div>

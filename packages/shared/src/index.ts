@@ -1,3 +1,4 @@
+export * from './legal';
 export * from './locale';
 export * from './roles';
 export * from './auth';
@@ -9,6 +10,7 @@ export * from './availability';
 export * from './time';
 export * from './appointment';
 export * from './customer';
+export * from './campaign';
 export * from './message';
 export * from './rating';
 export * from './admin';

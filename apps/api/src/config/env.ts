@@ -27,6 +27,14 @@ const envSchema = z.object({
   // Compose passes an empty string when the variable is unset; treat that as absent.
   RESEND_API_KEY: optionalString,
   /**
+   * Marketing email, deliberately on its own key and its own verified
+   * subdomain. A salon's campaign that collects spam complaints must not be
+   * able to damage the reputation carrying password resets and booking
+   * confirmations. Either both unset (campaigns disabled) or both set.
+   */
+  RESEND_MARKETING_API_KEY: optionalString,
+  EMAIL_MARKETING_FROM: optionalString,
+  /**
    * SMS delivery. All three must be set before a single text is sent; until
    * then reminders are email-only. US numbers also need A2P 10DLC
    * registration with the carrier or messages are filtered.
@@ -43,6 +51,12 @@ const envSchema = z.object({
   SITE_ADMIN_EMAILS: z.string().default(''),
   /** Public web origin, used to build links we hand to users (invites). */
   WEB_URL: z.url().default('http://localhost:3000'),
+  /**
+   * Public origin of this API, as a mail client reaches it. Only the campaign
+   * List-Unsubscribe header needs it: RFC 8058 one-click is a POST straight
+   * from Gmail or Yahoo, which a web page cannot answer.
+   */
+  PUBLIC_API_URL: z.url().default('http://localhost:3001'),
   JWT_ACCESS_SECRET: z.string().min(16),
   JWT_REFRESH_SECRET: z.string().min(16),
   JWT_ACCESS_TTL_SECONDS: z.coerce.number().int().positive().default(15 * 60),

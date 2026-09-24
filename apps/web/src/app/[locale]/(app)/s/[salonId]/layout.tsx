@@ -4,6 +4,7 @@ import type { Member, MySalon, Salon } from "@reserivo/shared";
 import { useQuery } from "@tanstack/react-query";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, type ReactNode } from "react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -13,10 +14,10 @@ import { cn } from "cn";
 
 /** Day-to-day work first; anything you set up once lives under Settings. */
 const TABS = [
-  { href: "/calendar", label: "Schedule" },
-  { href: "/customers", label: "Customers" },
-  { href: "/messages", label: "Messages" },
-  { href: "/settings", label: "Settings" },
+  { href: "/calendar", label: "schedule" },
+  { href: "/customers", label: "customers" },
+  { href: "/messages", label: "messages" },
+  { href: "/settings", label: "settings" },
 ] as const;
 
 export default function SalonLayout({ children }: { children: ReactNode }) {
@@ -24,6 +25,8 @@ export default function SalonLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
+  const t = useTranslations("nav.salon");
+  const common = useTranslations("common");
 
   const salon = useQuery({ queryKey: salonKeys.salon(salonId), queryFn: () => api<Salon>(`/salons/${salonId}`) });
   const members = useQuery({
@@ -38,9 +41,9 @@ export default function SalonLayout({ children }: { children: ReactNode }) {
     if (loaded) writeCurrentSalon(salonId);
   }, [loaded, salonId]);
 
-  if (salon.isPending || members.isPending) return <p className="text-muted-foreground">Loading…</p>;
+  if (salon.isPending || members.isPending) return <p className="text-muted-foreground">{common("loading")}</p>;
   if (salon.isError || members.isError) {
-    return <p className="text-destructive">You do not have access to this salon.</p>;
+    return <p className="text-destructive">{t("noAccess")}</p>;
   }
 
   const me = members.data.find((m) => m.userId === user?.id) ?? null;
@@ -55,18 +58,22 @@ export default function SalonLayout({ children }: { children: ReactNode }) {
           <div>
             <h1 className="text-2xl">{salon.data.name}</h1>
             <p className="text-sm text-muted-foreground">
-              Booking page:{" "}
-              <Link href={`/${salon.data.slug}`} className="underline" target="_blank">
-                /{salon.data.slug}
-              </Link>{" "}
-              · {salon.data.timezone}
+              {t.rich("bookingPage", {
+                slug: salon.data.slug,
+                timezone: salon.data.timezone,
+                link: (chunks) => (
+                  <Link href={`/${salon.data.slug}`} className="underline" target="_blank">
+                    {chunks}
+                  </Link>
+                ),
+              })}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {/* Only worth showing to someone who actually has somewhere to switch to. */}
             {others.length > 0 && (
               <select
-                aria-label="Switch salon"
+                aria-label={t("switch")}
                 className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
                 value={salonId}
                 onChange={(e) => router.push(`/s/${e.target.value}/calendar`)}
@@ -79,12 +86,12 @@ export default function SalonLayout({ children }: { children: ReactNode }) {
               </select>
             )}
             <nav className="flex gap-1 rounded-lg bg-muted p-1 text-sm">
-              {TABS.map((t) => {
-                const href = base + t.href;
+              {TABS.map((tab) => {
+                const href = base + tab.href;
                 const active = pathname.startsWith(href);
                 return (
                   <Link
-                    key={t.href}
+                    key={tab.href}
                     href={href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
@@ -92,7 +99,7 @@ export default function SalonLayout({ children }: { children: ReactNode }) {
                       active ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground",
                     )}
                   >
-                    {t.label}
+                    {t(tab.label)}
                   </Link>
                 );
               })}

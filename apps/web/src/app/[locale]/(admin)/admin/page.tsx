@@ -3,6 +3,7 @@
 import type { AdminSalon, AdminUser, PlatformStats } from "@reserivo/shared";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +12,8 @@ import { api } from "@/lib/api";
 
 /** Console home: how the platform is doing, and a way to find anyone in it. */
 export default function AdminOverviewPage() {
+  const t = useTranslations("admin");
+  const common = useTranslations("common");
   const [q, setQ] = useState("");
   const stats = useQuery({ queryKey: ["admin", "stats"], queryFn: () => api<PlatformStats>("/admin/stats") });
   const users = useQuery({
@@ -25,26 +28,26 @@ export default function AdminOverviewPage() {
   return (
     <div className="grid gap-6">
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
-        <Stat label="Users" value={stats.data?.users} />
-        <Stat label="Salons" value={stats.data?.salons} />
-        <Stat label="Designers" value={stats.data?.bookableMembers} />
-        <Stat label="Customers" value={stats.data?.customers} />
-        <Stat label="Appointments" value={stats.data?.appointments} />
-        <Stat label="Upcoming" value={stats.data?.upcomingAppointments} />
-        <Stat label="Booked / 7d" value={stats.data?.bookedLast7Days} />
+        <Stat label={t("stats.users")} value={stats.data?.users} />
+        <Stat label={t("stats.salons")} value={stats.data?.salons} />
+        <Stat label={t("stats.designers")} value={stats.data?.bookableMembers} />
+        <Stat label={t("stats.customers")} value={stats.data?.customers} />
+        <Stat label={t("stats.appointments")} value={stats.data?.appointments} />
+        <Stat label={t("stats.upcoming")} value={stats.data?.upcomingAppointments} />
+        <Stat label={t("stats.booked7d")} value={stats.data?.bookedLast7Days} />
       </section>
 
-      <Input placeholder="Search people by name or email, salons by name or link…" value={q} onChange={(e) => setQ(e.target.value)} />
+      <Input placeholder={t("search")} value={q} onChange={(e) => setQ(e.target.value)} />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>People</CardTitle>
-            <CardDescription>{q ? "Matching users" : "Newest signups"}</CardDescription>
+            <CardTitle>{t("people")}</CardTitle>
+            <CardDescription>{q ? t("matchingUsers") : t("newestSignups")}</CardDescription>
           </CardHeader>
           <CardContent>
-            {users.isPending && <p className="text-sm text-muted-foreground">Loading…</p>}
-            {users.data?.length === 0 && <p className="text-sm text-muted-foreground">No users match.</p>}
+            {users.isPending && <p className="text-sm text-muted-foreground">{common("loading")}</p>}
+            {users.data?.length === 0 && <p className="text-sm text-muted-foreground">{t("noUsers")}</p>}
             <ul className="divide-y">
               {users.data?.map((u) => (
                 <li key={u.id}>
@@ -52,12 +55,12 @@ export default function AdminOverviewPage() {
                     <span className="grid gap-0.5">
                       <span className="flex items-center gap-2 text-sm font-medium">
                         {u.name}
-                        {u.isSiteAdmin && <Badge variant="outline">Site admin</Badge>}
+                        {u.isSiteAdmin && <Badge variant="outline">{t("siteAdmin")}</Badge>}
                       </span>
                       <span className="text-xs text-muted-foreground">{u.email}</span>
                     </span>
                     <span className="shrink-0 text-xs text-muted-foreground">
-                      {u.salonCount} salon{u.salonCount === 1 ? "" : "s"}
+                      {t("salonCount", { count: u.salonCount })}
                     </span>
                   </Link>
                 </li>
@@ -68,12 +71,12 @@ export default function AdminOverviewPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Salons</CardTitle>
-            <CardDescription>{q ? "Matching salons" : "Newest salons"}</CardDescription>
+            <CardTitle>{t("salons")}</CardTitle>
+            <CardDescription>{q ? t("matchingSalons") : t("newestSalons")}</CardDescription>
           </CardHeader>
           <CardContent>
-            {salons.isPending && <p className="text-sm text-muted-foreground">Loading…</p>}
-            {salons.data?.length === 0 && <p className="text-sm text-muted-foreground">No salons match.</p>}
+            {salons.isPending && <p className="text-sm text-muted-foreground">{common("loading")}</p>}
+            {salons.data?.length === 0 && <p className="text-sm text-muted-foreground">{t("noSalons")}</p>}
             <ul className="divide-y">
               {salons.data?.map((s) => (
                 <li key={s.id}>
@@ -85,7 +88,7 @@ export default function AdminOverviewPage() {
                       </span>
                     </span>
                     <span className="shrink-0 text-xs text-muted-foreground">
-                      {s.memberCount} staff · {s.appointmentCount} appts
+                      {t("salonCounts", { staff: s.memberCount, appts: s.appointmentCount })}
                     </span>
                   </Link>
                 </li>

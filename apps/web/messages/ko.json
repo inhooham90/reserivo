@@ -7,7 +7,8 @@
     "loading": "불러오는 중…",
     "save": "저장",
     "cancel": "취소",
-    "language": "언어"
+    "language": "언어",
+    "somethingWrong": "문제가 발생했습니다"
   },
   "labels": {
     "role": {
@@ -29,5 +30,473 @@
       "MOBILE_PAY": "간편결제",
       "OTHER": "기타"
     }
+  },
+  "home": {
+    "signIn": "로그인",
+    "hero": {
+      "title": "살롱도, 디자이너도 모두 만족하는 온라인 예약.",
+      "subtitle": "디자이너마다 일정과 시술 메뉴를 따로 두고, 고객 연락처는 안전하게 지키며, 모든 것을 한곳에서 관리하세요.",
+      "cta": "시작하기",
+      "imageAlt": "테라코타 벽의 작은 살롱에서 디자이너가 고객의 머리를 자르는 모습"
+    },
+    "about": {
+      "title": "{product}란",
+      "body": "{product}는 미국의 헤어·네일 살롱을 위한 예약 소프트웨어입니다. 살롱이 가입해 디자이너와 시술, 영업시간을 등록하면 고객에게 공유할 수 있는 전용 예약 페이지 <url>reserivo.com/your-salon</url>이 생깁니다. 고객은 그 페이지에서 계정 없이 예약하고, 살롱은 하나의 캘린더로 하루를 관리합니다.",
+      "notASalon": "저희는 살롱에 소프트웨어를 판매합니다. 살롱이 아니며, 예약 금액에서 수수료를 떼지 않습니다."
+    },
+    "features": {
+      "page": {
+        "title": "살롱마다 하나의 페이지",
+        "body": "우리 디자이너, 우리 시술, 우리 가격과 영업시간을 명함에 인쇄할 수 있는 주소 하나에 담았습니다.",
+        "imageAlt": "흰 테이블에서 네일 아티스트가 고객의 손톱을 다듬는 모습"
+      },
+      "calendar": {
+        "title": "하나의 캘린더",
+        "body": "모든 자리를 한 화면에서 봅니다. 중복 예약은 생기기 전에 막고, 워크인 고객은 직접 추가합니다."
+      },
+      "clients": {
+        "title": "살롱에 남는 고객",
+        "body": "방문 기록, 메모, 태그는 살롱에 남고, 고객과는 서로 전화번호를 주고받지 않고도 메시지를 나눌 수 있습니다."
+      }
+    },
+    "reminders": {
+      "title": "예약 알림",
+      "body": "모든 예약은 즉시 이메일로 확인되고, 예약 전에 알림이 발송됩니다. 예약할 때 휴대전화 번호를 입력한 고객은 체크박스를 선택해 같은 알림을 문자 메시지로도 받을 수 있습니다. 예약 알림만 보내며, 광고는 절대 보내지 않고, 동의 없이는 보내지 않습니다. 동의 문구 원문을 포함한 전체 안내는 <link>reserivo.com/sms</link>에서 확인할 수 있습니다."
+    },
+    "operator": {
+      "title": "{product} 운영사",
+      "body": "{product}는 {legalName}({address})에서 운영합니다. 서비스, 계정 또는 받은 메시지에 관한 문의는 <email>{supportEmail}</email>로 이메일을 보내 주세요."
+    }
+  },
+  "footer": {
+    "terms": "이용약관",
+    "privacy": "개인정보처리방침",
+    "sms": "문자 알림",
+    "contact": "문의"
+  },
+  "storefront": {
+    "metaTitle": "{name} 예약 · {product}",
+    "chooseService": "시술을 선택하면 예약 가능한 시간을 볼 수 있습니다."
+  },
+  "booking": {
+    "steps": {
+      "label": "예약 진행 단계",
+      "service": "시술",
+      "time": "시간",
+      "details": "예약자 정보"
+    },
+    "settingUp": "이 살롱은 아직 메뉴를 준비하고 있습니다.",
+    "summary": {
+      "title": "예약 내역",
+      "service": "시술",
+      "with": "디자이너",
+      "when": "일시",
+      "chooseTime": "시간을 선택하세요",
+      "price": "가격",
+      "nothing": "아직 선택한 항목이 없습니다.",
+      "timezone": "시간은 {tz} 기준입니다.",
+      "cancellation": "{hours, plural, other {예약 #시간 전까지 온라인으로 무료 취소할 수 있습니다.}}",
+      "payAtSalon": "결제는 살롱에서 합니다."
+    },
+    "serviceWith": "{service} <muted>· {designer}</muted>",
+    "back": {
+      "allServices": "전체 시술",
+      "changeTime": "시간 변경"
+    },
+    "time": {
+      "pickDay": "날짜 선택",
+      "pickTime": "시간 선택",
+      "checking": "예약 가능한 시간을 확인하는 중",
+      "loadError": "예약 가능한 시간을 불러오지 못했습니다.",
+      "nothingOpen": "이 날은 예약 가능한 시간이 없습니다.",
+      "jumpTo": "{date}(으)로 이동"
+    },
+    "details": {
+      "title": "예약자 정보",
+      "bookingAs": "{email} 계정으로 예약합니다.",
+      "noAccount": "계정이 없어도 됩니다. 입력하신 정보는 예약 확인과 알림에만 사용합니다.",
+      "name": "이름",
+      "email": "이메일",
+      "phone": "전화번호 (선택)",
+      "notes": "디자이너에게 전할 말이 있나요? (선택)",
+      "submit": "예약 확정",
+      "submitting": "예약 중…"
+    },
+    "done": {
+      "title": "예약이 완료되었습니다",
+      "summary": "{salon} · {designer} 디자이너 · {service}",
+      "payAtSalon": "{price} · 결제는 살롱에서 합니다.",
+      "cancelUntil": "{time}까지 온라인으로 무료 취소할 수 있습니다.",
+      "seeAppointments": "내 예약 보기",
+      "createAccount": "같은 이메일로 <link>계정을 만들면</link> 이 예약을 온라인으로 관리하거나 취소할 수 있습니다."
+    }
+  },
+  "rating": {
+    "rated": "{max}점 만점에 {stars}점",
+    "ratedFrom": "고객 {count}명 평가, {max}점 만점에 {stars}점"
+  },
+  "auth": {
+    "email": "이메일",
+    "password": "비밀번호",
+    "login": {
+      "title": "로그인",
+      "description": "{product}에 다시 오신 것을 환영합니다.",
+      "submit": "로그인",
+      "submitting": "로그인 중…",
+      "forgot": "비밀번호를 잊으셨나요?",
+      "newHere": "처음이신가요? <link>계정 만들기</link>"
+    },
+    "register": {
+      "title": "계정 만들기",
+      "description": "몇 분이면 살롱을 설정할 수 있습니다.",
+      "name": "이름",
+      "submit": "계정 만들기",
+      "submitting": "만드는 중…",
+      "haveAccount": "이미 계정이 있으신가요? <link>로그인</link>"
+    },
+    "forgot": {
+      "title": "비밀번호 재설정",
+      "description": "새 비밀번호를 정할 수 있는 링크를 이메일로 보내 드립니다.",
+      "checkInbox": "받은편지함을 확인하세요.",
+      "sent": "해당 주소로 가입된 계정이 있다면 링크가 발송되었습니다. 링크는 한 번만 쓸 수 있으며 1시간 후 만료됩니다.",
+      "back": "로그인으로 돌아가기",
+      "submit": "링크 받기",
+      "submitting": "보내는 중…"
+    },
+    "reset": {
+      "title": "새 비밀번호 설정",
+      "description": "다른 기기에서 로그인된 세션도 모두 로그아웃됩니다.",
+      "missingToken": "링크에 토큰이 없습니다. 새 링크를 요청하세요.",
+      "sendAnother": "새 링크 보내기",
+      "newPassword": "새 비밀번호",
+      "submit": "비밀번호 설정",
+      "submitting": "저장 중…",
+      "expired": "링크가 만료되었나요? 다시 보내기"
+    },
+    "verify": {
+      "confirmed": "이메일이 확인되었습니다",
+      "failed": "링크가 작동하지 않았습니다",
+      "confirming": "이메일을 확인하는 중…",
+      "confirmedBody": "이 주소로 비회원 예약한 내역이 이제 계정에 연결되었습니다.",
+      "failedBody": "확인 링크는 한 번만 쓸 수 있으며 하루 후 만료됩니다.",
+      "oneMoment": "잠시만 기다려 주세요.",
+      "seeAppointments": "내 예약 보기",
+      "freshOne": "로그인하시면 새 링크를 보내 드릴게요. <link>로그인</link>"
+    }
+  },
+  "nav": {
+    "actingAs": "{name}(으)로 사용 중입니다. 모든 작업은 관리자 계정으로 기록됩니다.",
+    "stop": "종료",
+    "myAppointments": "내 예약",
+    "messages": "메시지",
+    "admin": "관리자",
+    "settings": "설정",
+    "signOut": "로그아웃",
+    "verify": {
+      "text": "이메일을 인증하면 비회원으로 한 예약을 확인하고 알림을 받을 수 있습니다.",
+      "resend": "링크 다시 보내기",
+      "sending": "보내는 중…",
+      "sent": "보냈습니다. 받은편지함을 확인하세요."
+    },
+    "salon": {
+      "schedule": "일정",
+      "customers": "고객",
+      "messages": "메시지",
+      "settings": "설정",
+      "bookingPage": "예약 페이지: <link>/{slug}</link> · {timezone}",
+      "switch": "살롱 전환",
+      "noAccess": "이 살롱에 접근할 권한이 없습니다."
+    },
+    "menu": {
+      "yourSalons": "내 살롱",
+      "setUp": "살롱 만들기"
+    }
+  },
+  "settings": {
+    "navLabel": "설정 메뉴",
+    "noDesigners": "아직 예약을 받는 사람이 없습니다. 팀 페이지에서 누군가에게 디자이너 역할을 주세요.",
+    "sections": {
+      "salon": {
+        "label": "살롱",
+        "hint": "이름, 시간대, 예약 규칙, 알림"
+      },
+      "team": {
+        "label": "팀",
+        "hint": "디자이너, 역할, 초대"
+      },
+      "services": {
+        "label": "시술",
+        "hint": "제공하는 시술과 가격"
+      },
+      "hours": {
+        "label": "영업시간",
+        "hint": "살롱 영업시간과 디자이너별 주간 일정"
+      },
+      "yourSalons": {
+        "label": "내 살롱",
+        "hint": "살롱 간 전환 또는 새 살롱 만들기"
+      }
+    },
+    "salon": {
+      "title": "살롱",
+      "linkStays": "예약 링크는 /{slug}로 유지됩니다.",
+      "name": "이름",
+      "timezone": "시간대",
+      "timezoneHint": "근무 시간은 이 시간대의 현지 시각 기준입니다.",
+      "policies": "예약 정책",
+      "policiesHint": "고객이 공개 예약 페이지에서 할 수 있는 것.",
+      "slotGrid": "예약 간격 (분)",
+      "leadTime": "최소 사전 예약 (분)",
+      "maxAdvance": "예약 가능 기간 (일)",
+      "cancelWindow": "무료 취소 가능 (시작 몇 시간 전까지)",
+      "reminders": "알림",
+      "remindersHint": "예약 전에 고객에게 알림을 보낼 시점입니다. 이메일로는 항상 보내고, 고객이 동의했고 플랫폼에서 문자가 켜져 있으면 문자로도 보냅니다.",
+      "reminderHours": "{hours, plural, other {#시간 전}}",
+      "reminderDays": "{days, plural, other {#일 전}}",
+      "noReminders": "알림을 보내지 않습니다.",
+      "save": "설정 저장",
+      "saving": "저장 중…",
+      "saved": "저장됨"
+    },
+    "roles": {
+      "managerHint": "팀, 살롱 영업시간, 설정, 고객 연락처",
+      "designerHint": "예약을 받습니다. 본인의 시술과 근무 시간이 예약 페이지에 표시됩니다",
+      "pickOne": "하나 이상 선택하세요."
+    },
+    "team": {
+      "members": "멤버",
+      "edit": "편집",
+      "close": "닫기",
+      "remove": "내보내기",
+      "confirmRemove": "{name}님을 살롱에서 내보낼까요?",
+      "removeFailed": "내보내지 못했습니다",
+      "displayName": "표시 이름",
+      "bio": "소개",
+      "roles": "역할",
+      "hoursSeeded": "근무 시간은 살롱 영업시간을 복사한 상태로 시작합니다.",
+      "save": "저장",
+      "saving": "저장 중…",
+      "inviteTitle": "초대하기",
+      "inviteHint": "이 이메일을 쓰는 계정으로 링크를 수락해야 합니다.",
+      "email": "이메일",
+      "invalidEmail": "올바른 이메일을 입력하세요",
+      "createInvite": "초대 링크 만들기",
+      "creating": "만드는 중…",
+      "share": "이 링크를 공유하세요. 한 번만 쓸 수 있으며 7일 후 만료됩니다.",
+      "copy": "링크 복사",
+      "copied": "복사됨",
+      "pending": "대기 중인 초대",
+      "revoke": "취소"
+    },
+    "services": {
+      "title": "시술",
+      "none": "아직 시술이 없습니다. 오른쪽에서 첫 시술을 추가하세요.",
+      "hidden": "숨김",
+      "doubleBooking": "중복 예약",
+      "buffer": "+ 정리 {duration}",
+      "edit": "편집",
+      "delete": "삭제",
+      "confirmDelete": "“{name}”을(를) 삭제할까요?",
+      "add": "시술 추가",
+      "editTitle": "시술 편집",
+      "newTitle": "새 시술",
+      "formHint": "소요 시간은 5분 단위입니다. 정리 시간은 시술 후 준비 시간입니다. {min}분을 넘는 시술은 중복 예약을 허용할 수 있습니다.",
+      "name": "이름",
+      "category": "카테고리",
+      "categoryPlaceholder": "커트, 염색, 네일…",
+      "price": "가격 ($)",
+      "minutes": "소요 시간 (분)",
+      "bufferLabel": "정리 시간",
+      "description": "설명",
+      "bookable": "공개 예약 페이지에서 예약 가능",
+      "allowDouble": "중복 예약을 허용할까요?",
+      "allowDoubleHint": "염색이나 펌처럼 중간에 대기 시간이 있는 시술용입니다. 이 시술과 겹쳐 다른 예약을 받을 수 있으며, 동시에 최대 두 명까지입니다.",
+      "saveChanges": "변경 사항 저장",
+      "addService": "시술 추가",
+      "saving": "저장 중…"
+    },
+    "hours": {
+      "salonTitle": "살롱 영업시간",
+      "salonHint": "매장 운영 시간이며 {timezone} 기준입니다. 예약을 받는 모든 사람은 이 시간 안에서 일정을 정합니다.",
+      "opening": "영업시간",
+      "openingHint": "점심 휴무가 있다면 두 번째 시간대를 추가하세요.",
+      "closures": "휴무 및 특별 영업일",
+      "closuresHint": "공휴일, 조기 마감, 하루만 여는 날. 모두에게 적용됩니다.",
+      "designerTitle": "디자이너 근무 시간",
+      "managerDesigner": "내 근무 시간과 팀의 근무 시간입니다. 모든 일정은 살롱 영업시간 안에 있어야 합니다.",
+      "managerOnly": "예약을 받지 않는 계정입니다. 여기에서 디자이너별 일정을 정하세요.",
+      "designerOnly": "내 근무 시간입니다. 살롱 영업시간 안에 있어야 합니다.",
+      "week": "{name}님의 주간 일정",
+      "weekly": "주간 근무 시간",
+      "weekHint": "요일마다 아래에 살롱 영업시간이 한도로 표시됩니다.",
+      "daysOff": "휴무일 및 변경",
+      "daysOffHint": "특정 날짜의 주간 근무 시간을 살롱 영업시간 안에서 바꿉니다.",
+      "salonClosed": "살롱 휴무",
+      "off": "휴무",
+      "remove": "삭제",
+      "addWindow": "시간대 추가",
+      "addHours": "근무 시간 추가",
+      "save": "저장",
+      "saving": "저장 중…",
+      "outside": "{day}: 살롱 영업시간({limits})을 벗어났습니다.",
+      "closedLower": "휴무",
+      "nothingUpcoming": "예정된 항목이 없습니다.",
+      "closed": "휴무",
+      "date": "날짜",
+      "type": "유형",
+      "typeOff": "휴무 / 쉬는 날",
+      "typeCustom": "시간 지정",
+      "note": "메모",
+      "optional": "선택",
+      "add": "추가",
+      "adding": "추가 중…"
+    },
+    "yourSalons": {
+      "loadFailed": "살롱 목록을 불러오지 못했습니다",
+      "checkConnection": "연결을 확인하고 다시 시도하세요.",
+      "retry": "다시 시도",
+      "setUpTitle": "살롱 만들기",
+      "setUpHint": "예약 페이지, 팀, 영업시간이 모두 여기서 시작됩니다. 나중에 언제든 바꿀 수 있습니다.",
+      "justBooking": "예약만 하러 오셨나요? 예약한 내역은 모두 <link>내 예약</link>에 있습니다.",
+      "title": "내 살롱",
+      "hint": "살롱을 열면 해당 일정으로 이동합니다.",
+      "settings": "설정",
+      "open": "열기",
+      "createAnother": "살롱 하나 더 만들기"
+    },
+    "createSalon": {
+      "title": "살롱 만들기",
+      "description": "만든 사람이 첫 번째 매니저가 됩니다.",
+      "name": "이름",
+      "url": "예약 URL",
+      "timezone": "시간대",
+      "takesAppointments": "나도 직접 예약을 받습니다",
+      "takesHint": "1인 살롱이나 원장 겸 디자이너용입니다. 나중에 설정 → 팀에서 바꿀 수 있습니다.",
+      "create": "살롱 만들기",
+      "creating": "만드는 중…"
+    }
+  },
+  "admin": {
+    "brand": "관리자",
+    "overview": "개요",
+    "audit": "감사 로그",
+    "backToApp": "앱으로 돌아가기",
+    "siteAdmin": "사이트 관리자",
+    "stats": {
+      "users": "사용자",
+      "salons": "살롱",
+      "designers": "디자이너",
+      "customers": "고객",
+      "appointments": "예약",
+      "upcoming": "예정",
+      "booked7d": "최근 7일 예약",
+      "staff": "직원",
+      "services": "시술"
+    },
+    "search": "사람은 이름이나 이메일로, 살롱은 이름이나 링크로 검색…",
+    "people": "사용자",
+    "matchingUsers": "검색된 사용자",
+    "newestSignups": "최근 가입자",
+    "noUsers": "일치하는 사용자가 없습니다.",
+    "salonCount": "{count, plural, other {살롱 #곳}}",
+    "salons": "살롱",
+    "matchingSalons": "검색된 살롱",
+    "newestSalons": "최근 생성된 살롱",
+    "noSalons": "일치하는 살롱이 없습니다.",
+    "salonCounts": "직원 {staff}명 · 예약 {appts}건",
+    "status": {
+      "INVITED": "초대됨",
+      "ACTIVE": "활성",
+      "REMOVED": "제외됨"
+    },
+    "salon": {
+      "back": "전체 살롱",
+      "notFound": "해당 살롱이 없습니다.",
+      "created": "{date} 생성",
+      "bookingPage": "예약 페이지",
+      "openWorkspace": "작업 공간 열기",
+      "policies": "예약 간격 {slot}분 · 최소 {lead}분 전 예약 · {days}일 앞까지 예약 · 시작 {hours}시간 전까지 무료 취소.",
+      "team": "팀",
+      "teamHint": "역할과 권한",
+      "seeAudit": "이 살롱의 감사 로그 보기"
+    },
+    "user": {
+      "back": "전체 사용자",
+      "notFound": "해당 사용자가 없습니다.",
+      "joined": "{date} 가입",
+      "actAs": "{name}(으)로 사용",
+      "confirm": "<b>{name}</b>님으로 {product}를 사용하며, 그 사람이 보는 화면을 그대로 보게 됩니다. 모든 작업은 내 계정으로 감사 로그에 기록됩니다. 내 세션은 그대로 유지되니, 돌아오려면 빨간 배너의 종료를 누르세요.",
+      "switching": "전환 중…",
+      "confirmYes": "네, {name}(으)로 사용합니다",
+      "cannotAdmins": "사이트 관리자끼리는 서로의 계정으로 사용할 수 없습니다.",
+      "isYou": "본인 계정입니다.",
+      "worksAt": "근무하는 살롱",
+      "noMemberships": "소속된 살롱이 없습니다.",
+      "memberships": "살롱 소속",
+      "asName": "{name}(으)로 활동",
+      "booksAt": "예약하는 살롱",
+      "noClients": "고객 기록이 없습니다.",
+      "clientRecords": "고객 기록이 있는 살롱",
+      "appointments": "{count, plural, other {예약 #건}}"
+    },
+    "log": {
+      "title": "감사 로그",
+      "everyChange": "모든 변경 사항, 최신순.",
+      "filtered": "한 살롱으로 필터링됨.",
+      "showAll": "전체 보기",
+      "entity": "대상",
+      "entityPlaceholder": "salons, appointments…",
+      "impersonatedOnly": "다른 사용자로 사용한 기록만",
+      "nothing": "아직 기록이 없습니다.",
+      "when": "일시",
+      "who": "사용자",
+      "action": "작업",
+      "where": "살롱",
+      "actingAs": "{name}(으)로 사용 중",
+      "payload": "데이터",
+      "loadMore": "더 보기",
+      "end": "로그의 끝입니다.",
+      "shown": "{count}건 표시"
+    }
+  },
+  "unsubscribe": {
+    "metaTitle": "수신 거부 · {product}",
+    "metaDescription": "{product} 살롱에서 받을 이메일을 선택하세요.",
+    "oneMoment": "잠시만 기다려 주세요…",
+    "expiredTitle": "만료된 링크입니다",
+    "expiredBody": "이미 사용된 링크이거나 살롱에 더 이상 기록이 없을 수 있습니다. 살롱에서 받은 이메일에 회신하면 살롱에 직접 연락할 수 있습니다.",
+    "title": {
+      "NONE": "{salon}의 수신 목록에 그대로 있습니다",
+      "SALON": "{salon}에서 더 이상 홍보 이메일을 보내지 않습니다",
+      "MARKETING": "{product}의 어떤 살롱도 홍보 이메일을 보내지 않습니다",
+      "ALL": "{product}에서 어떤 이메일도 보내지 않습니다"
+    },
+    "summary": {
+      "NONE": "{salon}에서 다시 혜택과 소식을 이메일로 보낼 수 있습니다. 중단할 항목이 있다면 선택하세요.",
+      "SALON": "처리되었습니다. 더 누르실 필요는 없습니다. 이 살롱 외에도 중단하려면 아래에서 선택하세요.",
+      "MARKETING": "예약 확인과 알림은 계속 받습니다. 홍보가 아니라 예약의 일부이기 때문입니다.",
+      "ALL": "예약한 일정의 확인과 알림도 포함됩니다. 직접 요청한 로그인 및 비밀번호 재설정 이메일은 계속 받습니다."
+    },
+    "legend": "무엇을 중단할까요?",
+    "recommended": "권장",
+    "option": {
+      "SALON": {
+        "label": "{salon}의 홍보 이메일",
+        "hint": "예약하는 다른 살롱은 계속 이메일을 보낼 수 있습니다. 예약 확인과 알림은 계속 받습니다."
+      },
+      "MARKETING": {
+        "label": "{product} 모든 살롱의 홍보 이메일",
+        "hint": "앞으로 예약하게 될 살롱도 포함됩니다. 예약 확인과 알림은 계속 받습니다."
+      },
+      "ALL": {
+        "label": "{product}의 모든 이메일",
+        "hint": "예약 확인, 변경, 알림 이메일도 중단됩니다. 직접 요청한 로그인 및 비밀번호 재설정 이메일은 계속 받습니다. 문자 알림은 별도이며, 문자에 STOP이라고 답장하면 중단됩니다."
+      }
+    },
+    "save": "선택 저장",
+    "unsubscribe": "수신 거부",
+    "saving": "저장 중…",
+    "undo": "취소하고 계속 받기",
+    "saveFailed": "저장하지 못했습니다. 다시 시도하세요."
   }
 }

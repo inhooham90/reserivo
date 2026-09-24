@@ -7,7 +7,8 @@
     "loading": "Loading…",
     "save": "Save",
     "cancel": "Cancel",
-    "language": "Language"
+    "language": "Language",
+    "somethingWrong": "Something went wrong"
   },
   "labels": {
     "role": {
@@ -29,5 +30,473 @@
       "MOBILE_PAY": "Mobile pay",
       "OTHER": "Other"
     }
+  },
+  "home": {
+    "signIn": "Sign in",
+    "hero": {
+      "title": "Online booking your salon and your stylists will both love.",
+      "subtitle": "Give every designer their own schedule and services, keep client contact details private, and manage it all from one place.",
+      "cta": "Get started",
+      "imageAlt": "A stylist cutting a client's hair in a small salon with terracotta walls"
+    },
+    "about": {
+      "title": "What {product} is",
+      "body": "{product} is appointment booking software for hair and nail salons in the United States. A salon signs up, adds its stylists, services and opening hours, and gets a booking page of its own at <url>reserivo.com/your-salon</url> to share with clients. Clients book on that page (no account needed) and the salon manages the day from one calendar.",
+      "notASalon": "We sell software to salons. We are not a salon, and we do not take a cut of a booking."
+    },
+    "features": {
+      "page": {
+        "title": "A page per salon",
+        "body": "Your stylists, your services, your prices and your hours, at an address you can print on a card.",
+        "imageAlt": "A nail technician filing a client's nails at a white table"
+      },
+      "calendar": {
+        "title": "One calendar",
+        "body": "Every chair on one screen, with double bookings caught before they happen and walk-ins added by hand."
+      },
+      "clients": {
+        "title": "Clients you keep",
+        "body": "Visit history, notes and tags stay with the salon, and clients message you without either side swapping phone numbers."
+      }
+    },
+    "reminders": {
+      "title": "Appointment reminders",
+      "body": "Every booking gets a confirmation by email straight away, and a reminder before the appointment. A client who gives a mobile number while booking can also tick a box to get that reminder as a text message: appointment reminders only, never marketing, and never without asking. The whole program, including the exact wording of the opt-in, is set out at <link>reserivo.com/sms</link>."
+    },
+    "operator": {
+      "title": "Who operates {product}",
+      "body": "{product} is operated by {legalName}, {address}. Email <email>{supportEmail}</email> with a question about the service, an account or a message you received."
+    }
+  },
+  "footer": {
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "sms": "Text reminders",
+    "contact": "Contact"
+  },
+  "storefront": {
+    "metaTitle": "Book at {name} · {product}",
+    "chooseService": "Choose a service to see available times."
+  },
+  "booking": {
+    "steps": {
+      "label": "Booking progress",
+      "service": "Service",
+      "time": "Time",
+      "details": "Your details"
+    },
+    "settingUp": "This salon is still setting up its menu.",
+    "summary": {
+      "title": "Your booking",
+      "service": "Service",
+      "with": "With",
+      "when": "When",
+      "chooseTime": "Choose a time",
+      "price": "Price",
+      "nothing": "Nothing chosen yet.",
+      "timezone": "Times shown in {tz}.",
+      "cancellation": "{hours, plural, one {Free cancellation online up to # hour before your appointment.} other {Free cancellation online up to # hours before your appointment.}}",
+      "payAtSalon": "Pay at the salon."
+    },
+    "serviceWith": "{service} <muted>with {designer}</muted>",
+    "back": {
+      "allServices": "All services",
+      "changeTime": "Change time"
+    },
+    "time": {
+      "pickDay": "Pick a day",
+      "pickTime": "Pick a time",
+      "checking": "Checking the calendar",
+      "loadError": "Could not load availability.",
+      "nothingOpen": "Nothing open on this day.",
+      "jumpTo": "Jump to {date}"
+    },
+    "details": {
+      "title": "Your details",
+      "bookingAs": "Booking as {email}.",
+      "noAccount": "No account needed. We only use this to confirm and remind you.",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone (optional)",
+      "notes": "Anything the stylist should know? (optional)",
+      "submit": "Confirm booking",
+      "submitting": "Booking…"
+    },
+    "done": {
+      "title": "You’re booked",
+      "summary": "{service} with {designer} at {salon}",
+      "payAtSalon": "{price} · pay at the salon.",
+      "cancelUntil": "Cancel free online until {time}.",
+      "seeAppointments": "See my appointments",
+      "createAccount": "<link>Create an account</link> with the same email to manage or cancel this booking online."
+    }
+  },
+  "rating": {
+    "rated": "Rated {stars} out of {max}",
+    "ratedFrom": "Rated {stars} out of {max} from {count, plural, one {# client} other {# clients}}"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "login": {
+      "title": "Sign in",
+      "description": "Welcome back to {product}.",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "forgot": "Forgot your password?",
+      "newHere": "New here? <link>Create an account</link>"
+    },
+    "register": {
+      "title": "Create your account",
+      "description": "Set up your salon in a couple of minutes.",
+      "name": "Your name",
+      "submit": "Create account",
+      "submitting": "Creating…",
+      "haveAccount": "Already have an account? <link>Sign in</link>"
+    },
+    "forgot": {
+      "title": "Reset your password",
+      "description": "We’ll email you a link to choose a new one.",
+      "checkInbox": "Check your inbox.",
+      "sent": "If there’s an account for that address, a link is on its way. It works once and expires in an hour.",
+      "back": "Back to sign in",
+      "submit": "Email me a link",
+      "submitting": "Sending…"
+    },
+    "reset": {
+      "title": "Choose a new password",
+      "description": "This also signs out anywhere else you’re logged in.",
+      "missingToken": "This link is missing its token. Request a new one.",
+      "sendAnother": "Send another link",
+      "newPassword": "New password",
+      "submit": "Set new password",
+      "submitting": "Saving…",
+      "expired": "Link expired? Send another"
+    },
+    "verify": {
+      "confirmed": "Email confirmed",
+      "failed": "That link didn’t work",
+      "confirming": "Confirming your email…",
+      "confirmedBody": "Any bookings you made as a guest with this address are now on your account.",
+      "failedBody": "Confirmation links work once and expire after a day.",
+      "oneMoment": "One moment.",
+      "seeAppointments": "See my appointments",
+      "freshOne": "Sign in and we’ll offer to send a fresh one. <link>Sign in</link>"
+    }
+  },
+  "nav": {
+    "actingAs": "Acting as {name}. Every action is recorded against your admin account.",
+    "stop": "Stop",
+    "myAppointments": "My appointments",
+    "messages": "Messages",
+    "admin": "Admin",
+    "settings": "Settings",
+    "signOut": "Sign out",
+    "verify": {
+      "text": "Confirm your email to see bookings you made as a guest and to get reminders.",
+      "resend": "Resend the link",
+      "sending": "Sending…",
+      "sent": "Sent. Check your inbox."
+    },
+    "salon": {
+      "schedule": "Schedule",
+      "customers": "Customers",
+      "messages": "Messages",
+      "settings": "Settings",
+      "bookingPage": "Booking page: <link>/{slug}</link> · {timezone}",
+      "switch": "Switch salon",
+      "noAccess": "You do not have access to this salon."
+    },
+    "menu": {
+      "yourSalons": "Your salons",
+      "setUp": "Set up a salon"
+    }
+  },
+  "settings": {
+    "navLabel": "Settings sections",
+    "noDesigners": "Nobody takes appointments yet. Give someone the Designer role on the Team page.",
+    "sections": {
+      "salon": {
+        "label": "Salon",
+        "hint": "Name, time zone, booking rules, reminders"
+      },
+      "team": {
+        "label": "Team",
+        "hint": "Designers, roles, invitations"
+      },
+      "services": {
+        "label": "Services",
+        "hint": "What you offer and what it costs"
+      },
+      "hours": {
+        "label": "Hours",
+        "hint": "Opening hours and each designer's week"
+      },
+      "yourSalons": {
+        "label": "Your salons",
+        "hint": "Switch between them, or start another"
+      }
+    },
+    "salon": {
+      "title": "Salon",
+      "linkStays": "Your booking link stays /{slug}.",
+      "name": "Name",
+      "timezone": "Time zone",
+      "timezoneHint": "Working hours are wall-clock times in this zone.",
+      "policies": "Booking policies",
+      "policiesHint": "What customers may do on the public page.",
+      "slotGrid": "Slot grid (min)",
+      "leadTime": "Minimum notice (min)",
+      "maxAdvance": "Book up to (days ahead)",
+      "cancelWindow": "Free cancel until (hours before)",
+      "reminders": "Reminders",
+      "remindersHint": "When to remind a customer before their appointment. Always by email; also by text once that customer has agreed to one and SMS is switched on for the platform.",
+      "reminderHours": "{hours, plural, one {# hour before} other {# hours before}}",
+      "reminderDays": "{days, plural, one {# day before} other {# days before}}",
+      "noReminders": "No reminders will be sent.",
+      "save": "Save settings",
+      "saving": "Saving…",
+      "saved": "Saved"
+    },
+    "roles": {
+      "managerHint": "Team, salon hours, settings, customer contact details",
+      "designerHint": "Takes appointments: own services and hours, shown on the booking page",
+      "pickOne": "Pick at least one."
+    },
+    "team": {
+      "members": "Members",
+      "edit": "Edit",
+      "close": "Close",
+      "remove": "Remove",
+      "confirmRemove": "Remove {name} from the salon?",
+      "removeFailed": "Could not remove",
+      "displayName": "Display name",
+      "bio": "Bio",
+      "roles": "Roles",
+      "hoursSeeded": "Their hours will start as a copy of the salon hours.",
+      "save": "Save",
+      "saving": "Saving…",
+      "inviteTitle": "Invite someone",
+      "inviteHint": "They accept the link with an account that uses this email.",
+      "email": "Email",
+      "invalidEmail": "Enter a valid email",
+      "createInvite": "Create invite link",
+      "creating": "Creating…",
+      "share": "Share this link. It works once and expires in 7 days.",
+      "copy": "Copy link",
+      "copied": "Copied",
+      "pending": "Pending invites",
+      "revoke": "Revoke"
+    },
+    "services": {
+      "title": "Services",
+      "none": "No services yet. Add the first one on the right.",
+      "hidden": "Hidden",
+      "doubleBooking": "Double booking",
+      "buffer": "+ {duration} buffer",
+      "edit": "Edit",
+      "delete": "Delete",
+      "confirmDelete": "Delete “{name}”?",
+      "add": "Add a service",
+      "editTitle": "Edit service",
+      "newTitle": "New service",
+      "formHint": "Durations in 5-minute steps. Buffer is cleanup time after. Over {min} minutes you can allow double booking.",
+      "name": "Name",
+      "category": "Category",
+      "categoryPlaceholder": "Cut, Color, Nails…",
+      "price": "Price ($)",
+      "minutes": "Minutes",
+      "bufferLabel": "Buffer",
+      "description": "Description",
+      "bookable": "Bookable on the public page",
+      "allowDouble": "Allow double booking?",
+      "allowDoubleHint": "For services with waiting time in them, like colour or a perm. Someone else can be booked over this one, up to two clients at a time.",
+      "saveChanges": "Save changes",
+      "addService": "Add service",
+      "saving": "Saving…"
+    },
+    "hours": {
+      "salonTitle": "Salon hours",
+      "salonHint": "When the shop is open, in {timezone}. Everyone who takes appointments schedules inside these.",
+      "opening": "Opening hours",
+      "openingHint": "Add a second window for a lunch closure.",
+      "closures": "Closures & special days",
+      "closuresHint": "Holidays, early closes, one-off openings. Applies to everyone.",
+      "designerTitle": "Designer hours",
+      "managerDesigner": "Your hours and your team’s. Each schedule must fit inside the salon hours.",
+      "managerOnly": "You don’t take appointments. Set each designer’s schedule here.",
+      "designerOnly": "Your working hours. They must fit inside the salon hours.",
+      "week": "{name}’s week",
+      "weekly": "Weekly hours",
+      "weekHint": "Salon hours are shown under each day as the limit.",
+      "daysOff": "Days off & changes",
+      "daysOffHint": "Overrides the weekly hours for one date, within the salon’s hours.",
+      "salonClosed": "Salon closed",
+      "off": "Off",
+      "remove": "Remove",
+      "addWindow": "Add window",
+      "addHours": "Add hours",
+      "save": "Save",
+      "saving": "Saving…",
+      "outside": "{day}: outside salon hours ({limits}).",
+      "closedLower": "closed",
+      "nothingUpcoming": "Nothing upcoming.",
+      "closed": "Closed",
+      "date": "Date",
+      "type": "Type",
+      "typeOff": "Closed / day off",
+      "typeCustom": "Custom hours",
+      "note": "Note",
+      "optional": "Optional",
+      "add": "Add",
+      "adding": "Adding…"
+    },
+    "yourSalons": {
+      "loadFailed": "Couldn’t load your salons",
+      "checkConnection": "Check your connection and try again.",
+      "retry": "Retry",
+      "setUpTitle": "Set up your salon",
+      "setUpHint": "Your booking page, your team and your hours all hang off this. You can change any of it later.",
+      "justBooking": "Just here to book an appointment? <link>Your appointments</link> has everything you have booked.",
+      "title": "Your salons",
+      "hint": "Opening one takes you to its schedule.",
+      "settings": "Settings",
+      "open": "Open",
+      "createAnother": "Create another salon"
+    },
+    "createSalon": {
+      "title": "Create a salon",
+      "description": "You become its first manager.",
+      "name": "Name",
+      "url": "Booking URL",
+      "timezone": "Time zone",
+      "takesAppointments": "I also take appointments myself",
+      "takesHint": "Solo operators and owner-stylists. You can change this later under Settings → Team.",
+      "create": "Create salon",
+      "creating": "Creating…"
+    }
+  },
+  "admin": {
+    "brand": "admin",
+    "overview": "Overview",
+    "audit": "Audit log",
+    "backToApp": "Back to app",
+    "siteAdmin": "Site admin",
+    "stats": {
+      "users": "Users",
+      "salons": "Salons",
+      "designers": "Designers",
+      "customers": "Customers",
+      "appointments": "Appointments",
+      "upcoming": "Upcoming",
+      "booked7d": "Booked / 7d",
+      "staff": "Staff",
+      "services": "Services"
+    },
+    "search": "Search people by name or email, salons by name or link…",
+    "people": "People",
+    "matchingUsers": "Matching users",
+    "newestSignups": "Newest signups",
+    "noUsers": "No users match.",
+    "salonCount": "{count, plural, one {# salon} other {# salons}}",
+    "salons": "Salons",
+    "matchingSalons": "Matching salons",
+    "newestSalons": "Newest salons",
+    "noSalons": "No salons match.",
+    "salonCounts": "{staff} staff · {appts} appts",
+    "status": {
+      "INVITED": "invited",
+      "ACTIVE": "active",
+      "REMOVED": "removed"
+    },
+    "salon": {
+      "back": "All salons",
+      "notFound": "No such salon.",
+      "created": "created {date}",
+      "bookingPage": "Booking page",
+      "openWorkspace": "Open workspace",
+      "policies": "Slots every {slot} min · {lead} min notice · books {days} days ahead · free cancellation until {hours}h before.",
+      "team": "Team",
+      "teamHint": "Roles and access",
+      "seeAudit": "See this salon’s audit log"
+    },
+    "user": {
+      "back": "All users",
+      "notFound": "No such user.",
+      "joined": "joined {date}",
+      "actAs": "Act as {name}",
+      "confirm": "You will use {product} as <b>{name}</b> and see exactly what they see. Everything you do is written to the audit log under your own account. Your session stays underneath: press Stop in the red banner to come back.",
+      "switching": "Switching…",
+      "confirmYes": "Yes, act as {name}",
+      "cannotAdmins": "Site admins cannot act as one another.",
+      "isYou": "This is you.",
+      "worksAt": "Works at",
+      "noMemberships": "Not a member of any salon.",
+      "memberships": "Salon memberships",
+      "asName": "as {name}",
+      "booksAt": "Books at",
+      "noClients": "No client records.",
+      "clientRecords": "Salons holding a client record",
+      "appointments": "{count, plural, one {# appointment} other {# appointments}}"
+    },
+    "log": {
+      "title": "Audit log",
+      "everyChange": "Every change, newest first.",
+      "filtered": "Filtered to one salon.",
+      "showAll": "Show all",
+      "entity": "Entity",
+      "entityPlaceholder": "salons, appointments…",
+      "impersonatedOnly": "Acting as someone else only",
+      "nothing": "Nothing recorded yet.",
+      "when": "When",
+      "who": "Who",
+      "action": "Action",
+      "where": "Where",
+      "actingAs": "acting as {name}",
+      "payload": "payload",
+      "loadMore": "Load more",
+      "end": "End of the log.",
+      "shown": "{count} shown"
+    }
+  },
+  "unsubscribe": {
+    "metaTitle": "Unsubscribe · {product}",
+    "metaDescription": "Choose which emails you get from salons on {product}.",
+    "oneMoment": "One moment…",
+    "expiredTitle": "That link has expired",
+    "expiredBody": "It may already have been used, or the salon may no longer hold a record for it. Replying to any email from the salon will reach them directly.",
+    "title": {
+      "NONE": "You’re still on {salon}’s list",
+      "SALON": "{salon} won’t send you promotions again",
+      "MARKETING": "No salon on {product} will send you promotions",
+      "ALL": "{product} won’t email you at all"
+    },
+    "summary": {
+      "NONE": "{salon} may email you about offers and news again. Pick what should stop, if anything.",
+      "SALON": "Done, no further click needed. If you’d rather stop more than this one salon, choose below.",
+      "MARKETING": "Booking confirmations and reminders still arrive, because they are part of a booking, not marketing.",
+      "ALL": "That includes confirmations and reminders for appointments you book. Sign-in and password-reset emails you ask for still arrive."
+    },
+    "legend": "What should stop?",
+    "recommended": "Recommended",
+    "option": {
+      "SALON": {
+        "label": "Promotions from {salon}",
+        "hint": "Other salons you book with can still email you. Booking confirmations and reminders still arrive."
+      },
+      "MARKETING": {
+        "label": "Promotions from every salon on {product}",
+        "hint": "Includes salons you book with in the future. Booking confirmations and reminders still arrive."
+      },
+      "ALL": {
+        "label": "Every email from {product}",
+        "hint": "Also stops booking confirmations, changes and reminders. Sign-in and password-reset emails you ask for still arrive. Text reminders are separate: reply STOP to one."
+      }
+    },
+    "save": "Save my choice",
+    "unsubscribe": "Unsubscribe",
+    "saving": "Saving…",
+    "undo": "Undo: keep emailing me",
+    "saveFailed": "That didn’t save. Try again."
   }
 }

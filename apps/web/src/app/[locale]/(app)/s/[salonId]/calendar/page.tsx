@@ -284,6 +284,11 @@ export default function CalendarPage() {
           <Input type="date" className="w-40" value={date} onChange={(e) => e.target.value && setDate(e.target.value)} />
           <span className="text-sm text-muted-foreground">{f.localDate(date)}</span>
         </div>
+        {!draft && !selected && columns.length > 0 && (
+          <p className="text-sm text-muted-foreground">
+            {appts.data?.length ? "Select an appointment for details, or click an empty time to book." : "Click an empty time to book the first appointment."}
+          </p>
+        )}
         <div className="flex items-center gap-3">
           <label className="flex items-center gap-2 text-sm text-muted-foreground">
             <input type="checkbox" checked={showCancelled} onChange={(e) => setShowCancelled(e.target.checked)} />
@@ -299,7 +304,9 @@ export default function CalendarPage() {
         <p className="text-sm text-muted-foreground">Nobody takes appointments yet — give someone the Designer role from the Team tab.</p>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
+      {/* The side column exists only while something is open in it, so an idle
+          schedule gets the full width instead of a 360px strip holding a hint. */}
+      <div className={cn("grid gap-4", (draft || selected) && "lg:grid-cols-[1fr_360px]")}>
         <div className="overflow-x-auto rounded-xl border bg-card">
           <div className="grid min-w-[640px]" style={{ gridTemplateColumns: `3.5rem repeat(${columns.length}, minmax(140px, 1fr))` }}>
             <div className="sticky top-0 z-10 border-b bg-card" />
@@ -431,7 +438,7 @@ export default function CalendarPage() {
           </div>
         </div>
 
-        <aside className="self-start">
+        <aside className="self-start lg:sticky lg:top-4">
           {draft && (
             <NewAppointmentForm
               draft={draft}
@@ -463,11 +470,6 @@ export default function CalendarPage() {
               }}
               onClose={() => setSelected(null)}
             />
-          )}
-          {!draft && !selected && columns.length > 0 && (
-            <p className="text-sm text-muted-foreground">
-              {appts.data?.length ? "Select an appointment for details, or click an empty time to book." : "Click an empty time to book the first appointment."}
-            </p>
           )}
         </aside>
       </div>
