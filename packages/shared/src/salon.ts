@@ -12,6 +12,7 @@ import { salonRolesSchema } from './roles';
  * switching to a prefix for every language stays a one-line change.
  */
 const RESERVED_SLUGS = new Set([
+  'accessibility',
   'admin',
   'api',
   'appointments',

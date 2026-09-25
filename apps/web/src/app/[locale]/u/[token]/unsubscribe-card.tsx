@@ -52,7 +52,7 @@ export function UnsubscribeCard({ token }: { token: string }) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="font-heading text-2xl">{t("expiredTitle")}</CardTitle>
+          <CardTitle role="heading" aria-level={1} className="font-heading text-2xl">{t("expiredTitle")}</CardTitle>
           <CardDescription>{t("expiredBody")}</CardDescription>
         </CardHeader>
       </Card>
@@ -69,7 +69,7 @@ export function UnsubscribeCard({ token }: { token: string }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-heading text-2xl">{t(`title.${state.scope}`, vars)}</CardTitle>
+        <CardTitle role="heading" aria-level={1} className="font-heading text-2xl">{t(`title.${state.scope}`, vars)}</CardTitle>
         <CardDescription>{t(`summary.${state.scope}`, vars)}</CardDescription>
       </CardHeader>
       <CardContent>

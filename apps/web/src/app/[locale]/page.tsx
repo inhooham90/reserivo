@@ -34,7 +34,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         </Button>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-6">
+      <main id="main" tabIndex={-1} className="mx-auto w-full max-w-6xl flex-1 px-6 outline-none">
         {/* Hero: copy left, photograph right. Stacks with the image second on phones. */}
         <section className="grid items-center gap-10 pt-8 pb-16 lg:grid-cols-12 lg:gap-12 lg:pt-12 lg:pb-24">
           <div className="grid gap-6 animate-in fade-in slide-in-from-bottom-3 duration-700 lg:col-span-6">

@@ -281,7 +281,7 @@ export default function CalendarPage() {
           <Button size="sm" variant="outline" aria-label="Next day" onClick={() => setDate((d) => addDays(d, 1))}>
             <span aria-hidden="true">→</span>
           </Button>
-          <Input type="date" className="w-40" value={date} onChange={(e) => e.target.value && setDate(e.target.value)} />
+          <Input type="date" className="w-40" aria-label="Date" value={date} onChange={(e) => e.target.value && setDate(e.target.value)} />
           <span className="text-sm text-muted-foreground">{f.localDate(date)}</span>
         </div>
         {!draft && !selected && columns.length > 0 && (

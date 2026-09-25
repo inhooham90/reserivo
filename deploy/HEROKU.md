@@ -1,4 +1,34 @@
-# Deploying Reserivo to Heroku
+# Deploying Morrri to Heroku
+
+> **Renaming to morrri.com (September 2026): in progress.** The product was
+> called Reserivo, and everything below still describes the live reserivo.com
+> setup. The Heroku apps, database and internal names keep `reserivo`; only
+> what users see changes. In order:
+>
+> 1. At the registrar for morrri.com, and on Heroku:
+>    `heroku domains:add morrri.com -a reserivo-web`, the same for `www.morrri.com`,
+>    and `heroku domains:add api.morrri.com -a reserivo-api`. Point each DNS
+>    record at the target Heroku prints, wait for ACM to issue certificates,
+>    then add the three records to `deploy/check-dns.ps1`.
+> 2. **Keep `reserivo.com`, `www.reserivo.com` and `api.reserivo.com` attached.**
+>    The web middleware 301s the old web hosts to the same path on morrri.com,
+>    so printed booking links and emailed links keep working. The API must keep
+>    answering on `api.reserivo.com` without a redirect: every email already
+>    sent carries a one-click `List-Unsubscribe` URL there, mail clients POST
+>    to it and will not follow a redirect, and CAN-SPAM needs it to keep working.
+> 3. Verify `morrri.com` in Resend the same way as below: apex, DKIM at
+>    `resend._domainkey.morrri.com`, `send.morrri.com` as return path, and no SPF
+>    at the apex. Probe with one send before switching.
+> 4. Create the `james@morrri.com` mailbox. The site prints it as the support,
+>    copyright and accessibility contact.
+> 5. `heroku config:set -a reserivo-api WEB_URL=https://morrri.com CORS_ORIGIN=https://morrri.com PUBLIC_API_URL=https://api.morrri.com "EMAIL_FROM=Morrri <noreply@morrri.com>"`,
+>    then rebuild the web image with `-ApiOrigin https://api.morrri.com`, since
+>    the API origin is baked into the bundle.
+> 6. Everyone signs in once: cookies do not cross from one domain to another.
+> 7. Resubmit the SMS campaign per `deploy/A2P-10DLC.md`.
+>
+> When it is done, update the table and sections below to the new domains and
+> remove this note.
 
 Two Heroku apps built from the Dockerfiles already in this repo, `reserivo-api`
 and `reserivo-web`, plus Heroku Postgres. Roughly $19/month: two Basic dynos at

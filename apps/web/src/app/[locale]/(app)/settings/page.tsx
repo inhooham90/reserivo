@@ -31,7 +31,7 @@ export default function YourSalonsPage() {
     return (
       <Card className="mx-auto mt-8 max-w-md">
         <CardHeader>
-          <CardTitle>{t("loadFailed")}</CardTitle>
+          <CardTitle role="heading" aria-level={1}>{t("loadFailed")}</CardTitle>
           <CardDescription>{t("checkConnection")}</CardDescription>
         </CardHeader>
         <CardContent>
@@ -69,7 +69,7 @@ export default function YourSalonsPage() {
     <div className="grid gap-4">
       <Card>
         <CardHeader>
-          <CardTitle>{t("title")}</CardTitle>
+          <CardTitle role="heading" aria-level={1}>{t("title")}</CardTitle>
           <CardDescription>{t("hint")}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-2">

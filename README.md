@@ -1,4 +1,6 @@
-# Reserivo
+# Morrri
+
+Formerly Reserivo. Internal names (the `@reserivo/shared` package, database, Heroku apps) keep the old name on purpose; see CLAUDE.md.
 
 Online booking for hair and nail salons. Each salon gets a booking page at `/{slug}`; designers manage their own services and hours; customers and designers message through the platform so contact details stay private.
 
@@ -39,6 +41,14 @@ npm run -w api prisma:studio                  # browse data
 ```
 
 Schema: `apps/api/prisma/schema.prisma`. Generated client is git-ignored at `apps/api/src/generated/`.
+
+## Third-party notices
+
+`/third-party-notices.txt` lists the licence of every font and package the website ships. Regenerate it after changing dependencies, with the stack running:
+
+```sh
+npm run notices
+```
 
 ## Tests
 

@@ -160,8 +160,8 @@ export class RemindersService {
   /**
    * Kept short: one segment is 160 characters, and every segment is billed.
    *
-   * "(via Reserivo)" is not branding. The A2P 10DLC campaign is registered to
-   * Reserivo, while the message announces the salon, and a carrier comparing a
+   * "(via Morrri)" is not branding. The A2P 10DLC campaign is registered to
+   * Morrri, while the message announces the salon, and a carrier comparing a
    * sample message against the registered brand has to find the brand in it.
    * Change this and change the samples filed with Twilio (deploy/A2P-10DLC.md).
    */
@@ -176,6 +176,6 @@ export class RemindersService {
       timeZone: appt.salon.timezone,
     }).format(appt.startAt);
     const lead = hoursBefore >= 24 ? 'tomorrow' : `in ${hoursBefore}h`;
-    return `${appt.salon.name} (via Reserivo): reminder, your ${appt.serviceNameSnapshot} with ${appt.designer.displayName} is ${lead} (${at}). Reply STOP to opt out.`;
+    return `${appt.salon.name} (via Morrri): reminder, your ${appt.serviceNameSnapshot} with ${appt.designer.displayName} is ${lead} (${at}). Reply STOP to opt out.`;
   }
 }

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Reserivo",
+    "title": "Morrri",
     "description": "Online booking for hair and nail salons."
   },
   "common": {
@@ -8,7 +8,8 @@
     "save": "Save",
     "cancel": "Cancel",
     "language": "Language",
-    "somethingWrong": "Something went wrong"
+    "somethingWrong": "Something went wrong",
+    "skipToContent": "Skip to main content"
   },
   "labels": {
     "role": {
@@ -41,7 +42,7 @@
     },
     "about": {
       "title": "What {product} is",
-      "body": "{product} is appointment booking software for hair and nail salons in the United States. A salon signs up, adds its stylists, services and opening hours, and gets a booking page of its own at <url>reserivo.com/your-salon</url> to share with clients. Clients book on that page (no account needed) and the salon manages the day from one calendar.",
+      "body": "{product} is appointment booking software for hair and nail salons in the United States. A salon signs up, adds its stylists, services and opening hours, and gets a booking page of its own at <url>morrri.com/your-salon</url> to share with clients. Clients book on that page (no account needed) and the salon manages the day from one calendar.",
       "notASalon": "We sell software to salons. We are not a salon, and we do not take a cut of a booking."
     },
     "features": {
@@ -61,7 +62,7 @@
     },
     "reminders": {
       "title": "Appointment reminders",
-      "body": "Every booking gets a confirmation by email straight away, and a reminder before the appointment. A client who gives a mobile number while booking can also tick a box to get that reminder as a text message: appointment reminders only, never marketing, and never without asking. The whole program, including the exact wording of the opt-in, is set out at <link>reserivo.com/sms</link>."
+      "body": "Every booking gets a confirmation by email straight away, and a reminder before the appointment. A client who gives a mobile number while booking can also tick a box to get that reminder as a text message: appointment reminders only, never marketing, and never without asking. The whole program, including the exact wording of the opt-in, is set out at <link>morrri.com/sms</link>."
     },
     "operator": {
       "title": "Who operates {product}",
@@ -71,6 +72,7 @@
   "footer": {
     "terms": "Terms",
     "privacy": "Privacy",
+    "accessibility": "Accessibility",
     "sms": "Text reminders",
     "contact": "Contact"
   },
@@ -205,12 +207,14 @@
       "settings": "Settings",
       "bookingPage": "Booking page: <link>/{slug}</link> · {timezone}",
       "switch": "Switch salon",
-      "noAccess": "You do not have access to this salon."
+      "noAccess": "You do not have access to this salon.",
+      "tabsLabel": "Salon sections"
     },
     "menu": {
       "yourSalons": "Your salons",
       "setUp": "Set up a salon"
-    }
+    },
+    "primaryLabel": "Main"
   },
   "settings": {
     "navLabel": "Settings sections",
@@ -349,7 +353,12 @@
       "note": "Note",
       "optional": "Optional",
       "add": "Add",
-      "adding": "Adding…"
+      "adding": "Adding…",
+      "startOf": "{day} start time",
+      "endOf": "{day} end time",
+      "removeOf": "Remove {day} hours",
+      "startTime": "Start time",
+      "endTime": "End time"
     },
     "yourSalons": {
       "loadFailed": "Couldn’t load your salons",

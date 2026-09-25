@@ -39,6 +39,7 @@ export default function PrivacyPage() {
         <li>Your appointments — times, services and prices</li>
         <li>Notes you add when booking, and notes the salon keeps about you</li>
         <li>Messages exchanged with the salon through {LEGAL.product}</li>
+        <li>Star ratings you give a designer after a visit. They are only ever shown as an average, never with your name</li>
         <li>Whether you agreed to text reminders, and when</li>
         <li>
           Whether you unsubscribed from a salon’s emails, from every salon’s promotions, or from all our email, and
@@ -118,6 +119,29 @@ export default function PrivacyPage() {
         address goes to our email provider for the sole purpose of delivering the message.
       </p>
 
+      <h2>Cookies and browser storage</h2>
+      <p>
+        We use only what the service needs to work. There are no advertising cookies, no analytics or tracking
+        scripts, and nothing that follows you to other websites.
+      </p>
+      <ul>
+        <li>
+          <strong>Sign-in cookie.</strong> Keeps you signed in. It can only be read by our servers, and it expires,
+          or is removed when you sign out.
+        </li>
+        <li>
+          <strong>Language cookie.</strong> Remembers the language you chose, so the next page is in it too.
+        </li>
+        <li>
+          <strong>Your last salon.</strong> For salon staff, your browser remembers which salon you last opened, so
+          signing in takes you back to its schedule. It stays on your device and is never sent to us.
+        </li>
+      </ul>
+      <p>
+        Because nothing here is used for advertising or tracking, there is nothing to opt out of. Blocking these
+        cookies will stop sign-in and the language choice from working.
+      </p>
+
       <h2>Why we use it</h2>
       <ul>
         <li>To take and manage bookings, and to show salons their schedule</li>
@@ -170,13 +194,22 @@ export default function PrivacyPage() {
           the link in any of them
         </li>
         <li>
+          Not be treated differently for using any of these rights
+        </li>
+        <li>
           If you are a salon client, you can also ask the salon directly — it is their record, and we will help them
           act on your request
         </li>
       </ul>
       <p>
         Email <a href={`mailto:${LEGAL.supportEmail}`}>{LEGAL.supportEmail}</a> and we will respond as quickly as we
-        can.
+        can. We may need to confirm it is you before acting on a request, and you may ask someone to make a request
+        for you.
+      </p>
+      <p>
+        Some U.S. states, such as California, give their residents these rights by law. We do not sell personal
+        information or share it for targeted advertising, so there is no sale or sharing to opt out of. We do not use
+        personal information to make decisions about you that have legal or similarly significant effects.
       </p>
 
       <h2>Security</h2>

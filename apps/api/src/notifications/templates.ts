@@ -91,7 +91,7 @@ export function render(event: NotificationEvent, webUrl: string): RenderedEmail 
       ];
       const cta = { label: 'Confirm my email', href: event.data.link };
       return {
-        subject: 'Confirm your email · Reserivo',
+        subject: 'Confirm your email · Morrri',
         text: `${lines.join('\n\n')}\n\n${cta.href}`,
         html: wrap('Confirm your email', lines, cta),
       };
@@ -104,7 +104,7 @@ export function render(event: NotificationEvent, webUrl: string): RenderedEmail 
       ];
       const cta = { label: 'Choose a new password', href: event.data.link };
       return {
-        subject: 'Reset your Reserivo password',
+        subject: 'Reset your Morrri password',
         text: `${lines.join('\n\n')}\n\n${cta.href}`,
         html: wrap('Reset your password', lines, cta),
       };

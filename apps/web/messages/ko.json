@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Reserivo",
+    "title": "Morrri",
     "description": "헤어·네일 살롱을 위한 온라인 예약."
   },
   "common": {
@@ -8,7 +8,8 @@
     "save": "저장",
     "cancel": "취소",
     "language": "언어",
-    "somethingWrong": "문제가 발생했습니다"
+    "somethingWrong": "문제가 발생했습니다",
+    "skipToContent": "본문으로 건너뛰기"
   },
   "labels": {
     "role": {
@@ -41,7 +42,7 @@
     },
     "about": {
       "title": "{product}란",
-      "body": "{product}는 미국의 헤어·네일 살롱을 위한 예약 소프트웨어입니다. 살롱이 가입해 디자이너와 시술, 영업시간을 등록하면 고객에게 공유할 수 있는 전용 예약 페이지 <url>reserivo.com/your-salon</url>이 생깁니다. 고객은 그 페이지에서 계정 없이 예약하고, 살롱은 하나의 캘린더로 하루를 관리합니다.",
+      "body": "{product}는 미국의 헤어·네일 살롱을 위한 예약 소프트웨어입니다. 살롱이 가입해 디자이너와 시술, 영업시간을 등록하면 고객에게 공유할 수 있는 전용 예약 페이지 <url>morrri.com/your-salon</url>이 생깁니다. 고객은 그 페이지에서 계정 없이 예약하고, 살롱은 하나의 캘린더로 하루를 관리합니다.",
       "notASalon": "저희는 살롱에 소프트웨어를 판매합니다. 살롱이 아니며, 예약 금액에서 수수료를 떼지 않습니다."
     },
     "features": {
@@ -61,7 +62,7 @@
     },
     "reminders": {
       "title": "예약 알림",
-      "body": "모든 예약은 즉시 이메일로 확인되고, 예약 전에 알림이 발송됩니다. 예약할 때 휴대전화 번호를 입력한 고객은 체크박스를 선택해 같은 알림을 문자 메시지로도 받을 수 있습니다. 예약 알림만 보내며, 광고는 절대 보내지 않고, 동의 없이는 보내지 않습니다. 동의 문구 원문을 포함한 전체 안내는 <link>reserivo.com/sms</link>에서 확인할 수 있습니다."
+      "body": "모든 예약은 즉시 이메일로 확인되고, 예약 전에 알림이 발송됩니다. 예약할 때 휴대전화 번호를 입력한 고객은 체크박스를 선택해 같은 알림을 문자 메시지로도 받을 수 있습니다. 예약 알림만 보내며, 광고는 절대 보내지 않고, 동의 없이는 보내지 않습니다. 동의 문구 원문을 포함한 전체 안내는 <link>morrri.com/sms</link>에서 확인할 수 있습니다."
     },
     "operator": {
       "title": "{product} 운영사",
@@ -71,6 +72,7 @@
   "footer": {
     "terms": "이용약관",
     "privacy": "개인정보처리방침",
+    "accessibility": "접근성",
     "sms": "문자 알림",
     "contact": "문의"
   },
@@ -205,12 +207,14 @@
       "settings": "설정",
       "bookingPage": "예약 페이지: <link>/{slug}</link> · {timezone}",
       "switch": "살롱 전환",
-      "noAccess": "이 살롱에 접근할 권한이 없습니다."
+      "noAccess": "이 살롱에 접근할 권한이 없습니다.",
+      "tabsLabel": "살롱 메뉴"
     },
     "menu": {
       "yourSalons": "내 살롱",
       "setUp": "살롱 만들기"
-    }
+    },
+    "primaryLabel": "주 메뉴"
   },
   "settings": {
     "navLabel": "설정 메뉴",
@@ -349,7 +353,12 @@
       "note": "메모",
       "optional": "선택",
       "add": "추가",
-      "adding": "추가 중…"
+      "adding": "추가 중…",
+      "startOf": "{day} 시작 시간",
+      "endOf": "{day} 종료 시간",
+      "removeOf": "{day} 시간 삭제",
+      "startTime": "시작 시간",
+      "endTime": "종료 시간"
     },
     "yourSalons": {
       "loadFailed": "살롱 목록을 불러오지 못했습니다",

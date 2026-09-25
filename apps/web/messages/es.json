@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Reserivo",
+    "title": "Morrri",
     "description": "Reservas en línea para peluquerías y salones de uñas."
   },
   "common": {
@@ -8,7 +8,8 @@
     "save": "Guardar",
     "cancel": "Cancelar",
     "language": "Idioma",
-    "somethingWrong": "Algo salió mal"
+    "somethingWrong": "Algo salió mal",
+    "skipToContent": "Saltar al contenido principal"
   },
   "labels": {
     "role": {
@@ -41,7 +42,7 @@
     },
     "about": {
       "title": "Qué es {product}",
-      "body": "{product} es un software de reservas para peluquerías y salones de uñas en Estados Unidos. El salón se registra, añade a sus estilistas, sus servicios y su horario, y obtiene su propia página de reservas en <url>reserivo.com/your-salon</url> para compartir con sus clientes. Los clientes reservan en esa página (sin necesidad de cuenta) y el salón organiza el día desde un solo calendario.",
+      "body": "{product} es un software de reservas para peluquerías y salones de uñas en Estados Unidos. El salón se registra, añade a sus estilistas, sus servicios y su horario, y obtiene su propia página de reservas en <url>morrri.com/your-salon</url> para compartir con sus clientes. Los clientes reservan en esa página (sin necesidad de cuenta) y el salón organiza el día desde un solo calendario.",
       "notASalon": "Vendemos software a salones. No somos un salón y no nos quedamos con ninguna parte de una reserva."
     },
     "features": {
@@ -61,7 +62,7 @@
     },
     "reminders": {
       "title": "Recordatorios de citas",
-      "body": "Cada reserva recibe al instante una confirmación por correo electrónico y un recordatorio antes de la cita. Quien deja un número de móvil al reservar también puede marcar una casilla para recibir ese recordatorio por mensaje de texto: solo recordatorios de citas, nunca publicidad y nunca sin pedir permiso. Todo el programa, incluido el texto exacto del consentimiento, se explica en <link>reserivo.com/sms</link>."
+      "body": "Cada reserva recibe al instante una confirmación por correo electrónico y un recordatorio antes de la cita. Quien deja un número de móvil al reservar también puede marcar una casilla para recibir ese recordatorio por mensaje de texto: solo recordatorios de citas, nunca publicidad y nunca sin pedir permiso. Todo el programa, incluido el texto exacto del consentimiento, se explica en <link>morrri.com/sms</link>."
     },
     "operator": {
       "title": "Quién opera {product}",
@@ -71,6 +72,7 @@
   "footer": {
     "terms": "Términos",
     "privacy": "Privacidad",
+    "accessibility": "Accesibilidad",
     "sms": "Recordatorios por SMS",
     "contact": "Contacto"
   },
@@ -205,12 +207,14 @@
       "settings": "Ajustes",
       "bookingPage": "Página de reservas: <link>/{slug}</link> · {timezone}",
       "switch": "Cambiar de salón",
-      "noAccess": "No tienes acceso a este salón."
+      "noAccess": "No tienes acceso a este salón.",
+      "tabsLabel": "Secciones del salón"
     },
     "menu": {
       "yourSalons": "Tus salones",
       "setUp": "Crear un salón"
-    }
+    },
+    "primaryLabel": "Principal"
   },
   "settings": {
     "navLabel": "Secciones de ajustes",
@@ -349,7 +353,12 @@
       "note": "Nota",
       "optional": "Opcional",
       "add": "Añadir",
-      "adding": "Añadiendo…"
+      "adding": "Añadiendo…",
+      "startOf": "Hora de inicio del {day}",
+      "endOf": "Hora de fin del {day}",
+      "removeOf": "Quitar el horario del {day}",
+      "startTime": "Hora de inicio",
+      "endTime": "Hora de fin"
     },
     "yourSalons": {
       "loadFailed": "No se pudieron cargar tus salones",

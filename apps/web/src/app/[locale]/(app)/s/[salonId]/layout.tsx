@@ -85,7 +85,7 @@ export default function SalonLayout({ children }: { children: ReactNode }) {
                 ))}
               </select>
             )}
-            <nav className="flex gap-1 rounded-lg bg-muted p-1 text-sm">
+            <nav aria-label={t("tabsLabel")} className="flex gap-1 rounded-lg bg-muted p-1 text-sm">
               {TABS.map((tab) => {
                 const href = base + tab.href;
                 const active = pathname.startsWith(href);

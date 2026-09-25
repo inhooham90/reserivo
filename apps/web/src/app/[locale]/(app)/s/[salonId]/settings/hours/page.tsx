@@ -244,11 +244,11 @@ function WeeklyEditor({
                 {draft[wd].length === 0 && <p className="pt-1.5 text-sm text-muted-foreground">{closed ? "—" : t("off")}</p>}
                 {draft[wd].map((w, i) => (
                   <div key={i} className="flex flex-wrap items-center gap-2">
-                    <Input type="time" step={300} className="w-32" value={w.start} disabled={!canEdit} onChange={(e) => update(wd, i, { start: e.target.value })} />
+                    <Input type="time" step={300} className="w-32" aria-label={t("startOf", { day: weekdays[wd] })} value={w.start} disabled={!canEdit} onChange={(e) => update(wd, i, { start: e.target.value })} />
                     <span className="text-muted-foreground">–</span>
-                    <Input type="time" step={300} className="w-32" value={w.end} disabled={!canEdit} onChange={(e) => update(wd, i, { end: e.target.value })} />
+                    <Input type="time" step={300} className="w-32" aria-label={t("endOf", { day: weekdays[wd] })} value={w.end} disabled={!canEdit} onChange={(e) => update(wd, i, { end: e.target.value })} />
                     {canEdit && (
-                      <Button size="xs" variant="ghost" onClick={() => removeWin(wd, i)}>
+                      <Button size="xs" variant="ghost" aria-label={t("removeOf", { day: weekdays[wd] })} onClick={() => removeWin(wd, i)}>
                         {t("remove")}
                       </Button>
                     )}
@@ -379,9 +379,9 @@ function Exceptions({
             </div>
             {type === "CUSTOM" && (
               <div className="flex items-center gap-2">
-                <Input type="time" step={300} className="w-32" value={start} onChange={(e) => setStart(e.target.value)} />
+                <Input type="time" step={300} className="w-32" aria-label={t("startTime")} value={start} onChange={(e) => setStart(e.target.value)} />
                 <span className="text-muted-foreground">–</span>
-                <Input type="time" step={300} className="w-32" value={end} onChange={(e) => setEnd(e.target.value)} />
+                <Input type="time" step={300} className="w-32" aria-label={t("endTime")} value={end} onChange={(e) => setEnd(e.target.value)} />
               </div>
             )}
             <div className="grid gap-1.5">

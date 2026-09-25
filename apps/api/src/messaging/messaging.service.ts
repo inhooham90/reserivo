@@ -147,7 +147,7 @@ export class MessagingService {
 
     const customer = await this.customers.findInSalon(tenant.salonId, input.customerId);
     if (!customer.userId) {
-      throw new ConflictException(`${customer.name} has no Reserivo account yet, so the relay cannot reach them.`);
+      throw new ConflictException(`${customer.name} has no Morrri account yet, so the relay cannot reach them.`);
     }
 
     const conv = await this.upsertConversation(customer.id, designerId, tenant.salonId);

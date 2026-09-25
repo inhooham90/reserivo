@@ -198,7 +198,7 @@ describe('Phase 3 (e2e)', () => {
 
   it('staff cannot open a thread with a customer who has no account', async () => {
     const res = await api().post(`/salons/${salonId}/conversations`).set(auth(ownToken)).send({ customerId: walkinCustomerId, designerId: dsgMemberId }).expect(409);
-    expect(res.body.message).toMatch(/no Reserivo account/);
+    expect(res.body.message).toMatch(/no Morrri account/);
   });
 
   it('a designer cannot start a thread on another designer’s behalf; a manager can', async () => {

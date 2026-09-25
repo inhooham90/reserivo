@@ -31,12 +31,12 @@ export default function InvitePage() {
   });
 
   return (
-    <main className="flex flex-1 items-center justify-center p-6">
+    <main id="main" tabIndex={-1} className="flex flex-1 items-center justify-center p-6 outline-none">
       <Card className="w-full max-w-md">
         {preview.isPending && <CardContent className="text-muted-foreground">Loading…</CardContent>}
         {preview.isError && (
           <CardHeader>
-            <CardTitle>This invite is not available</CardTitle>
+            <CardTitle role="heading" aria-level={1}>This invite is not available</CardTitle>
             <CardDescription>
               {preview.error instanceof ApiError ? preview.error.message : "The link may be wrong, used, or expired."}
             </CardDescription>
@@ -45,7 +45,7 @@ export default function InvitePage() {
         {preview.data && (
           <>
             <CardHeader>
-              <CardTitle>Join {preview.data.salonName}</CardTitle>
+              <CardTitle role="heading" aria-level={1}>Join {preview.data.salonName}</CardTitle>
               <CardDescription>
                 You have been invited as {f.roles(preview.data.roles)}. This invite is for{" "}
                 <span className="font-medium text-foreground">{preview.data.email}</span>.

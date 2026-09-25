@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function UnsubscribePage({ params }: Props) {
   const { token } = await params;
   return (
-    <main className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center px-6 py-16">
+    <main id="main" tabIndex={-1} className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center px-6 py-16 outline-none">
       <UnsubscribeCard token={token} />
     </main>
   );

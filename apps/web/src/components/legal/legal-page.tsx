@@ -8,7 +8,7 @@ import { LEGAL } from "@/lib/legal";
  */
 export function LegalPage({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-6 py-12">
+    <main id="main" tabIndex={-1} className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-6 py-12 outline-none">
       <Link href="/" className="text-sm text-muted-foreground underline">
         ← {LEGAL.product}
       </Link>

@@ -1,4 +1,4 @@
-// Reserivo data model.
+// Morrri data model.
 // Every tenant-scoped table carries salonId. Roles live on SalonMembership,
 // never on User (one person can be a customer at one salon and a designer at
 // another). Timestamps are timestamptz (UTC); Salon.timezone is the IANA zone

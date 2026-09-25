@@ -137,7 +137,7 @@ function CustomerRecord({ id }: { id: string }) {
         <CardContent className="grid gap-4">
           {!c.hasAccount && (
             <p className="text-xs text-muted-foreground">
-              The relay reaches customers through their Reserivo account. This customer hasn’t created one yet.
+              The relay reaches customers through their Morrri account. This customer hasn’t created one yet.
             </p>
           )}
           <FieldError message={message.error instanceof ApiError ? message.error.message : undefined} />

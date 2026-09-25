@@ -44,7 +44,7 @@ export default function SmsPage() {
       <ul>
         <li>
           The client opens their salon’s booking page — a public URL of the form{" "}
-          <strong>https://reserivo.com/&#123;salon&#125;</strong>, shared by the salon (for example on its own website,
+          <strong>https://morrri.com/&#123;salon&#125;</strong>, shared by the salon (for example on its own website,
           a business card or a social profile). No account or login is required.
         </li>
         <li>They choose a stylist and a service from the salon’s menu.</li>
@@ -92,11 +92,11 @@ export default function SmsPage() {
       <p>
         “Terms” and “Privacy Policy” are links to{" "}
         <Link href="/terms" className="underline">
-          reserivo.com/terms
+          morrri.com/terms
         </Link>{" "}
         and{" "}
         <Link href="/privacy" className="underline">
-          reserivo.com/privacy
+          morrri.com/privacy
         </Link>
         .
       </p>
@@ -111,10 +111,10 @@ export default function SmsPage() {
       <p>Sample messages, exactly as sent:</p>
       <ul>
         <li>
-          Glow Salon (via Reserivo): reminder, your Women’s Cut with Mia is tomorrow (Thu, 2:30 PM). Reply STOP to opt out.
+          Glow Salon (via Morrri): reminder, your Women’s Cut with Mia is tomorrow (Thu, 2:30 PM). Reply STOP to opt out.
         </li>
         <li>
-          Glow Salon (via Reserivo): reminder, your Balayage with Mia is in 2h (Thu, 2:30 PM). Reply STOP to opt out.
+          Glow Salon (via Morrri): reminder, your Balayage with Mia is in 2h (Thu, 2:30 PM). Reply STOP to opt out.
         </li>
       </ul>
 

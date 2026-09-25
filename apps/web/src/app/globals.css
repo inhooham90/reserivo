@@ -3,7 +3,7 @@
 @import "shadcn/tailwind.css";
 
 /*
- * Reserivo design tokens — warm & editorial.
+ * Morrri design tokens — warm & editorial.
  *
  * Every color, radius and font decision lives here as a CSS variable; pages
  * and components only ever reference tokens (bg-primary, text-muted-foreground…).
@@ -57,6 +57,7 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -98,7 +99,11 @@
   --muted-foreground: oklch(0.5 0.018 55);
   --accent: oklch(0.935 0.026 52);
   --accent-foreground: oklch(0.3 0.03 42);
-  --destructive: oklch(0.55 0.19 27);
+  /* 0.53 so red text still clears 4.5:1 on its own 10% tint (no-show and
+     conflict blocks, destructive buttons) over the page ground; 0.55 measured
+     4.40:1 there. */
+  --destructive: oklch(0.53 0.19 27);
+  --destructive-foreground: oklch(0.985 0.006 80);
   /* Dividers and card edges are decoration, so they stay soft — just less
      ghostly than 1.29:1. --input is different: it draws the *boundary of a
      control*, which WCAG 1.4.11 requires to reach 3:1, so it is much stronger. */
@@ -138,7 +143,11 @@
     --muted-foreground: oklch(0.7 0.014 65);
     --accent: oklch(0.31 0.022 48);
     --accent-foreground: oklch(0.94 0.012 70);
-    --destructive: oklch(0.7 0.17 25);
+    /* 0.73: red text on a 20% tint over a card (dark destructive buttons)
+       measured 4.30:1 at 0.7. Solid red is light here, so what sits on it is
+       dark: white on it managed only 2.88:1. */
+    --destructive: oklch(0.73 0.16 25);
+    --destructive-foreground: oklch(0.2 0.03 40);
     /* 10% measured 2.75:1 against the ground; 14% clears the 3:1 line. */
     --border: oklch(1 0 0 / 14%);
     --input: oklch(1 0 0 / 18%);

@@ -12,7 +12,7 @@ describe('renderCampaign', () => {
     salonName: 'Glow Salon',
     subject: 'Spring colour, 20% off',
     body: 'Hello!\n\nWe have space this month.',
-    unsubscribeUrl: 'https://reserivo.com/u/tok-123',
+    unsubscribeUrl: 'https://morrri.com/u/tok-123',
   };
 
   it('carries the unsubscribe link in both parts', () => {

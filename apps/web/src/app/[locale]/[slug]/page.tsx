@@ -27,7 +27,7 @@ export default async function SalonPublicPage({ params }: Props) {
 
   return (
     <>
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 pb-20">
+      <main id="main" tabIndex={-1} className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 pb-20 outline-none">
         <header className="grid gap-4 border-b pt-12 pb-10 md:pt-20 md:pb-14">
           <h1 className="max-w-[20ch] text-4xl leading-[1.05] animate-in fade-in slide-in-from-bottom-2 duration-700 md:text-6xl">
             {salon.name}

@@ -39,10 +39,10 @@ function VerifyEmail() {
   }, [token, isIdle, mutate]);
 
   return (
-    <main className="flex flex-1 items-center justify-center p-6">
+    <main id="main" tabIndex={-1} className="flex flex-1 items-center justify-center p-6 outline-none">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>
+          <CardTitle role="heading" aria-level={1}>
             {verify.isSuccess ? t("confirmed") : verify.isError || !token ? t("failed") : t("confirming")}
           </CardTitle>
           <CardDescription>

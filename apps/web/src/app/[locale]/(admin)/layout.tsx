@@ -38,9 +38,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     <>
       <header className="border-b bg-muted/30">
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
-          <nav className="flex items-center gap-4 text-sm">
+          <nav aria-label={nav("primaryLabel")} className="flex items-center gap-4 text-sm">
             <Link href="/admin" className="font-semibold">
-              Reserivo <span className="text-muted-foreground">{t("brand")}</span>
+              Morrri <span className="text-muted-foreground">{t("brand")}</span>
             </Link>
             {TABS.map((tab) => (
               <Link
@@ -66,7 +66,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-6xl flex-1 p-4">{children}</main>
+      <main id="main" tabIndex={-1} className="mx-auto w-full max-w-6xl flex-1 p-4 outline-none">{children}</main>
     </>
   );
 }

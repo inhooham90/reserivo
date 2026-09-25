@@ -31,10 +31,10 @@ export default function ForgotPasswordPage() {
   });
 
   return (
-    <main className="flex flex-1 items-center justify-center p-6">
+    <main id="main" tabIndex={-1} className="flex flex-1 items-center justify-center p-6 outline-none">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>{t("forgot.title")}</CardTitle>
+          <CardTitle role="heading" aria-level={1}>{t("forgot.title")}</CardTitle>
           <CardDescription>
             {sent ? t("forgot.checkInbox") : t("forgot.description")}
           </CardDescription>

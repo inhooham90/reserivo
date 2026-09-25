@@ -24,6 +24,9 @@ export function PublicFooter({ className }: { className?: string }) {
         <Link href="/privacy" className="underline-offset-4 hover:text-foreground hover:underline">
           {t("privacy")}
         </Link>
+        <Link href="/accessibility" className="underline-offset-4 hover:text-foreground hover:underline">
+          {t("accessibility")}
+        </Link>
         <Link href="/sms" className="underline-offset-4 hover:text-foreground hover:underline">
           {t("sms")}
         </Link>

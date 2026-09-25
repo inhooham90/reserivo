@@ -58,7 +58,7 @@ export class MarketingMailer {
     const { error } = await this.client.emails.send({
       // The display name is the salon because that is who the client knows;
       // the address is ours because ours is the verified domain.
-      from: `${send.salonName} via Reserivo <${this.from}>`,
+      from: `${send.salonName} via Morrri <${this.from}>`,
       to: send.to,
       replyTo: send.replyTo,
       subject: send.mail.subject,

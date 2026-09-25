@@ -10,14 +10,14 @@
  * what is filed with Twilio — see deploy/A2P-10DLC.md.
  */
 export const LEGAL = {
-  product: 'Reserivo',
+  product: 'Morrri',
   /** The company that operates the service. */
   legalName: 'Akkija',
   address: '500 7th Ave, 8th Floor, New York, NY 10018',
-  supportEmail: 'james@reserivo.com',
+  supportEmail: 'james@morrri.com',
   jurisdiction: 'the State of New York, United States',
   /** Shown at the top of both documents; bump when the text changes. */
-  lastUpdated: '23 September 2026',
+  lastUpdated: '24 September 2026',
   /** Named in the privacy policy, because a reader is entitled to know. */
   processors: [
     { name: 'Resend', purpose: 'sending email' },

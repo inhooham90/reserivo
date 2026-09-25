@@ -54,6 +54,7 @@ export default async function LocaleLayout({
   // can still reach it and must 404 rather than render an empty message table.
   if (!hasLocale(LOCALES, locale)) notFound();
   setRequestLocale(locale);
+  const common = await getTranslations("common");
 
   return (
     <html
@@ -61,6 +62,14 @@ export default async function LocaleLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} ${CJK_FONT[locale] ?? ""} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
+        {/* WCAG 2.4.1: the first Tab stop on every page jumps past the header.
+            Every page's <main> carries id="main" and tabIndex={-1} to receive it. */}
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-foreground focus:ring-3 focus:ring-ring"
+        >
+          {common("skipToContent")}
+        </a>
         <NextIntlClientProvider>
           <Providers>{children}</Providers>
         </NextIntlClientProvider>

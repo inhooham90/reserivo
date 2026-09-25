@@ -12,11 +12,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="grid flex-1 lg:grid-cols-2">
       <div className="flex flex-col">
-        <div className="flex h-16 items-center px-6">
+        <header className="flex h-16 items-center px-6">
           <Link href="/" className="font-heading text-xl tracking-tight">
             {LEGAL.product}
           </Link>
-        </div>
+        </header>
         {children}
       </div>
       <div aria-hidden className="hidden p-3 lg:block">

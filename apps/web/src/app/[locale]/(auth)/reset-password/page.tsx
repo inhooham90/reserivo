@@ -51,10 +51,10 @@ function ResetPassword() {
   };
 
   return (
-    <main className="flex flex-1 items-center justify-center p-6">
+    <main id="main" tabIndex={-1} className="flex flex-1 items-center justify-center p-6 outline-none">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>{t("title")}</CardTitle>
+          <CardTitle role="heading" aria-level={1}>{t("title")}</CardTitle>
           <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent>

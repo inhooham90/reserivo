@@ -39,7 +39,7 @@ export function SmsConsent({
         Text me a reminder before my appointment.
         <span className="block text-xs text-muted-foreground">
           {!hasPhone && "Add a mobile number above to turn this on. "}
-          Reserivo appointment reminders only, never marketing. 1–2 messages per appointment. Message and data rates
+          Morrri appointment reminders only, never marketing. 1–2 messages per appointment. Message and data rates
           may apply. Reply STOP to unsubscribe, HELP for help. See our{" "}
           <Link href="/terms" target="_blank" className="underline">
             Terms

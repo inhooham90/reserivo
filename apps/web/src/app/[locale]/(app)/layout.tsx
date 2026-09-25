@@ -31,48 +31,54 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <>
-      {user.actorUserId && (
-        <div className="flex flex-wrap items-center justify-center gap-3 bg-destructive px-4 py-1.5 text-center text-sm font-medium text-white">
-          <span>{t("actingAs", { name: user.name })}</span>
-          <button
-            type="button"
-            className="underline underline-offset-2"
-            onClick={() => void stopImpersonating().then(() => router.replace("/admin"))}
-          >
-            {t("stop")}
-          </button>
-        </div>
-      )}
-      {!user.emailVerified && !user.actorUserId && <VerifyEmailNotice />}
-      <header className="border-b">
-        <div className={cn("mx-auto flex h-14 w-full items-center justify-between px-4", wide ? "lg:px-6" : "max-w-5xl")}>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link href="/dashboard" className="font-semibold">
-              Reserivo
-            </Link>
-            <Link href="/appointments" className="text-muted-foreground hover:text-foreground">
-              {t("myAppointments")}
-            </Link>
-            <Link href="/messages" className="text-muted-foreground hover:text-foreground">
-              {t("messages")}
-            </Link>
-            {user.isSiteAdmin && (
-              <Link href="/admin" className="text-muted-foreground hover:text-foreground">
-                {t("admin")}
+      {/* The banners sit inside <header> so nothing on the page is outside a
+          landmark; a screen reader moving by region would otherwise skip them. */}
+      <header>
+        {user.actorUserId && (
+          <div className="flex flex-wrap items-center justify-center gap-3 bg-destructive px-4 py-1.5 text-center text-sm font-medium text-destructive-foreground">
+            <span>{t("actingAs", { name: user.name })}</span>
+            <button
+              type="button"
+              className="underline underline-offset-2"
+              onClick={() => void stopImpersonating().then(() => router.replace("/admin"))}
+            >
+              {t("stop")}
+            </button>
+          </div>
+        )}
+        {!user.emailVerified && !user.actorUserId && <VerifyEmailNotice />}
+        <div className="border-b">
+          <div className={cn("mx-auto flex h-14 w-full items-center justify-between px-4", wide ? "lg:px-6" : "max-w-5xl")}>
+            <nav aria-label={t("primaryLabel")} className="flex items-center gap-4 text-sm">
+              <Link href="/dashboard" className="font-semibold">
+                Morrri
               </Link>
-            )}
-          </nav>
-          <div className="flex items-center gap-2 text-sm">
-            <span className="hidden text-muted-foreground sm:inline">{user.name}</span>
-            <LocaleSwitcher />
-            <SettingsMenu />
-            <Button variant="outline" size="sm" onClick={() => void logout().then(() => router.replace("/login"))}>
-              {t("signOut")}
-            </Button>
+              <Link href="/appointments" className="text-muted-foreground hover:text-foreground">
+                {t("myAppointments")}
+              </Link>
+              <Link href="/messages" className="text-muted-foreground hover:text-foreground">
+                {t("messages")}
+              </Link>
+              {user.isSiteAdmin && (
+                <Link href="/admin" className="text-muted-foreground hover:text-foreground">
+                  {t("admin")}
+                </Link>
+              )}
+            </nav>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="hidden text-muted-foreground sm:inline">{user.name}</span>
+              <LocaleSwitcher />
+              <SettingsMenu />
+              <Button variant="outline" size="sm" onClick={() => void logout().then(() => router.replace("/login"))}>
+                {t("signOut")}
+              </Button>
+            </div>
           </div>
         </div>
       </header>
-      <main className={cn("mx-auto w-full flex-1 p-4", wide ? "lg:px-6" : "max-w-5xl")}>{children}</main>
+      <main id="main" tabIndex={-1} className={cn("mx-auto w-full flex-1 p-4 outline-none", wide ? "lg:px-6" : "max-w-5xl")}>
+        {children}
+      </main>
     </>
   );
 }

@@ -42,7 +42,7 @@ const envSchema = z.object({
   TWILIO_ACCOUNT_SID: optionalString,
   TWILIO_AUTH_TOKEN: optionalString,
   TWILIO_FROM_NUMBER: optionalString,
-  EMAIL_FROM: z.string().default('Reserivo <onboarding@resend.dev>'),
+  EMAIL_FROM: z.string().default('Morrri <onboarding@resend.dev>'),
   /**
    * Comma-separated emails that always hold site admin. Applied on boot to
    * accounts that already exist and at registration to new ones. Grant-only:

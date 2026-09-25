@@ -1,7 +1,9 @@
 <#
 .SYNOPSIS
-  Check the Namecheap records for reserivo.com against what Heroku expects,
-  and confirm Google Workspace mail is still intact.
+  Check the Namecheap records for reserivo.com and morrri.com against what
+  Heroku expects, and confirm Google Workspace mail on reserivo.com is still
+  intact. Both domains stay attached during the rename: reserivo.com redirects
+  and keeps answering unsubscribe links in emails already sent.
 
 .EXAMPLE
   .\deploy\check-dns.ps1
@@ -21,8 +23,15 @@ $server = "8.8.8.8"
 $expected = @(
   @{ Name = "reserivo.com";     Target = "shrouded-date-wddud7nwy26fs7oobbnhwnew.herokudns.com";         Note = "web (ALIAS on the root)" },
   @{ Name = "www.reserivo.com"; Target = "fluffy-pear-ag5mahj9uo2nishg2b24o413.herokudns.com";           Note = "web" },
-  @{ Name = "api.reserivo.com"; Target = "cylindrical-mayflower-k5gfadg9r54dnju25v7n9nmq.herokudns.com"; Note = "api" }
+  @{ Name = "api.reserivo.com"; Target = "cylindrical-mayflower-k5gfadg9r54dnju25v7n9nmq.herokudns.com"; Note = "api" },
+  @{ Name = "morrri.com";       Target = "genetic-citadel-0hgn7tbuvrddjlpz9dfejeid.herokudns.com";       Note = "web (ALIAS on the root)" },
+  @{ Name = "www.morrri.com";   Target = "silhouetted-spinosaurus-yawp5c6cgl0n9ar48lwfp4v9.herokudns.com"; Note = "web" },
+  @{ Name = "api.morrri.com";   Target = "floating-wisteria-ymt19ny55he7aoms4ma86gg0.herokudns.com";     Note = "api" }
 )
+
+# Namecheap's parking page. A root still answering with this means the default
+# parking records were not deleted, so the ALIAS never took effect.
+$parking = "162.255.119.32"
 
 function Resolve-Safe {
   param([string]$Name, [string]$Type)
@@ -42,6 +51,10 @@ foreach ($e in $expected) {
 
   if ($cname -contains $e.Target) {
     Write-Host ("  OK       {0,-20} -> {1}" -f $e.Name, $e.Target) -ForegroundColor Green
+  }
+  elseif ($addrs -contains $parking) {
+    Write-Host ("  PARKED   {0,-20} -> Namecheap parking page. Delete the default parking records, then add the ALIAS" -f $e.Name) -ForegroundColor Red
+    $ready = $false
   }
   elseif ($addrs.Count -gt 0) {
     Write-Host ("  PROBABLY {0,-20} -> {1} (ALIAS flattened; Heroku confirms below)" -f $e.Name, ($addrs -join ", ")) -ForegroundColor Yellow

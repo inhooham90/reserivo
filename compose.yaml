@@ -62,7 +62,7 @@ services:
       SITE_ADMIN_EMAILS: ${SITE_ADMIN_EMAILS:-james@akkija.com}
       # Email: leave RESEND_API_KEY unset locally and notifications are only logged.
       RESEND_API_KEY: ${RESEND_API_KEY:-}
-      EMAIL_FROM: ${EMAIL_FROM:-Reserivo <onboarding@resend.dev>}
+      EMAIL_FROM: ${EMAIL_FROM:-Morrri <onboarding@resend.dev>}
       # Campaign email sends on its own key and its own verified subdomain, so a
       # salon's complaint rate cannot reach the reputation carrying password
       # resets. Unset locally: campaigns are logged, same as notifications.

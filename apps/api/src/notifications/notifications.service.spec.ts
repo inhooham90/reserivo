@@ -22,7 +22,7 @@ describe('NotificationsService suppression', () => {
   const reset: NotificationEvent = {
     type: 'auth.password_reset',
     to: { email: 'rita@example.com', name: 'Rita' },
-    data: { link: 'https://reserivo.com/reset-password?token=x', expiresInMinutes: 60 },
+    data: { link: 'https://morrri.com/reset-password?token=x', expiresInMinutes: 60 },
   };
 
   const setup = (scope: 'MARKETING' | 'ALL' | null) => {

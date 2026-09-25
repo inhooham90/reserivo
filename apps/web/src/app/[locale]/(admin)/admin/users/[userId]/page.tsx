@@ -66,7 +66,7 @@ export default function AdminUserPage() {
               <div className="grid gap-2 rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm">
                 <p>
                   {t.rich("user.confirm", {
-                    product: "Reserivo",
+                    product: "Morrri",
                     name: u.name,
                     b: (chunks) => <span className="font-medium">{chunks}</span>,
                   })}

@@ -31,6 +31,10 @@ export default function TermsPage() {
 
       <h2>3. Your account</h2>
       <ul>
+        <li>
+          You must be at least 16 to hold an account or book an appointment yourself. A parent or guardian may book
+          for someone younger
+        </li>
         <li>Give accurate information and keep it up to date</li>
         <li>Keep your password to yourself; you are responsible for what happens under your account</li>
         <li>Tell us promptly if you think someone else has access</li>
@@ -107,7 +111,7 @@ export default function TermsPage() {
         </Link>
         ; the program is described in full at{" "}
         <Link href="/sms" className="underline">
-          reserivo.com/sms
+          morrri.com/sms
         </Link>
         . We do not sell, rent or share mobile numbers, or the fact that you consented, with third parties for their
         own marketing.
@@ -180,6 +184,51 @@ export default function TermsPage() {
 
       <h2>14. Governing law</h2>
       <p>These terms are governed by the laws of {LEGAL.jurisdiction}.</p>
+      {/*
+        Sections 15 onward were added after 1–14, and appended rather than
+        inserted so that "section 6" and "section 7" keep pointing at the SMS
+        and email terms: the A2P 10DLC filing and section 4 both cite them.
+      */}
+      <h2>15. Your content, and ours</h2>
+      <p>
+        What you put into {LEGAL.product} stays yours: a salon’s name, services, descriptions and notes, the messages
+        you write, and the emails a salon sends its clients. You allow us to store, display and deliver it only so far
+        as we need to run the service for you, and you confirm you have the right to use it.
+      </p>
+      <p>
+        The {LEGAL.product} name, the software and the design of the site belong to {LEGAL.legalName}. These terms
+        let you use the service; they do not give you any other right in it.
+      </p>
+      <h2>16. Copyright complaints</h2>
+      <p>
+        If you believe something on {LEGAL.product} infringes your copyright, email{" "}
+        <a href={`mailto:${LEGAL.supportEmail}?subject=Copyright`}>{LEGAL.supportEmail}</a> with:
+      </p>
+      <ul>
+        <li>The work you believe is infringed</li>
+        <li>Where the material is on {LEGAL.product}, such as the page’s address</li>
+        <li>Your name, postal address, phone number and email</li>
+        <li>A statement that you believe in good faith the use is not authorised by you, your agent or the law</li>
+        <li>
+          A statement, under penalty of perjury, that your notice is accurate and that you own the copyright or may
+          act for its owner
+        </li>
+        <li>Your physical or electronic signature</li>
+      </ul>
+      <p>
+        We will remove material we find infringing, and tell the person who posted it. We close the accounts of
+        people who infringe repeatedly.
+      </p>
+      <h2>17. Open-source software</h2>
+      <p>
+        {LEGAL.product} is built with open-source software and typefaces. Their licences and copyright notices are
+        listed in our <a href="/third-party-notices.txt">third-party notices</a>.
+      </p>
+      <h2>18. Accessibility</h2>
+      <p>
+        We aim to meet WCAG 2.2 Level AA. Our <Link href="/accessibility">accessibility statement</Link> explains what
+        we have done, what we know still falls short, and how to get help if something does not work for you.
+      </p>
 
       <h2>Contact</h2>
       <p>

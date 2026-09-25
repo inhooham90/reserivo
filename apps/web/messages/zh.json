@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Reserivo",
+    "title": "Morrri",
     "description": "美发与美甲沙龙在线预约。"
   },
   "common": {
@@ -8,7 +8,8 @@
     "save": "保存",
     "cancel": "取消",
     "language": "语言",
-    "somethingWrong": "出了点问题"
+    "somethingWrong": "出了点问题",
+    "skipToContent": "跳到主要内容"
   },
   "labels": {
     "role": {
@@ -41,7 +42,7 @@
     },
     "about": {
       "title": "{product} 是什么",
-      "body": "{product} 是为美国美发和美甲沙龙打造的预约软件。沙龙注册后添加发型师、服务项目和营业时间，即可获得一个专属预约页面 <url>reserivo.com/your-salon</url>，分享给客户。客户无需注册账号即可在该页面预约，沙龙则在同一个日历中安排每一天。",
+      "body": "{product} 是为美国美发和美甲沙龙打造的预约软件。沙龙注册后添加发型师、服务项目和营业时间，即可获得一个专属预约页面 <url>morrri.com/your-salon</url>，分享给客户。客户无需注册账号即可在该页面预约，沙龙则在同一个日历中安排每一天。",
       "notASalon": "我们向沙龙出售软件。我们不是沙龙，也不从任何一笔预约中抽成。"
     },
     "features": {
@@ -61,7 +62,7 @@
     },
     "reminders": {
       "title": "预约提醒",
-      "body": "每笔预约都会立即通过电子邮件确认，并在到店前发送提醒。预约时填写手机号码的客户还可以勾选一个选项，通过短信接收这条提醒：只发送预约提醒，绝不发送营销信息，未经同意绝不发送。完整说明（包括同意条款的原文）请见 <link>reserivo.com/sms</link>。"
+      "body": "每笔预约都会立即通过电子邮件确认，并在到店前发送提醒。预约时填写手机号码的客户还可以勾选一个选项，通过短信接收这条提醒：只发送预约提醒，绝不发送营销信息，未经同意绝不发送。完整说明（包括同意条款的原文）请见 <link>morrri.com/sms</link>。"
     },
     "operator": {
       "title": "{product} 的运营方",
@@ -71,6 +72,7 @@
   "footer": {
     "terms": "服务条款",
     "privacy": "隐私政策",
+    "accessibility": "无障碍",
     "sms": "短信提醒",
     "contact": "联系我们"
   },
@@ -205,12 +207,14 @@
       "settings": "设置",
       "bookingPage": "预约页面：<link>/{slug}</link> · {timezone}",
       "switch": "切换沙龙",
-      "noAccess": "你无权访问这家沙龙。"
+      "noAccess": "你无权访问这家沙龙。",
+      "tabsLabel": "沙龙分区"
     },
     "menu": {
       "yourSalons": "我的沙龙",
       "setUp": "创建沙龙"
-    }
+    },
+    "primaryLabel": "主导航"
   },
   "settings": {
     "navLabel": "设置分区",
@@ -349,7 +353,12 @@
       "note": "备注",
       "optional": "选填",
       "add": "添加",
-      "adding": "正在添加…"
+      "adding": "正在添加…",
+      "startOf": "{day}开始时间",
+      "endOf": "{day}结束时间",
+      "removeOf": "删除{day}的时段",
+      "startTime": "开始时间",
+      "endTime": "结束时间"
     },
     "yourSalons": {
       "loadFailed": "无法加载你的沙龙",
