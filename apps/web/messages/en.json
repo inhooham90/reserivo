@@ -263,7 +263,10 @@
       "yourSalons": "Your businesses",
       "setUp": "Set up a business"
     },
-    "primaryLabel": "Main"
+    "primaryLabel": "Main",
+    "schedule": "Schedule",
+    "personal": "Personal",
+    "myMessages": "My messages"
   },
   "schedule": {
     "toolbar": {
@@ -577,7 +580,10 @@
       "aside": "Hours, team, services and reminders all live in Settings.",
       "settings": "Settings",
       "open": "Open",
-      "createAnother": "Create another business"
+      "createAnother": "Create another business",
+      "notApprovedTitle": "Business accounts are approved by Morrri",
+      "notApprovedBody": "To run your business on Morrri, email <link>{email}</link> and we will set up your account.",
+      "createNeedsApproval": "Creating another business needs approval from Morrri. <link>Contact us</link>."
     },
     "createSalon": {
       "title": "Create a business",
@@ -672,6 +678,20 @@
       "loadMore": "Load more",
       "end": "End of the log.",
       "shown": "{count} shown"
+    },
+    "business": {
+      "title": "Business account",
+      "approved": "Business",
+      "member": "Team member",
+      "filterLabel": "Business accounts",
+      "filterAll": "Everyone",
+      "filterApproved": "Approved businesses",
+      "filterUnapproved": "Not approved",
+      "approvedOn": "Approved as a business on {date}. Can create businesses.",
+      "memberOnly": "A business account because they belong to a business. Cannot create one until approved.",
+      "personal": "Personal account. Approve it to let them create a business.",
+      "approve": "Approve as business",
+      "revoke": "Withdraw approval"
     }
   },
   "unsubscribe": {

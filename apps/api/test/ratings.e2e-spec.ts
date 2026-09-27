@@ -12,6 +12,7 @@ import {
 import cookieParser from 'cookie-parser';
 import request from 'supertest';
 import { AppModule } from '../src/app.module.js';
+import { approveBusiness } from './business.js';
 
 const LA = 'America/Los_Angeles';
 
@@ -93,6 +94,7 @@ describe('Designer ratings (e2e)', () => {
     await app.init();
 
     ownerToken = (await api().post('/auth/register').send(owner).expect(201)).body.accessToken;
+    await approveBusiness(app, owner.email);
     slug = `ratings-${stamp}`;
     salonId = (
       await api().post('/salons').set(auth(ownerToken)).send({ name: 'Rated Salon', slug, timezone: LA }).expect(201)

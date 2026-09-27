@@ -8,6 +8,7 @@ import { siteAdminEmails, type Env } from '../config/env.js';
 import { NotificationsService } from '../notifications/notifications.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { AccessTokenPayload, AuthenticatedUser } from './auth.types.js';
+import { businessFlags } from './business-account.js';
 import { TOKEN_TTL_MINUTES, UserTokensService } from './user-tokens.service.js';
 
 export interface RequestMeta {
@@ -20,7 +21,14 @@ export interface IssuedTokens extends AuthResponse {
   refreshExpiresAt: Date;
 }
 
-type UserRow = { id: string; email: string; name: string; isSiteAdmin: boolean; emailVerifiedAt: Date | null };
+type UserRow = {
+  id: string;
+  email: string;
+  name: string;
+  isSiteAdmin: boolean;
+  emailVerifiedAt: Date | null;
+  businessApprovedAt: Date | null;
+};
 
 @Injectable()
 export class AuthService {
@@ -47,7 +55,7 @@ export class AuthService {
     // Nothing is claimed by email here: signing up proves nothing about the
     // address. Guest bookings are linked once the address is confirmed.
     await this.sendVerification(user);
-    return this.issueTokens(this.toCurrentUser(user), meta);
+    return this.issueTokens(await this.toCurrentUser(user), meta);
   }
 
   async login(input: LoginInput, meta: RequestMeta): Promise<IssuedTokens> {
@@ -56,7 +64,7 @@ export class AuthService {
     if (!user?.passwordHash || !(await verify(user.passwordHash, input.password))) {
       throw new UnauthorizedException('Invalid email or password');
     }
-    return this.issueTokens(this.toCurrentUser(user), meta);
+    return this.issueTokens(await this.toCurrentUser(user), meta);
   }
 
   /** Rotates the refresh token: the presented one is revoked and a new one issued. */
@@ -72,7 +80,7 @@ export class AuthService {
     }
 
     await this.prisma.refreshToken.update({ where: { id: stored.id }, data: { revokedAt: new Date() } });
-    return this.issueTokens(this.toCurrentUser(stored.user), meta);
+    return this.issueTokens(await this.toCurrentUser(stored.user), meta);
   }
 
   async logout(rawToken: string | undefined): Promise<void> {
@@ -110,7 +118,7 @@ export class AuthService {
       await tx.customer.updateMany({ where: { email: updated.email, userId: null }, data: { userId: updated.id } });
       return updated;
     });
-    return this.issueTokens(this.toCurrentUser(user), meta);
+    return this.issueTokens(await this.toCurrentUser(user), meta);
   }
 
   // ---------- Password reset ----------
@@ -153,7 +161,7 @@ export class AuthService {
       await tx.customer.updateMany({ where: { email: updated.email, userId: null }, data: { userId: updated.id } });
       return updated;
     });
-    return this.issueTokens(this.toCurrentUser(user), meta);
+    return this.issueTokens(await this.toCurrentUser(user), meta);
   }
 
   /**
@@ -204,13 +212,15 @@ export class AuthService {
     return createHash('sha256').update(token).digest('hex');
   }
 
-  private toCurrentUser(user: UserRow): CurrentUser {
+  private async toCurrentUser(user: UserRow): Promise<CurrentUser> {
+    const memberships = await this.prisma.salonMembership.count({ where: { userId: user.id, status: 'ACTIVE' } });
     return {
       id: user.id,
       email: user.email,
       name: user.name,
       isSiteAdmin: user.isSiteAdmin,
       emailVerified: user.emailVerifiedAt !== null,
+      ...businessFlags({ ...user, _count: { memberships } }),
       actorUserId: null,
     };
   }

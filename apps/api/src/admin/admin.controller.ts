@@ -1,12 +1,14 @@
-import { Controller, Get, HttpCode, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, HttpCode, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import {
   adminSearchSchema,
+  adminUserSearchSchema,
   auditQuerySchema,
   type AdminSalon,
   type AdminSalonDetail,
   type AdminSearch,
   type AdminUser,
   type AdminUserDetail,
+  type AdminUserSearch,
   type AuditPage,
   type AuditQuery,
   type AuthResponse,
@@ -31,13 +33,26 @@ export class AdminController {
   }
 
   @Get('users')
-  users(@Query(new ZodValidationPipe(adminSearchSchema)) query: AdminSearch): Promise<AdminUser[]> {
+  users(@Query(new ZodValidationPipe(adminUserSearchSchema)) query: AdminUserSearch): Promise<AdminUser[]> {
     return this.admin.searchUsers(query);
   }
 
   @Get('users/:id')
   user(@CurrentUser() admin: AuthenticatedUser, @Param('id') id: string): Promise<AdminUserDetail> {
     return this.admin.userDetail(admin, id);
+  }
+
+  /** Approve this account to create businesses. Idempotent. */
+  @HttpCode(200)
+  @Post('users/:id/business-approval')
+  approveBusiness(@CurrentUser() admin: AuthenticatedUser, @Param('id') id: string): Promise<AdminUserDetail> {
+    return this.admin.setBusinessApproval(admin, id, true);
+  }
+
+  /** Withdraw it. Businesses the account already belongs to are untouched. */
+  @Delete('users/:id/business-approval')
+  revokeBusiness(@CurrentUser() admin: AuthenticatedUser, @Param('id') id: string): Promise<AdminUserDetail> {
+    return this.admin.setBusinessApproval(admin, id, false);
   }
 
   @Get('salons')

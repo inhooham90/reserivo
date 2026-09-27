@@ -28,6 +28,15 @@ export const currentUserSchema = z.object({
    * matched to them by email — guest bookings and conversations stay hidden.
    */
   emailVerified: z.boolean(),
+  /**
+   * Business accounts get business tools by default (header Schedule and
+   * Messages go to the business); their personal bookings and inbox sit
+   * behind the Personal menu. True when approved by a site admin or when the
+   * account belongs to a business.
+   */
+  isBusinessAccount: z.boolean(),
+  /** Approved by a site admin (or is one): may create a business. */
+  canCreateBusiness: z.boolean(),
   /** Present only when a site admin is acting as this user. */
   actorUserId: z.string().nullable().optional(),
 });

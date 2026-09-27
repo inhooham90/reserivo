@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import cookieParser from 'cookie-parser';
 import request from 'supertest';
 import { AppModule } from '../src/app.module.js';
+import { approveBusiness } from './business.js';
 import { CampaignsService } from '../src/campaigns/campaigns.service.js';
 import { MarketingMailer } from '../src/campaigns/marketing-mailer.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
@@ -58,6 +59,7 @@ describe('Campaigns (e2e)', () => {
 
     ownToken = (await api().post('/auth/register').send(owner).expect(201)).body.accessToken;
     dsgToken = (await api().post('/auth/register').send(designer).expect(201)).body.accessToken;
+    await approveBusiness(app, owner.email);
     salonId = (
       await api()
         .post('/salons')

@@ -263,7 +263,10 @@
       "yourSalons": "내 비즈니스",
       "setUp": "비즈니스 만들기"
     },
-    "primaryLabel": "주 메뉴"
+    "primaryLabel": "주 메뉴",
+    "schedule": "일정",
+    "personal": "개인",
+    "myMessages": "내 메시지"
   },
   "schedule": {
     "toolbar": {
@@ -577,7 +580,10 @@
       "aside": "영업시간, 팀, 시술, 알림은 모두 설정에 있습니다.",
       "settings": "설정",
       "open": "열기",
-      "createAnother": "비즈니스 하나 더 만들기"
+      "createAnother": "비즈니스 하나 더 만들기",
+      "notApprovedTitle": "비즈니스 계정은 Morrri가 승인합니다",
+      "notApprovedBody": "Morrri에서 비즈니스를 운영하려면 <link>{email}</link>로 이메일을 보내 주세요. 계정을 설정해 드립니다.",
+      "createNeedsApproval": "비즈니스를 추가로 만들려면 Morrri의 승인이 필요합니다. <link>문의하기</link>."
     },
     "createSalon": {
       "title": "비즈니스 만들기",
@@ -672,6 +678,20 @@
       "loadMore": "더 보기",
       "end": "로그의 끝입니다.",
       "shown": "{count}건 표시"
+    },
+    "business": {
+      "title": "비즈니스 계정",
+      "approved": "비즈니스",
+      "member": "팀원",
+      "filterLabel": "비즈니스 계정",
+      "filterAll": "전체",
+      "filterApproved": "승인된 비즈니스",
+      "filterUnapproved": "미승인",
+      "approvedOn": "{date}에 비즈니스로 승인됨. 비즈니스를 만들 수 있습니다.",
+      "memberOnly": "비즈니스에 소속되어 있어 비즈니스 계정입니다. 승인 전에는 비즈니스를 만들 수 없습니다.",
+      "personal": "개인 계정입니다. 승인하면 비즈니스를 만들 수 있습니다.",
+      "approve": "비즈니스로 승인",
+      "revoke": "승인 철회"
     }
   },
   "unsubscribe": {

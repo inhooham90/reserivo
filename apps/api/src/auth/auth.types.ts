@@ -9,6 +9,9 @@ export interface AuthenticatedUser {
    * email* — guest bookings, relay threads — requires it; matching by id does not.
    */
   emailVerified: boolean;
+  /** See business-account.ts. */
+  isBusinessAccount: boolean;
+  canCreateBusiness: boolean;
   /**
    * When a site admin is acting as this user, the admin's real id.
    * The audit interceptor records it as actorUserId.

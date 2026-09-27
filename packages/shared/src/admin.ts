@@ -25,6 +25,12 @@ export type AdminSearch = z.infer<typeof adminSearchSchema>;
 
 // ---------- Users ----------
 
+/** The accounts list can be narrowed to accounts a site admin has, or has not, approved as businesses. */
+export const adminUserSearchSchema = adminSearchSchema.extend({
+  business: z.enum(['approved', 'unapproved']).optional(),
+});
+export type AdminUserSearch = z.infer<typeof adminUserSearchSchema>;
+
 export const adminUserSchema = z.object({
   id: z.string(),
   email: z.string(),
@@ -33,6 +39,10 @@ export const adminUserSchema = z.object({
   isSiteAdmin: z.boolean(),
   createdAt: z.string(),
   salonCount: z.number().int(),
+  /** When a site admin approved this account to create businesses; null if never (or revoked). */
+  businessApprovedAt: z.string().nullable(),
+  /** Approved, or belongs to a business (see apps/api/src/auth/business-account.ts). */
+  isBusinessAccount: z.boolean(),
 });
 export type AdminUser = z.infer<typeof adminUserSchema>;
 

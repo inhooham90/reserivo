@@ -11,6 +11,8 @@ import { CreateSalonCard } from "@/components/salon/create-salon-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
+import { LEGAL } from "@/lib/legal";
 import { useFormat } from "@/lib/use-format";
 import { ghostPillSm, outlinePillSm } from "@/lib/v3";
 
@@ -20,12 +22,23 @@ import { ghostPillSm, outlinePillSm } from "@/lib/v3";
  * Deliberately **not** under `/s/{salonId}`: everything there needs a salon to
  * scope to, and this is the one page someone with no salon must be able to
  * reach. It is how a new account creates its first business.
+ *
+ * Creating one needs an account a site admin has approved (`canCreateBusiness`;
+ * the API refuses otherwise), so an unapproved account is told how to ask
+ * instead of being shown a form that would fail.
  */
 export default function YourSalonsPage() {
   const f = useFormat();
   const t = useTranslations("settings.yourSalons");
   const common = useTranslations("common");
   const [creating, setCreating] = useState(false);
+  const { user } = useAuth();
+  const canCreate = Boolean(user?.canCreateBusiness);
+  const contact = (chunks: React.ReactNode) => (
+    <a href={`mailto:${LEGAL.supportEmail}`} className="underline">
+      {chunks}
+    </a>
+  );
   const salons = useQuery({ queryKey: ["salons", "mine"], queryFn: () => api<MySalon[]>("/salons/mine") });
 
   if (salons.isPending) return <p className="text-muted-foreground">{common("loading")}</p>;
@@ -51,10 +64,18 @@ export default function YourSalonsPage() {
   if (list.length === 0) {
     return (
       <div className="mx-auto grid max-w-lg gap-4">
-        <CreateSalonCard
-          title={t("setUpTitle")}
-          description={t("setUpHint")}
-        />
+        {canCreate ? (
+          <CreateSalonCard title={t("setUpTitle")} description={t("setUpHint")} />
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle role="heading" aria-level={1}>
+                {t("notApprovedTitle")}
+              </CardTitle>
+              <CardDescription>{t.rich("notApprovedBody", { email: LEGAL.supportEmail, link: contact })}</CardDescription>
+            </CardHeader>
+          </Card>
+        )}
         <p className="text-sm text-muted-foreground">
           {t.rich("justBooking", {
             link: (chunks) => (
@@ -106,7 +127,9 @@ export default function YourSalonsPage() {
         </ul>
 
         <div className="mt-4">
-          {creating ? (
+          {!canCreate ? (
+            <p className="text-sm text-muted-foreground">{t.rich("createNeedsApproval", { link: contact })}</p>
+          ) : creating ? (
             <CreateSalonCard onCancel={() => setCreating(false)} />
           ) : (
             <Button variant="ghost" className={ghostPillSm} onClick={() => setCreating(true)}>

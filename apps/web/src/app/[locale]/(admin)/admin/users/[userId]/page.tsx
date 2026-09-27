@@ -1,7 +1,7 @@
 "use client";
 
 import type { AdminUserDetail } from "@reserivo/shared";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -28,6 +28,17 @@ export default function AdminUserPage() {
   const actAs = useMutation({
     mutationFn: () => impersonate(userId),
     onSuccess: () => router.replace("/dashboard"),
+  });
+
+  // Approval lets the account create businesses; the list's filter and badges read the same field.
+  const queryClient = useQueryClient();
+  const approval = useMutation({
+    mutationFn: (approve: boolean) =>
+      api<AdminUserDetail>(`/admin/users/${userId}/business-approval`, { method: approve ? "POST" : "DELETE" }),
+    onSuccess: (next) => {
+      queryClient.setQueryData(["admin", "users", userId], next);
+      void queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+    },
   });
 
   if (user.isPending) return <p className="text-muted-foreground">{common("loading")}</p>;
@@ -89,6 +100,37 @@ export default function AdminUserPage() {
             <p className="text-xs text-muted-foreground">
               {u.isSiteAdmin ? t("user.cannotAdmins") : t("user.isYou")}
             </p>
+          </CardContent>
+        )}
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
+          <div>
+            <CardTitle>{t("business.title")}</CardTitle>
+            <CardDescription>
+              {u.businessApprovedAt
+                ? t("business.approvedOn", {
+                    date: f.inTz(u.businessApprovedAt, Intl.DateTimeFormat().resolvedOptions().timeZone, "dateWithYear"),
+                  })
+                : u.isBusinessAccount
+                  ? t("business.memberOnly")
+                  : t("business.personal")}
+            </CardDescription>
+          </div>
+          <Button
+            size="sm"
+            variant={u.businessApprovedAt ? "outline" : "default"}
+            className="shrink-0"
+            disabled={approval.isPending}
+            onClick={() => approval.mutate(!u.businessApprovedAt)}
+          >
+            {u.businessApprovedAt ? t("business.revoke") : t("business.approve")}
+          </Button>
+        </CardHeader>
+        {approval.isError && (
+          <CardContent>
+            <FieldError message={approval.error instanceof ApiError ? approval.error.message : undefined} />
           </CardContent>
         )}
       </Card>

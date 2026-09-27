@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import cookieParser from 'cookie-parser';
 import request from 'supertest';
 import { AppModule } from '../src/app.module.js';
+import { approveBusiness } from './business.js';
 
 /** Phase 1: team invites, role sets, services, hours, and the public catalog. */
 describe('Phase 1 (e2e)', () => {
@@ -36,6 +37,7 @@ describe('Phase 1 (e2e)', () => {
     dsgToken = (await api().post('/auth/register').send(designer).expect(201)).body.accessToken;
     strToken = (await api().post('/auth/register').send(stranger).expect(201)).body.accessToken;
 
+    await approveBusiness(app, manager.email);
     slug = `phase1-${stamp}`;
     // A front-desk owner: administers, does not take clients.
     const salon = await api()

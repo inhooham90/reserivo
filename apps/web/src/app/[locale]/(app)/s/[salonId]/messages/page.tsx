@@ -20,7 +20,12 @@ export default function StaffMessagesPage() {
   );
 }
 
-/** Split view: threads on the left (designers: theirs; managers: everyone's), the open thread on the right. */
+/**
+ * Split view: threads on the left (designers: theirs; managers: everyone's), the open thread on the right.
+ * From lg up it fills the screen (data-fill-viewport) so the thread scrolls inside itself like a
+ * messenger. Below lg there is room for one pane: an open thread replaces the list, gets a way back
+ * to it, and sits in a one-screen box (data-thread-box) that ThreadView scrolls into view.
+ */
 function StaffMessages() {
   const { salon, members, me, isManager } = useSalon();
   const router = useRouter();
@@ -49,8 +54,8 @@ function StaffMessages() {
   });
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[320px_1fr]">
-      <aside className="grid gap-3 self-start">
+    <div data-fill-viewport className="grid gap-4 lg:h-full lg:min-h-0 lg:grid-cols-[320px_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)]">
+      <aside className={cn("min-h-0 flex-col gap-3", open ? "hidden lg:flex" : "flex")}>
         {isManager && designers.length > 1 && (
           <select
             className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
@@ -75,7 +80,7 @@ function StaffMessages() {
             .
           </p>
         )}
-        <ul className="divide-y rounded-xl border bg-card">
+        <ul className="min-h-0 divide-y overflow-y-auto rounded-xl border bg-card">
           {convs.data?.map((c) => (
             <li key={c.id}>
               <button
@@ -97,13 +102,26 @@ function StaffMessages() {
         </ul>
       </aside>
 
-      <section>
+      <section className={cn("min-h-0 flex-col gap-3", open ? "flex" : "hidden lg:flex")}>
         {!open && <p className="text-sm text-muted-foreground">Select a conversation.</p>}
         {open && (
-          <Card>
-            <CardHeader>
+          <div className="flex shrink-0 items-center justify-between gap-3 text-sm lg:hidden">
+            <button type="button" onClick={() => router.replace(`/s/${salon.id}/messages`)} className="text-muted-foreground underline">
+              ← All conversations
+            </button>
+            {/* The card's description (which carries this link) is hidden on phones to give the thread room. */}
+            {current && (
+              <Link href={`/s/${salon.id}/customers?c=${current.customer.id}`} className="underline md:hidden">
+                Customer record
+              </Link>
+            )}
+          </div>
+        )}
+        {open && (
+          <Card data-thread-box className="h-[calc(100dvh-3rem)] lg:h-auto lg:min-h-0 lg:flex-1">
+            <CardHeader className="shrink-0">
               <CardTitle>{current?.customer.name ?? "Conversation"}</CardTitle>
-              <CardDescription>
+              <CardDescription className="hidden md:block">
                 {current && (
                   <>
                     Thread with {current.designer.displayName}.{" "}
@@ -116,7 +134,7 @@ function StaffMessages() {
                 )}
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex min-h-0 flex-1 flex-col">
               {thread.isPending && <p className="text-sm text-muted-foreground">Loading…</p>}
               {thread.isError && <p className="text-sm text-destructive">You don’t have access to this conversation.</p>}
               {thread.data && (

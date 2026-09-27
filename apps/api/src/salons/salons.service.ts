@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import type { CreateSalonInput, MySalon, PublicSalon, Salon, SalonRole, UpdateSalonInput } from '@reserivo/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RatingsService } from '../ratings/ratings.service.js';
@@ -17,7 +17,9 @@ export class SalonsService {
    * first MANAGER — and a DESIGNER too when they take appointments themselves
    * (solo operators, owner-stylists), seeded with the salon's hours.
    */
-  async create(input: CreateSalonInput, creator: { id: string; name: string }): Promise<MySalon> {
+  async create(input: CreateSalonInput, creator: { id: string; name: string; canCreateBusiness: boolean }): Promise<MySalon> {
+    // Business accounts are approved by a site admin (see auth/business-account.ts); the web hides the form too.
+    if (!creator.canCreateBusiness) throw new ForbiddenException('This account is not approved to create a business yet');
     const taken = await this.prisma.salon.findUnique({ where: { slug: input.slug }, select: { id: true } });
     if (taken) throw new ConflictException('That URL is already taken');
 

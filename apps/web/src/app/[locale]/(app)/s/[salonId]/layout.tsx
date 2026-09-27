@@ -57,7 +57,8 @@ export default function SalonLayout({ children, modal }: { children: ReactNode; 
 
   return (
     <SalonContext.Provider value={{ salon: salon.data, members: members.data, me, isManager }}>
-      <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
+      {/* Passes the remaining height on to a page with data-fill-viewport (Messages); inert otherwise. */}
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:has-[[data-fill-viewport]]:min-h-0 lg:has-[[data-fill-viewport]]:flex-1 lg:has-[[data-fill-viewport]]:grid-rows-[auto_minmax(0,1fr)]">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
             <h1 className="text-[28px] leading-[1.3] md:text-4xl md:leading-[1.2]">{salon.data.name}</h1>

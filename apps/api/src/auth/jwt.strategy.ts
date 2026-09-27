@@ -5,6 +5,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import type { Env } from '../config/env.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { AccessTokenPayload, AuthenticatedUser } from './auth.types.js';
+import { businessAccountSelect, businessFlags } from './business-account.js';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -25,7 +26,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
-      select: { id: true, email: true, name: true, isSiteAdmin: true, emailVerifiedAt: true },
+      select: { id: true, email: true, name: true, isSiteAdmin: true, emailVerifiedAt: true, ...businessAccountSelect },
     });
     if (!user) throw new UnauthorizedException();
 
@@ -38,7 +39,15 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       if (!actor?.isSiteAdmin) throw new UnauthorizedException();
     }
 
-    const { emailVerifiedAt, ...rest } = user;
-    return { ...rest, emailVerified: emailVerifiedAt !== null, actorUserId: payload.act ?? null };
+    const { id, email, name, isSiteAdmin, emailVerifiedAt } = user;
+    return {
+      id,
+      email,
+      name,
+      isSiteAdmin,
+      emailVerified: emailVerifiedAt !== null,
+      ...businessFlags(user),
+      actorUserId: payload.act ?? null,
+    };
   }
 }

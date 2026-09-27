@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import cookieParser from 'cookie-parser';
 import request from 'supertest';
 import { AppModule } from '../src/app.module.js';
+import { approveBusiness } from './business.js';
 
 /**
  * Runs against DATABASE_URL (see apps/api/.env). Each run registers fresh users
@@ -73,6 +74,7 @@ describe('Phase 0 (e2e)', () => {
   });
 
   it('POST /salons creates the salon and makes the caller its MANAGER', async () => {
+    await approveBusiness(app, owner.email);
     const res = await api()
       .post('/salons')
       .set('Authorization', `Bearer ${ownerToken}`)

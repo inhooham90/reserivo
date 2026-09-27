@@ -4,6 +4,7 @@ import { addDays, localToUtc, todayIn } from '@reserivo/shared';
 import cookieParser from 'cookie-parser';
 import request from 'supertest';
 import { AppModule } from '../src/app.module.js';
+import { approveBusiness } from './business.js';
 import { NotificationsService } from '../src/notifications/notifications.service.js';
 
 const LA = 'America/Los_Angeles';
@@ -55,6 +56,7 @@ describe('Phase 5 (e2e)', () => {
     await app.init();
 
     ownToken = (await api().post('/auth/register').send(owner).expect(201)).body.accessToken;
+    await approveBusiness(app, owner.email);
     slug = `phase5-${stamp}`;
     salonId = (await api().post('/salons').set(auth(ownToken)).send({ name: 'Phase Five Salon', slug, timezone: LA }).expect(201)).body.id;
     memberId = (await api().get(`/salons/${salonId}/members`).set(auth(ownToken)).expect(200)).body[0].id;

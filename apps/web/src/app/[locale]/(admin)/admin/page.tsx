@@ -15,10 +15,12 @@ export default function AdminOverviewPage() {
   const t = useTranslations("admin");
   const common = useTranslations("common");
   const [q, setQ] = useState("");
+  // Narrows People to accounts approved (or not) to create businesses; approving is on each person's page.
+  const [business, setBusiness] = useState<"" | "approved" | "unapproved">("");
   const stats = useQuery({ queryKey: ["admin", "stats"], queryFn: () => api<PlatformStats>("/admin/stats") });
   const users = useQuery({
-    queryKey: ["admin", "users", q],
-    queryFn: () => api<AdminUser[]>(`/admin/users?q=${encodeURIComponent(q)}&limit=25`),
+    queryKey: ["admin", "users", q, business],
+    queryFn: () => api<AdminUser[]>(`/admin/users?q=${encodeURIComponent(q)}&limit=25${business ? `&business=${business}` : ""}`),
   });
   const salons = useQuery({
     queryKey: ["admin", "salons", q],
@@ -41,9 +43,21 @@ export default function AdminOverviewPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
-          <CardHeader>
-            <CardTitle>{t("people")}</CardTitle>
-            <CardDescription>{q ? t("matchingUsers") : t("newestSignups")}</CardDescription>
+          <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
+            <div>
+              <CardTitle>{t("people")}</CardTitle>
+              <CardDescription>{q ? t("matchingUsers") : t("newestSignups")}</CardDescription>
+            </div>
+            <select
+              aria-label={t("business.filterLabel")}
+              className="h-8 rounded-md border border-input bg-card px-2 text-sm"
+              value={business}
+              onChange={(e) => setBusiness(e.target.value as typeof business)}
+            >
+              <option value="">{t("business.filterAll")}</option>
+              <option value="approved">{t("business.filterApproved")}</option>
+              <option value="unapproved">{t("business.filterUnapproved")}</option>
+            </select>
           </CardHeader>
           <CardContent>
             {users.isPending && <p className="text-sm text-muted-foreground">{common("loading")}</p>}
@@ -56,6 +70,11 @@ export default function AdminOverviewPage() {
                       <span className="flex items-center gap-2 text-sm font-medium">
                         {u.name}
                         {u.isSiteAdmin && <Badge variant="outline">{t("siteAdmin")}</Badge>}
+                        {u.businessApprovedAt ? (
+                          <Badge variant="secondary">{t("business.approved")}</Badge>
+                        ) : (
+                          u.isBusinessAccount && <Badge variant="outline">{t("business.member")}</Badge>
+                        )}
                       </span>
                       <span className="text-xs text-muted-foreground">{u.email}</span>
                     </span>

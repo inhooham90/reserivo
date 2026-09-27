@@ -3,9 +3,11 @@
 import { useMutation } from "@tanstack/react-query";
 import Image from "next/image";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, type ReactNode } from "react";
 import { LocaleSwitcher } from "@/components/layout/locale-switcher";
+import { PersonalMenu } from "@/components/layout/personal-menu";
 import { SettingsMenu } from "@/components/layout/settings-menu";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
@@ -21,6 +23,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const t = useTranslations("nav");
   const common = useTranslations("common");
   const pathname = usePathname();
+  // Read from the URL, never from localStorage during render (hydration; see CLAUDE.md).
+  const { salonId } = useParams<{ salonId?: string }>();
   // Inside a salon the schedule wants every pixel of width; personal pages
   // (appointments, messages, account settings) sit in DESIGN.md's 1200px
   // column. The 24px/40px gutters apply either way.
@@ -37,17 +41,33 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     );
   }
 
+  // A business account's header is the business: Schedule and Messages go to
+  // the business in the URL, or through /dashboard to the one they used last.
+  // Their personal bookings and inbox sit behind PersonalMenu instead.
+  const inSalon = (tab: string) => new RegExp(`^/s/[^/]+/${tab}(/|$)`).test(pathname);
   const links = [
-    { href: "/appointments", label: t("myAppointments") },
-    { href: "/messages", label: t("messages") },
-    ...(user.isSiteAdmin ? [{ href: "/admin", label: t("admin") }] : []),
+    ...(user.isBusinessAccount
+      ? [
+          { href: salonId ? `/s/${salonId}/calendar` : "/dashboard", label: t("schedule"), active: inSalon("calendar") },
+          { href: salonId ? `/s/${salonId}/messages` : "/dashboard?to=messages", label: t("messages"), active: inSalon("messages") },
+        ]
+      : [
+          { href: "/appointments", label: t("myAppointments"), active: pathname.startsWith("/appointments") },
+          { href: "/messages", label: t("messages"), active: pathname.startsWith("/messages") },
+        ]),
+    ...(user.isSiteAdmin ? [{ href: "/admin", label: t("admin"), active: pathname.startsWith("/admin") }] : []),
   ];
 
   return (
     // Morrri v3 (DESIGN.md) covers the whole signed-in app: every salon tab
     // shares this header, so converting only the schedule would switch
     // palettes on each click. The scope is light-only for now.
-    <div className="theme-morrri flex flex-1 flex-col">
+    // From lg up, a page carrying data-fill-viewport (the chat) gets exactly the
+    // screen (dvh follows collapsing browser bars) and main hands the height left
+    // under the header to the page. Every other page, and the chat below lg, grows
+    // and scrolls as usual.
+    <div className="theme-morrri flex flex-1 flex-col lg:has-[[data-fill-viewport]]:h-dvh lg:has-[[data-fill-viewport]]:flex-none">
+
       {/* The banners sit inside <header> so nothing on the page is outside a
           landmark; a screen reader moving by region would otherwise skip them. */}
       <header>
@@ -74,14 +94,11 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             </Link>
             {/* Drops to its own row on a phone rather than crowding the account cluster. */}
             <nav aria-label={t("primaryLabel")} className={cn(navGroup, "order-last w-full md:order-none md:w-auto")}>
-              {links.map((link) => {
-                const active = pathname.startsWith(link.href);
-                return (
-                  <Link key={link.href} href={link.href} aria-current={active ? "page" : undefined} className={navItem(active)}>
-                    {link.label}
-                  </Link>
-                );
-              })}
+              {links.map((link) => (
+                <Link key={link.href} href={link.href} aria-current={link.active ? "page" : undefined} className={navItem(link.active)}>
+                  {link.label}
+                </Link>
+              ))}
             </nav>
             <div className="ml-auto flex items-center gap-1">
               <span className="flex items-center gap-2 pr-2 text-sm font-medium">
@@ -93,6 +110,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 </span>
                 <span className="hidden lg:inline">{user.name}</span>
               </span>
+              {user.isBusinessAccount && <PersonalMenu className={ghostPillSm} />}
               <LocaleSwitcher className={cn(ghostPillSm, "hidden sm:inline-flex")} />
               <SettingsMenu className={ghostPillSm} />
               <Button
@@ -107,7 +125,11 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
-      <main id="main" tabIndex={-1} className={cn(column, "flex-1 py-6 outline-none")}>
+      <main
+        id="main"
+        tabIndex={-1}
+        className={cn(column, "flex-1 py-6 outline-none lg:has-[[data-fill-viewport]]:flex lg:has-[[data-fill-viewport]]:min-h-0 lg:has-[[data-fill-viewport]]:flex-col")}
+      >
         {children}
       </main>
     </div>

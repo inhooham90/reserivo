@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import cookieParser from 'cookie-parser';
 import request from 'supertest';
 import { AppModule } from '../src/app.module.js';
+import { approveBusiness } from './business.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
 
 /** Phase 4: the site-admin console — search, acting as a user, and the audit log. */
@@ -45,6 +46,7 @@ describe('Phase 4 (e2e)', () => {
       box(res.body.accessToken, res.body.user.id);
     }
 
+    await approveBusiness(app, admin.email);
     slug = `phase4-${stamp}`;
     salonId = (
       await api()

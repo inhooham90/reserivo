@@ -263,7 +263,10 @@
       "yourSalons": "Tus negocios",
       "setUp": "Crear un negocio"
     },
-    "primaryLabel": "Principal"
+    "primaryLabel": "Principal",
+    "schedule": "Agenda",
+    "personal": "Personal",
+    "myMessages": "Mis mensajes"
   },
   "schedule": {
     "toolbar": {
@@ -577,7 +580,10 @@
       "aside": "El horario, el equipo, los servicios y los recordatorios están en Ajustes.",
       "settings": "Ajustes",
       "open": "Abrir",
-      "createAnother": "Crear otro negocio"
+      "createAnother": "Crear otro negocio",
+      "notApprovedTitle": "Morrri aprueba las cuentas de negocio",
+      "notApprovedBody": "Para gestionar tu negocio en Morrri, escribe a <link>{email}</link> y configuraremos tu cuenta.",
+      "createNeedsApproval": "Crear otro negocio requiere la aprobación de Morrri. <link>Contáctanos</link>."
     },
     "createSalon": {
       "title": "Crear un negocio",
@@ -672,6 +678,20 @@
       "loadMore": "Cargar más",
       "end": "Fin del registro.",
       "shown": "{count} mostrados"
+    },
+    "business": {
+      "title": "Cuenta de negocio",
+      "approved": "Negocio",
+      "member": "Miembro del equipo",
+      "filterLabel": "Cuentas de negocio",
+      "filterAll": "Todos",
+      "filterApproved": "Negocios aprobados",
+      "filterUnapproved": "Sin aprobar",
+      "approvedOn": "Aprobada como negocio el {date}. Puede crear negocios.",
+      "memberOnly": "Es cuenta de negocio porque pertenece a un negocio. No puede crear uno hasta que se apruebe.",
+      "personal": "Cuenta personal. Apruébala para que pueda crear un negocio.",
+      "approve": "Aprobar como negocio",
+      "revoke": "Retirar aprobación"
     }
   },
   "unsubscribe": {

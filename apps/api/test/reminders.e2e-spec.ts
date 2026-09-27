@@ -4,6 +4,7 @@ import { addDays, localToUtc, todayIn } from '@reserivo/shared';
 import cookieParser from 'cookie-parser';
 import request from 'supertest';
 import { AppModule } from '../src/app.module.js';
+import { approveBusiness } from './business.js';
 import { NotificationsService } from '../src/notifications/notifications.service.js';
 import type { NotificationEvent } from '../src/notifications/notifications.types.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
@@ -65,6 +66,7 @@ describe('Reminders (e2e)', () => {
     reminders = app.get(RemindersService);
 
     ownToken = (await api().post('/auth/register').send(owner).expect(201)).body.accessToken;
+    await approveBusiness(app, owner.email);
     slug = `reminders-${stamp}`;
     salonId = (await api().post('/salons').set(auth(ownToken)).send({ name: 'Reminder Salon', slug, timezone: LA }).expect(201)).body.id;
     memberId = (await api().get(`/salons/${salonId}/members`).set(auth(ownToken)).expect(200)).body[0].id;

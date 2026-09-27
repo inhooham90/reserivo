@@ -4,6 +4,7 @@ import { addDays, todayIn, weekdayOf } from '@reserivo/shared';
 import cookieParser from 'cookie-parser';
 import request from 'supertest';
 import { AppModule } from '../src/app.module.js';
+import { approveBusiness } from './business.js';
 
 const LA = 'America/Los_Angeles';
 
@@ -38,6 +39,7 @@ describe('Salon hours (e2e)', () => {
     mgrToken = (await api().post('/auth/register').send(manager).expect(201)).body.accessToken;
     dsgToken = (await api().post('/auth/register').send(designer).expect(201)).body.accessToken;
 
+    await approveBusiness(app, manager.email);
     slug = `hours-${stamp}`;
     salonId = (await api().post('/salons').set(auth(mgrToken)).send({ name: 'Hours Salon', slug, timezone: LA, takesAppointments: false }).expect(201)).body.id;
     mgrMemberId = (await api().get(`/salons/${salonId}/members`).set(auth(mgrToken)).expect(200)).body[0].id;

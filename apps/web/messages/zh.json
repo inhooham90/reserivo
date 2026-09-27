@@ -263,7 +263,10 @@
       "yourSalons": "我的商家",
       "setUp": "创建商家"
     },
-    "primaryLabel": "主导航"
+    "primaryLabel": "主导航",
+    "schedule": "日程",
+    "personal": "个人",
+    "myMessages": "我的消息"
   },
   "schedule": {
     "toolbar": {
@@ -577,7 +580,10 @@
       "aside": "营业时间、团队、服务和提醒都在设置里。",
       "settings": "设置",
       "open": "打开",
-      "createAnother": "再创建一个商家"
+      "createAnother": "再创建一个商家",
+      "notApprovedTitle": "商家账户由 Morrri 审核批准",
+      "notApprovedBody": "如需在 Morrri 上经营您的商家，请发送邮件至 <link>{email}</link>，我们会为您开通账户。",
+      "createNeedsApproval": "创建更多商家需要 Morrri 批准。<link>联系我们</link>。"
     },
     "createSalon": {
       "title": "创建商家",
@@ -672,6 +678,20 @@
       "loadMore": "加载更多",
       "end": "已到日志末尾。",
       "shown": "已显示 {count} 条"
+    },
+    "business": {
+      "title": "商家账户",
+      "approved": "商家",
+      "member": "团队成员",
+      "filterLabel": "商家账户",
+      "filterAll": "全部",
+      "filterApproved": "已批准的商家",
+      "filterUnapproved": "未批准",
+      "approvedOn": "已于 {date} 批准为商家。可以创建商家。",
+      "memberOnly": "因隶属于某个商家而成为商家账户。获批前不能创建商家。",
+      "personal": "个人账户。批准后即可创建商家。",
+      "approve": "批准为商家",
+      "revoke": "撤销批准"
     }
   },
   "unsubscribe": {

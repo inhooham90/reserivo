@@ -6,6 +6,7 @@ import {
   type AdminSearch,
   type AdminUser,
   type AdminUserDetail,
+  type AdminUserSearch,
   type AuditEntry,
   type AuditPage,
   type AuditQuery,
@@ -15,6 +16,7 @@ import {
 import { AuditService } from '../audit/audit.service.js';
 import { AuthService } from '../auth/auth.service.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
+import { businessAccountSelect, businessFlags } from '../auth/business-account.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 const insensitive = { mode: 'insensitive' } as const;
@@ -45,9 +47,12 @@ export class AdminService {
 
   // ---------- Users ----------
 
-  async searchUsers({ q, limit }: AdminSearch): Promise<AdminUser[]> {
+  async searchUsers({ q, limit, business }: AdminUserSearch): Promise<AdminUser[]> {
     const rows = await this.prisma.user.findMany({
-      where: q ? { OR: [{ email: { contains: q, ...insensitive } }, { name: { contains: q, ...insensitive } }] } : {},
+      where: {
+        ...(q ? { OR: [{ email: { contains: q, ...insensitive } }, { name: { contains: q, ...insensitive } }] } : {}),
+        ...(business ? { businessApprovedAt: business === 'approved' ? { not: null } : null } : {}),
+      },
       select: {
         id: true,
         email: true,
@@ -55,7 +60,10 @@ export class AdminService {
         phone: true,
         isSiteAdmin: true,
         createdAt: true,
+        businessApprovedAt: true,
         _count: { select: { memberships: true } },
+        // One ACTIVE row is enough to say "belongs to a business".
+        memberships: { where: { status: 'ACTIVE' }, select: { id: true }, take: 1 },
       },
       orderBy: { createdAt: 'desc' },
       take: limit,
@@ -68,7 +76,24 @@ export class AdminService {
       isSiteAdmin: r.isSiteAdmin,
       createdAt: r.createdAt.toISOString(),
       salonCount: r._count.memberships,
+      businessApprovedAt: r.businessApprovedAt?.toISOString() ?? null,
+      isBusinessAccount: businessFlags({ ...r, _count: { memberships: r.memberships.length } }).isBusinessAccount,
     }));
+  }
+
+  /**
+   * Approves an account to create businesses, or withdraws that. Idempotent.
+   * Withdrawing never touches businesses the account already belongs to, so it
+   * stays a business account while it has one; it only stops new ones.
+   * The audit interceptor records the request.
+   */
+  async setBusinessApproval(admin: AuthenticatedUser, id: string, approved: boolean): Promise<AdminUserDetail> {
+    const user = await this.prisma.user.findUnique({ where: { id }, select: { businessApprovedAt: true } });
+    if (!user) throw new NotFoundException('User not found');
+    if (approved !== (user.businessApprovedAt !== null)) {
+      await this.prisma.user.update({ where: { id }, data: { businessApprovedAt: approved ? new Date() : null } });
+    }
+    return this.userDetail(admin, id);
   }
 
   async userDetail(admin: AuthenticatedUser, id: string): Promise<AdminUserDetail> {
@@ -94,6 +119,11 @@ export class AdminService {
       isSiteAdmin: user.isSiteAdmin,
       createdAt: user.createdAt.toISOString(),
       salonCount: user.memberships.length,
+      businessApprovedAt: user.businessApprovedAt?.toISOString() ?? null,
+      isBusinessAccount: businessFlags({
+        ...user,
+        _count: { memberships: user.memberships.filter((m) => m.status === 'ACTIVE').length },
+      }).isBusinessAccount,
       memberships: user.memberships.map((m) => ({
         id: m.id,
         salonId: m.salonId,
@@ -193,7 +223,7 @@ export class AdminService {
   async impersonate(admin: AuthenticatedUser, userId: string, meta: { ip?: string; userAgent?: string }): Promise<AuthResponse> {
     const target = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, name: true, isSiteAdmin: true, emailVerifiedAt: true },
+      select: { id: true, email: true, name: true, isSiteAdmin: true, emailVerifiedAt: true, ...businessAccountSelect },
     });
     if (!target) throw new NotFoundException('User not found');
     if (target.id === admin.id) throw new ConflictException('You are already yourself');
@@ -220,6 +250,7 @@ export class AdminService {
         name: target.name,
         isSiteAdmin: false,
         emailVerified: target.emailVerifiedAt !== null,
+        ...businessFlags(target),
         actorUserId: admin.id,
       },
     };

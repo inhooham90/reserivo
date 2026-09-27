@@ -27,8 +27,9 @@ export default function ConversationPage() {
   });
 
   return (
-    <div className="mx-auto grid w-full max-w-2xl gap-4">
-      <div>
+    // Fills the screen from lg up; below it the thread gets a one-screen box scrolled into view (see ThreadView).
+    <div data-fill-viewport className="mx-auto flex w-full max-w-2xl flex-col gap-4 lg:min-h-0 lg:flex-1">
+      <div className="shrink-0">
         <Link href="/messages" className="text-sm text-muted-foreground underline">
           ← All messages
         </Link>
@@ -37,13 +38,15 @@ export default function ConversationPage() {
       {thread.isPending && <p className="text-muted-foreground">Loading…</p>}
       {thread.isError && <p className="text-destructive">This conversation is not available.</p>}
       {thread.data && (
-        <ThreadView
-          messages={thread.data.messages}
-          viewer="customer"
-          onSend={(body) => send.mutate(body)}
-          sending={send.isPending}
-          error={send.error instanceof ApiError ? send.error.message : undefined}
-        />
+        <div data-thread-box className="flex h-[calc(100dvh-3rem)] flex-col lg:h-auto lg:min-h-0 lg:flex-1">
+          <ThreadView
+            messages={thread.data.messages}
+            viewer="customer"
+            onSend={(body) => send.mutate(body)}
+            sending={send.isPending}
+            error={send.error instanceof ApiError ? send.error.message : undefined}
+          />
+        </div>
       )}
     </div>
   );

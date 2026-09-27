@@ -4,6 +4,7 @@ import { addDays, localToUtc, todayIn, type AvailabilityResponse } from '@reseri
 import cookieParser from 'cookie-parser';
 import request from 'supertest';
 import { AppModule } from '../src/app.module.js';
+import { approveBusiness } from './business.js';
 
 const LA = 'America/Los_Angeles';
 
@@ -61,6 +62,7 @@ describe('Double booking (e2e)', () => {
     await app.init();
 
     token = (await api().post('/auth/register').send(owner).expect(201)).body.accessToken;
+    await approveBusiness(app, owner.email);
     slug = `double-booking-${stamp}`;
     salonId = (await api().post('/salons').set(auth()).send({ name: 'Double Salon', slug, timezone: LA }).expect(201))
       .body.id;

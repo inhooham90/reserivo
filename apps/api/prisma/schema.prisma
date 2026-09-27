@@ -30,6 +30,10 @@ model User {
   /// new language needs no migration; reads narrow it with toLocale().
   locale          String    @default("en")
   isSiteAdmin     Boolean   @default(false)
+  /// Set by a site admin: this account may create businesses. Belonging to a
+  /// business (an ACTIVE membership) makes an account a business account on
+  /// its own, so invited team members never need this. See business-account.ts.
+  businessApprovedAt DateTime? @db.Timestamptz(6)
   createdAt       DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt       DateTime  @updatedAt @db.Timestamptz(6)
 
