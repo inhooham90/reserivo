@@ -75,6 +75,8 @@ const DATE_STYLES = {
   monthYear: { year: "numeric", month: "short" },
   /** "Mon, Jan 5" */
   dayMonth: { weekday: "short", month: "short", day: "numeric" },
+  /** "Monday, Jan 5": the schedule toolbar, where the weekday is the point. */
+  dayLong: { weekday: "long", month: "short", day: "numeric" },
 } satisfies Record<string, Intl.DateTimeFormatOptions>;
 
 export type DateStyle = keyof typeof DATE_STYLES;

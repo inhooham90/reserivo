@@ -1,22 +1,13 @@
-import { intersectWindows, localToUtc, weekdayOf, type Window } from '@reserivo/shared';
+import { intersectWindows, localToUtc, windowsForDate, type ExceptionLike, type RuleLike, type Window } from '@reserivo/shared';
 
 /**
  * Pure slot computation. No I/O, no clock reads — everything comes in through
  * the input so it can be tested exhaustively (including DST transitions).
  */
 
-export interface RuleLike {
-  weekday: number;
-  startMinutes: number;
-  endMinutes: number;
-}
-
-export interface ExceptionLike {
-  date: string;
-  type: 'OFF' | 'CUSTOM';
-  startMinutes: number | null;
-  endMinutes: number | null;
-}
+// Day windows moved to @reserivo/shared so the staff calendar draws closed hours
+// with exactly the rule the engine books by.
+export { windowsForDate, type RuleLike, type ExceptionLike } from '@reserivo/shared';
 
 /** An occupied interval on the designer's timeline; endAt already includes any buffer. */
 export interface BusyInterval {
@@ -65,23 +56,6 @@ export interface SlotEngineInput {
 export interface EngineSlot {
   startAt: Date;
   startMinutes: number;
-}
-
-/**
- * The working windows for one date: an OFF exception wins, then CUSTOM windows
- * replace the weekly rules, otherwise the weekday's rules apply.
- */
-export function windowsForDate(date: string, rules: RuleLike[], exceptions: ExceptionLike[]): Window[] {
-  const todays = exceptions.filter((e) => e.date === date);
-  if (todays.some((e) => e.type === 'OFF')) return [];
-
-  const custom = todays.filter((e) => e.type === 'CUSTOM' && e.startMinutes !== null && e.endMinutes !== null);
-  if (custom.length) {
-    return custom.map((e) => ({ startMinutes: e.startMinutes!, endMinutes: e.endMinutes! }));
-  }
-
-  const weekday = weekdayOf(date);
-  return rules.filter((r) => r.weekday === weekday).map((r) => ({ startMinutes: r.startMinutes, endMinutes: r.endMinutes }));
 }
 
 /** Salon windows, narrowed by the member's own windows when they have any. */

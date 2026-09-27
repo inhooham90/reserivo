@@ -149,7 +149,7 @@ export class AdminService {
         _count: { select: { memberships: true, customers: true, appointments: true, services: true } },
       },
     });
-    if (!salon) throw new NotFoundException('Salon not found');
+    if (!salon) throw new NotFoundException('Business not found');
 
     const upcomingAppointments = await this.prisma.appointment.count({
       where: { salonId: id, status: { in: [...BLOCKING_STATUSES] }, startAt: { gte: new Date() } },

@@ -19,9 +19,9 @@ export const metadata: Metadata = {
  */
 export default function AccessibilityPage() {
   return (
-    <LegalPage title="Accessibility">
+    <LegalPage doc="accessibility" title="Accessibility">
       <p>
-        {LEGAL.product} should work for everyone who books an appointment or runs a salon with it, including people
+        {LEGAL.product} should work for everyone who books an appointment or runs a business with it, including people
         who use a screen reader, a keyboard instead of a mouse, magnification, or voice control. {LEGAL.legalName}{" "}
         is responsible for the accessibility of the {LEGAL.product} website and app.
       </p>
@@ -59,17 +59,17 @@ export default function AccessibilityPage() {
       <p>We know about these, and are working on them:</p>
       <ul>
         <li>
-          <strong>Choosing a time on the salon calendar.</strong> Staff can click an empty time on the calendar to
+          <strong>Choosing a time on the business calendar.</strong> Staff can click an empty time on the calendar to
           start a booking. That shortcut needs a mouse or touch screen. The “New appointment” button does the same
           thing from the keyboard.
         </li>
         <li>
-          <strong>Languages.</strong> Some screens for salon staff, the text-message consent wording, and our legal
+          <strong>Languages.</strong> Some screens for business staff, the text-message consent wording, and our legal
           pages are in English only for now.
         </li>
         <li>
-          <strong>What salons write.</strong> Each salon writes its own service names and descriptions. We give them
-          plain-text fields, but we do not review what they write.
+          <strong>What businesses write.</strong> Each business writes its own service names and descriptions. We give
+          them plain-text fields, but we do not review what they write.
         </li>
       </ul>
 
@@ -77,13 +77,13 @@ export default function AccessibilityPage() {
       <p>
         Tell us, and we will help. Email{" "}
         <a href={`mailto:${LEGAL.supportEmail}?subject=Accessibility`}>{LEGAL.supportEmail}</a> with the page you were
-        on and what went wrong. If you cannot book an appointment through a salon’s booking page, include the salon’s
-        name and the time you want, and we will help you make the booking. We aim to reply within five business
-        days.
+        on and what went wrong. If you cannot book an appointment through a business’s booking page, include the
+        business’s name and the time you want, and we will help you make the booking. We aim to reply within five
+        business days.
       </p>
       <p>
-        This page covers the {LEGAL.product} website. Questions about access to a salon’s premises, such as steps,
-        parking or seating, are for the salon itself.
+        This page covers the {LEGAL.product} website. Questions about access to a business’s premises, such as steps,
+        parking or seating, are for the business itself.
       </p>
       <p>
         See also our <Link href="/terms">Terms of Service</Link> and <Link href="/privacy">Privacy Policy</Link>.

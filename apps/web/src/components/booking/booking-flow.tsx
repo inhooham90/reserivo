@@ -11,11 +11,11 @@ import {
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Check, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { useMemo, useState } from "react";
 import { FieldError } from "@/components/field-error";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,6 +24,7 @@ import { useAuth } from "@/lib/auth";
 import { RatingSummary } from "@/components/rating/stars";
 import { SmsConsent } from "@/components/booking/sms-consent";
 import { useFormat } from "@/lib/use-format";
+import { outlinePillSm, pillButton, pillInput, textLink } from "@/lib/v3";
 import { cn } from "cn";
 
 type Designer = PublicSalon["designers"][number];
@@ -36,8 +37,10 @@ const DAYS_SHOWN = 14;
 const STEPS = ["service", "time", "details"] as const;
 
 /**
- * The customer's path from menu to confirmed booking. Storefront mood: bigger
- * type, plenty of air, and every color a token so a salon's accent can take over.
+ * The customer's path from menu to confirmed booking, on the Morrri v3 design
+ * (DESIGN.md): pill controls, containers told apart by tone rather than
+ * borders, navy only on the primary action and the selected day. Every color
+ * is a token so a salon's accent can take over.
  *
  * On wide screens the flow sits beside a sticky summary of what has been chosen
  * so far; on phones the same summary is shown inline above each step instead.
@@ -109,8 +112,9 @@ function Steps({ current }: { current: number }) {
           <span
             aria-hidden
             className={cn(
-              "grid size-6 place-items-center rounded-full border border-input text-xs tabular-nums",
-              i < current && "border-primary bg-primary text-primary-foreground",
+              "grid size-7 place-items-center rounded-full border border-input text-xs tabular-nums",
+              // DESIGN.md: a checked state is Ink, never Navy; navy stays on the primary button.
+              i < current && "border-foreground bg-foreground text-background",
               i === current && "border-foreground",
             )}
           >
@@ -140,7 +144,7 @@ function Avatar({ designer }: { designer: Designer }) {
   return (
     <span
       aria-hidden
-      className="grid size-14 shrink-0 place-items-center rounded-full bg-accent font-heading text-lg text-accent-foreground"
+      className="grid size-14 shrink-0 place-items-center rounded-full bg-lavender font-display text-lg text-foreground"
     >
       {initials}
     </span>
@@ -154,7 +158,8 @@ function Menu({ salon, onPick }: { salon: PublicSalon; onPick: (d: Designer, s: 
 
   if (withServices.length === 0) {
     return (
-      <div className="rounded-xl bg-muted px-6 py-10 text-center">
+      <div className="grid justify-items-center gap-4 rounded-lg bg-muted px-6 py-10 text-center">
+        <Image src="/images/mona-binoculars.png" alt="" width={720} height={715} sizes="160px" className="h-auto w-40" />
         <p className="text-lg">{t("settingUp")}</p>
       </div>
     );
@@ -174,21 +179,23 @@ function Menu({ salon, onPick }: { salon: PublicSalon; onPick: (d: Designer, s: 
               {d.bio && <p className="max-w-prose text-muted-foreground">{d.bio}</p>}
             </div>
           </div>
-          <ul className="divide-y border-y">
+          <ul className="divide-y divide-border overflow-hidden rounded-lg bg-muted">
             {d.services.map((s) => (
               <li key={s.id}>
                 <button
                   type="button"
                   onClick={() => onPick(d, s)}
-                  className="group grid w-full grid-cols-[1fr_auto] items-baseline gap-x-6 gap-y-1 px-3 py-4 text-left transition-colors hover:bg-muted focus-visible:bg-muted focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
+                  className="group grid w-full grid-cols-[1fr_auto] items-baseline gap-x-6 gap-y-1 px-6 py-5 text-left transition-colors hover:bg-surface-muted focus-visible:bg-surface-muted focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
                 >
                   <span className="text-lg font-medium">{s.name}</span>
-                  <span className="flex items-center gap-2 text-lg tabular-nums">
+                  <span className="flex items-center gap-3 text-lg tabular-nums">
                     {f.cents(s.priceCents)}
-                    <ChevronRight
+                    <span
                       aria-hidden
-                      className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground"
-                    />
+                      className="grid size-8 place-items-center self-center rounded-full bg-card transition-transform group-hover:translate-x-0.5"
+                    >
+                      <ChevronRight className="size-4" />
+                    </span>
                   </span>
                   <span className="text-sm text-muted-foreground">
                     {f.duration(s.durationMin)}
@@ -222,8 +229,8 @@ function BookingSummary({
   const f = useFormat();
   const t = useTranslations("booking.summary");
   return (
-    <div className="grid gap-5 rounded-xl border bg-card p-6">
-      <p className="font-heading text-xl">{t("title")}</p>
+    <div className="grid gap-5 rounded-lg bg-butter p-8">
+      <p className="font-display text-[28px] leading-[1.3] font-medium tracking-[-0.01em]">{t("title")}</p>
       {service && designer ? (
         <dl className="grid gap-4">
           <div className="grid gap-0.5">
@@ -265,7 +272,7 @@ function Summary({ designer, service, startAt, timezone }: { designer: Designer;
   const f = useFormat();
   const t = useTranslations("booking");
   return (
-    <div className="flex flex-wrap items-baseline justify-between gap-2 rounded-xl border bg-card px-5 py-4 lg:hidden">
+    <div className="flex flex-wrap items-baseline justify-between gap-2 rounded-lg bg-butter px-5 py-4 lg:hidden">
       <div className="grid gap-0.5">
         <span className="font-medium">
           {t.rich("serviceWith", {
@@ -289,7 +296,7 @@ function BackButton({ onClick, children }: { onClick: () => void; children: Reac
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-1.5 justify-self-start rounded-md text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      className="-ml-3 inline-flex h-10 items-center gap-1.5 justify-self-start rounded-full px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
     >
       <ArrowLeft aria-hidden className="size-4" />
       {children}
@@ -350,10 +357,14 @@ function TimePicker({
                 disabled={availability.isSuccess && count === 0}
                 aria-pressed={active}
                 className={cn(
-                  "grid min-w-[4.75rem] shrink-0 snap-start gap-0.5 rounded-lg border px-3 py-2.5 text-center text-sm transition-colors",
+                  "grid min-w-[4.75rem] shrink-0 snap-start gap-0.5 rounded-2xl border px-3 py-3 text-center text-sm transition-colors",
                   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
-                  active ? "border-primary bg-primary text-primary-foreground" : "border-input bg-card hover:bg-muted",
-                  "disabled:cursor-not-allowed disabled:opacity-40",
+                  // The selected day is a pill toggle, so it takes the navy pair (DESIGN.md "Primary").
+                  // A selected day stays solid even when closed (today after hours): faded navy reads as grey mush.
+                  active
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-input bg-card hover:border-foreground disabled:opacity-40 disabled:hover:border-input",
+                  "disabled:cursor-not-allowed",
                 )}
               >
                 <span className="text-xs uppercase tracking-wide opacity-80">{weekday}</span>
@@ -369,16 +380,16 @@ function TimePicker({
         {availability.isPending && (
           <div role="status" aria-label={t("time.checking")} className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
             {Array.from({ length: 10 }, (_, i) => (
-              <div key={i} className="h-11 animate-pulse rounded-lg bg-muted" />
+              <div key={i} className="h-12 animate-pulse rounded-full bg-muted" />
             ))}
           </div>
         )}
         {availability.isError && <p className="text-destructive">{t("time.loadError")}</p>}
         {selected && selected.slots.length === 0 && (
-          <div className="grid justify-items-start gap-3 rounded-xl bg-muted px-5 py-6">
+          <div className="grid justify-items-start gap-4 rounded-lg bg-lavender px-6 py-6">
             <p>{t("time.nothingOpen")}</p>
             {firstOpen && firstOpen !== date && (
-              <Button variant="outline" onClick={() => setDate(firstOpen)}>
+              <Button variant="outline" className={outlinePillSm} onClick={() => setDate(firstOpen)}>
                 {t("time.jumpTo", { date: f.localDate(firstOpen) })}
               </Button>
             )}
@@ -391,7 +402,7 @@ function TimePicker({
                 key={s.startAt}
                 variant="outline"
                 size="lg"
-                className="h-11 text-base tabular-nums hover:border-primary"
+                className={cn(outlinePillSm, "h-12 border-input text-base tabular-nums dark:border-input")}
                 onClick={() => onPick(s.startAt)}
               >
                 {f.minutes(s.startMinutes)}
@@ -441,70 +452,90 @@ function Details({
     <div className="grid gap-8 animate-in fade-in duration-300">
       <BackButton onClick={onBack}>{t("back.changeTime")}</BackButton>
       <Summary designer={designer} service={service} startAt={startAt} timezone={salon.timezone} />
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-heading text-2xl">{t("details.title")}</CardTitle>
-          <CardDescription>
-            {user ? t("details.bookingAs", { email: user.email }) : t("details.noAccount")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form
-            className="grid gap-5"
-            onSubmit={(e) => {
-              e.preventDefault();
-              book.mutate({
-                designerId: designer.id,
-                serviceId: service.id,
-                startAt,
-                customer: {
-                  name: name.trim(),
-                  email: email.trim(),
-                  phone: phone.trim() || undefined,
-                  smsConsent: phone.trim() ? smsConsent : undefined,
-                },
-                notes: notes.trim() || undefined,
-              });
-            }}
-          >
+      <section aria-labelledby="bk-title" className="grid gap-6 rounded-lg bg-muted px-6 py-8 md:p-10">
+        <div className="grid gap-1.5">
+          <h2 id="bk-title" className="text-[28px] leading-[1.3]">
+            {t("details.title")}
+          </h2>
+          <p className="text-muted-foreground">{user ? t("details.bookingAs", { email: user.email }) : t("details.noAccount")}</p>
+        </div>
+        <form
+          className="grid gap-5"
+          onSubmit={(e) => {
+            e.preventDefault();
+            book.mutate({
+              designerId: designer.id,
+              serviceId: service.id,
+              startAt,
+              customer: {
+                name: name.trim(),
+                email: email.trim(),
+                phone: phone.trim() || undefined,
+                smsConsent: phone.trim() ? smsConsent : undefined,
+              },
+              notes: notes.trim() || undefined,
+            });
+          }}
+        >
+          <div className="grid gap-2">
+            <Label htmlFor="bk-name">{t("details.name")}</Label>
+            <Input
+              id="bk-name"
+              className={pillInput}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoComplete="name"
+              required
+            />
+            <FieldError message={fieldError("name")} />
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2">
             <div className="grid gap-2">
-              <Label htmlFor="bk-name">{t("details.name")}</Label>
-              <Input id="bk-name" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" required />
-              <FieldError message={fieldError("name")} />
+              <Label htmlFor="bk-email">{t("details.email")}</Label>
+              <Input
+                id="bk-email"
+                className={pillInput}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+                required
+                disabled={Boolean(user)}
+              />
+              <FieldError message={fieldError("email")} />
             </div>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div className="grid gap-2">
-                <Label htmlFor="bk-email">{t("details.email")}</Label>
-                <Input
-                  id="bk-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  autoComplete="email"
-                  required
-                  disabled={Boolean(user)}
-                />
-                <FieldError message={fieldError("email")} />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="bk-phone">{t("details.phone")}</Label>
-                <Input id="bk-phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="tel" />
-                <FieldError message={fieldError("phone")} />
-              </div>
-            </div>
-            <SmsConsent checked={smsConsent} onChange={setSmsConsent} hasPhone={Boolean(phone.trim())} />
             <div className="grid gap-2">
-              <Label htmlFor="bk-notes">{t("details.notes")}</Label>
-              <Textarea id="bk-notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
+              <Label htmlFor="bk-phone">{t("details.phone")}</Label>
+              <Input
+                id="bk-phone"
+                className={pillInput}
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                autoComplete="tel"
+              />
+              <FieldError message={fieldError("phone")} />
             </div>
-            {err && !err.issues.length && <FieldError message={err.message} />}
-            <Button type="submit" size="lg" className="h-11 text-base" disabled={book.isPending}>
-              {book.isPending ? t("details.submitting") : t("details.submit")}
-            </Button>
-            <p className="text-xs text-muted-foreground">{t("summary.cancellation", { hours: salon.cancelWindowHours })}</p>
-          </form>
-        </CardContent>
-      </Card>
+          </div>
+          <SmsConsent checked={smsConsent} onChange={setSmsConsent} hasPhone={Boolean(phone.trim())} />
+          <div className="grid gap-2">
+            <Label htmlFor="bk-notes">{t("details.notes")}</Label>
+            {/* Not a pill: a multi-line field in a full capsule clips its corners. */}
+            <Textarea
+              id="bk-notes"
+              rows={2}
+              className="rounded-3xl bg-card px-6 py-3 text-base md:text-base dark:bg-card"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
+          </div>
+          {err && !err.issues.length && <FieldError message={err.message} />}
+          <Button type="submit" size="lg" className={cn(pillButton, "w-full text-base")} disabled={book.isPending}>
+            {book.isPending ? t("details.submitting") : t("details.submit")}
+          </Button>
+          <p className="text-xs text-muted-foreground">{t("summary.cancellation", { hours: salon.cancelWindowHours })}</p>
+        </form>
+      </section>
     </div>
   );
 }
@@ -514,38 +545,60 @@ function Confirmation({ appt }: { appt: CustomerAppointment }) {
   const { user } = useAuth();
   const t = useTranslations("booking.done");
   return (
-    <div className="grid max-w-2xl gap-6 animate-in fade-in slide-in-from-bottom-3 duration-500">
-      <span className="grid size-12 place-items-center rounded-full bg-primary text-primary-foreground">
-        <Check aria-hidden className="size-6" />
-      </span>
-      <div className="grid gap-2">
-        <h2 className="text-4xl">{t("title")}</h2>
-        <p className="text-lg text-muted-foreground">
-          {t("summary", { service: appt.serviceName, designer: appt.designerName, salon: appt.salon.name })}
-        </p>
-      </div>
-      <p className="font-heading text-3xl">{f.inTz(appt.startAt, appt.salon.timezone, "dateTimeLong")}</p>
-      <p className="text-muted-foreground">
-        {t("payAtSalon", { price: f.cents(appt.priceCents) })}
-        {appt.cancellableUntil && <> {t("cancelUntil", { time: f.inTz(appt.cancellableUntil, appt.salon.timezone) })}</>}
-      </p>
-      <div className="border-t pt-6">
-        {user ? (
-          <Button size="lg" className="h-11 px-5" nativeButton={false} render={<Link href="/appointments" />}>
-            {t("seeAppointments")}
-          </Button>
-        ) : (
-          <p className="text-muted-foreground">
-            {t.rich("createAccount", {
-              link: (chunks) => (
-                <Link href="/register?next=/appointments" className="text-foreground underline underline-offset-4">
-                  {chunks}
-                </Link>
-              ),
+    <div className="grid items-center gap-6 rounded-lg bg-butter px-6 py-10 animate-in fade-in slide-in-from-bottom-3 duration-500 md:grid-cols-[minmax(0,1fr)_auto] md:gap-12 md:p-16">
+      <div className="grid max-w-2xl gap-6">
+        <span className="grid size-12 place-items-center rounded-full bg-foreground text-background">
+          <Check aria-hidden className="size-6" />
+        </span>
+        <div className="grid gap-2">
+          <h2 className="text-4xl leading-[1.2] md:text-5xl">{t("title")}</h2>
+          <p className="text-lg text-body">
+            {t("summary", {
+              service: appt.serviceName,
+              designer: appt.designerName,
+              salon: appt.salon.name,
             })}
           </p>
-        )}
+        </div>
+        {/* A time, so Geist: DESIGN.md keeps numbers out of the serif. */}
+        <p className="text-3xl font-semibold tracking-[-0.02em]">{f.inTz(appt.startAt, appt.salon.timezone, "dateTimeLong")}</p>
+        <p className="text-body">
+          {t("payAtSalon", { price: f.cents(appt.priceCents) })}
+          {appt.cancellableUntil && (
+            <>
+              {" "}
+              {t("cancelUntil", {
+                time: f.inTz(appt.cancellableUntil, appt.salon.timezone),
+              })}
+            </>
+          )}
+        </p>
+        <div className="border-t border-border pt-6">
+          {user ? (
+            <Button size="lg" className={cn(pillButton, "text-base")} nativeButton={false} render={<Link href="/appointments" />}>
+              {t("seeAppointments")}
+            </Button>
+          ) : (
+            <p className="text-body">
+              {t.rich("createAccount", {
+                link: (chunks) => (
+                  <Link href="/register?next=/appointments" className={textLink}>
+                    {chunks}
+                  </Link>
+                ),
+              })}
+            </p>
+          )}
+        </div>
       </div>
+      <Image
+        src="/images/mona-hairflip.png"
+        alt=""
+        width={720}
+        height={715}
+        sizes="(min-width: 768px) 240px, 160px"
+        className="m-auto h-auto w-40 md:w-60"
+      />
     </div>
   );
 }

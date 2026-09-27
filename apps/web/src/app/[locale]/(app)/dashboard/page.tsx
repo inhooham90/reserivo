@@ -35,7 +35,7 @@ export default function DashboardPage() {
     return (
       <Card className="mx-auto mt-8 max-w-md">
         <CardHeader>
-          <CardTitle>Couldn’t load your salons</CardTitle>
+          <CardTitle>Couldn’t load your businesses</CardTitle>
           <CardDescription>Check your connection and try again.</CardDescription>
         </CardHeader>
         <CardContent>

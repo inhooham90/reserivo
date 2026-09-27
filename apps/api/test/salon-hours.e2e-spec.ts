@@ -112,7 +112,7 @@ describe('Salon hours (e2e)', () => {
       .set(auth(dsgToken))
       .send({ rules: [{ weekday: 2, startMinutes: 480, endMinutes: 720 }] }) // 8:00 start, salon opens 9
       .expect(400);
-    expect(early.body.message).toMatch(/Tuesday 08:00–12:00 is outside salon hours \(09:00–18:00\)/);
+    expect(early.body.message).toMatch(/Tuesday 08:00–12:00 is outside business hours \(09:00–18:00\)/);
 
     const sunday = await api()
       .put(`/salons/${salonId}/members/${dsgMemberId}/availability/rules`)
@@ -171,7 +171,7 @@ describe('Salon hours (e2e)', () => {
       .set(auth(dsgToken))
       .send({ date: TUE, type: 'CUSTOM', startMinutes: 660, endMinutes: 1020 }) // until 17, salon closes 14
       .expect(400);
-    expect(tooLate.body.message).toMatch(/outside the salon's hours/);
+    expect(tooLate.body.message).toMatch(/outside business hours/);
 
     await api()
       .post(`/salons/${salonId}/members/${dsgMemberId}/availability/exceptions`)

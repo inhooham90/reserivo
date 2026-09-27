@@ -59,7 +59,7 @@ export class AvailabilityService {
         ? salonWindows.map((w) => `${minutesToHHMM(w.startMinutes)}–${minutesToHHMM(w.endMinutes)}`).join(', ')
         : 'closed';
       throw new BadRequestException(
-        `${WEEKDAY[rule.weekday]} ${minutesToHHMM(rule.startMinutes)}–${minutesToHHMM(rule.endMinutes)} is outside salon hours (${bounds}).`,
+        `${WEEKDAY[rule.weekday]} ${minutesToHHMM(rule.startMinutes)}–${minutesToHHMM(rule.endMinutes)} is outside business hours (${bounds}).`,
       );
     }
 
@@ -92,7 +92,7 @@ export class AvailabilityService {
         const bounds = open.length
           ? open.map((w) => `${minutesToHHMM(w.startMinutes)}–${minutesToHHMM(w.endMinutes)}`).join(', ')
           : 'closed that day';
-        throw new BadRequestException(`Those hours are outside the salon's hours on ${input.date} (${bounds}).`);
+        throw new BadRequestException(`Those hours are outside business hours on ${input.date} (${bounds}).`);
       }
     }
 

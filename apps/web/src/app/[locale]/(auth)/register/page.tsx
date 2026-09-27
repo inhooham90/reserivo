@@ -6,13 +6,14 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { Suspense, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
+import { AuthCard, authLink, pillButton, pillInput } from "@/components/auth/auth-card";
+import { PasswordInput } from "@/components/auth/password-input";
 import { FieldError } from "@/components/field-error";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ApiError } from "@/lib/api";
-import { useAuth } from "@/lib/auth";
+import { useAuth, useRedirectIfSignedIn } from "@/lib/auth";
 import { useNextPath } from "@/lib/use-next-path";
 
 function RegisterForm() {
@@ -21,6 +22,7 @@ function RegisterForm() {
   const common = useTranslations("common");
   const router = useRouter();
   const nextPath = useNextPath();
+  const status = useRedirectIfSignedIn(nextPath);
   const [serverError, setServerError] = useState<string | null>(null);
   const form = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -37,47 +39,42 @@ function RegisterForm() {
     }
   });
 
+  // Signed in already: the hook above is on its way to the dashboard.
+  if (status === "authenticated") return null;
+
   return (
-    <main id="main" tabIndex={-1} className="flex flex-1 items-center justify-center p-6 outline-none">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle role="heading" aria-level={1}>{t("register.title")}</CardTitle>
-          <CardDescription>{t("register.description")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={onSubmit} className="grid gap-4" noValidate>
-            <div className="grid gap-1.5">
-              <Label htmlFor="name">{t("register.name")}</Label>
-              <Input id="name" autoComplete="name" {...form.register("name")} />
-              <FieldError message={form.formState.errors.name?.message} />
-            </div>
-            <div className="grid gap-1.5">
-              <Label htmlFor="email">{t("email")}</Label>
-              <Input id="email" type="email" autoComplete="email" {...form.register("email")} />
-              <FieldError message={form.formState.errors.email?.message} />
-            </div>
-            <div className="grid gap-1.5">
-              <Label htmlFor="password">{t("password")}</Label>
-              <Input id="password" type="password" autoComplete="new-password" {...form.register("password")} />
-              <FieldError message={form.formState.errors.password?.message} />
-            </div>
-            <FieldError message={serverError ?? undefined} />
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? t("register.submitting") : t("register.submit")}
-            </Button>
-            <p className="text-center text-sm text-muted-foreground">
-              {t.rich("register.haveAccount", {
-                link: (chunks) => (
-                  <Link href="/login" className="underline">
-                    {chunks}
-                  </Link>
-                ),
-              })}
-            </p>
-          </form>
-        </CardContent>
-      </Card>
-    </main>
+    <AuthCard title={t("register.title")} description={t("register.description")}>
+      <form onSubmit={onSubmit} className="grid gap-6" noValidate>
+        <div className="grid gap-2">
+          <Label htmlFor="name">{t("register.name")}</Label>
+          <Input id="name" autoComplete="name" className={pillInput} {...form.register("name")} />
+          <FieldError message={form.formState.errors.name?.message} />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="email">{t("email")}</Label>
+          <Input id="email" type="email" autoComplete="email" className={pillInput} {...form.register("email")} />
+          <FieldError message={form.formState.errors.email?.message} />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="password">{t("password")}</Label>
+          <PasswordInput id="password" autoComplete="new-password" {...form.register("password")} />
+          <FieldError message={form.formState.errors.password?.message} />
+        </div>
+        <FieldError message={serverError ?? undefined} />
+        <Button type="submit" className={pillButton} disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? t("register.submitting") : t("register.submit")}
+        </Button>
+      </form>
+      <p className="mt-8 text-center text-sm text-body">
+        {t.rich("register.haveAccount", {
+          link: (chunks) => (
+            <Link href="/login" className={authLink}>
+              {chunks}
+            </Link>
+          ),
+        })}
+      </p>
+    </AuthCard>
   );
 }
 

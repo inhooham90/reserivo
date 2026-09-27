@@ -262,7 +262,7 @@ export class CampaignsService {
     if (wide && !address) {
       // No address on file any more, so there is nothing to suppress, and
       // nothing is being sent to it either.
-      throw new BadRequestException('This salon no longer has an email address on file for you');
+      throw new BadRequestException('This business no longer has an email address on file for you');
     }
 
     await this.prisma.$transaction(async (tx) => {

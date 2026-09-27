@@ -19,7 +19,7 @@
 > 3. Verify `morrri.com` in Resend the same way as below: apex, DKIM at
 >    `resend._domainkey.morrri.com`, `send.morrri.com` as return path, and no SPF
 >    at the apex. Probe with one send before switching.
-> 4. Create the `james@morrri.com` mailbox. The site prints it as the support,
+> 4. Create the `team@morrri.com` mailbox. The site prints it as the support,
 >    copyright and accessibility contact.
 > 5. `heroku config:set -a reserivo-api WEB_URL=https://morrri.com CORS_ORIGIN=https://morrri.com PUBLIC_API_URL=https://api.morrri.com "EMAIL_FROM=Morrri <noreply@morrri.com>"`,
 >    then rebuild the web image with `-ApiOrigin https://api.morrri.com`, since

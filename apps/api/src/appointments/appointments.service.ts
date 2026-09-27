@@ -164,7 +164,7 @@ export class AppointmentsService {
     const until = this.cancellableUntil(row);
     if (!until || until < new Date()) {
       throw new ConflictException(
-        `Online cancellation closes ${row.salon.cancelWindowHours} hours before the appointment. Please contact the salon.`,
+        `Online cancellation closes ${row.salon.cancelWindowHours} hours before the appointment. Please contact the business.`,
       );
     }
 
@@ -302,7 +302,7 @@ export class AppointmentsService {
       if (input.status === 'CANCELLED') {
         data.cancelledAt = new Date();
         data.cancelledByUserId = user.id;
-        data.cancelReason = input.cancelReason ?? 'Cancelled by salon';
+        data.cancelReason = input.cancelReason ?? 'Cancelled by the business';
       }
     }
 
@@ -372,13 +372,13 @@ export class AppointmentsService {
 
   private async salonBySlug(slug: string) {
     const salon = await this.prisma.salon.findUnique({ where: { slug } });
-    if (!salon) throw new NotFoundException('Salon not found');
+    if (!salon) throw new NotFoundException('Business not found');
     return salon;
   }
 
   private async salonById(id: string) {
     const salon = await this.prisma.salon.findUnique({ where: { id } });
-    if (!salon) throw new NotFoundException('Salon not found');
+    if (!salon) throw new NotFoundException('Business not found');
     return salon;
   }
 
@@ -394,7 +394,7 @@ export class AppointmentsService {
   /** Staff path: any service of that designer in this salon, active or not. */
   private async serviceInSalon(salonId: string, serviceId: string, designerId: string) {
     const service = await this.prisma.service.findFirst({ where: { id: serviceId, salonId, designerId } });
-    if (!service) throw new BadRequestException('That service does not belong to this designer');
+    if (!service) throw new BadRequestException('That service does not belong to this team member');
     return service;
   }
 

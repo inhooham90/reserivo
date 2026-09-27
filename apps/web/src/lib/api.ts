@@ -71,8 +71,26 @@ export async function api<T>(path: string, init: ApiInit = {}): Promise<T> {
   return (await res.json()) as T;
 }
 
-/** Exchanges the refresh cookie for a new access token. Null when the session is gone. */
-export async function refresh(): Promise<AuthResponse | null> {
+let inflight: Promise<AuthResponse | null> | null = null;
+
+/**
+ * Exchanges the refresh cookie for a new access token. Null when the session is gone.
+ *
+ * Single-flight: the API rotates the refresh token on every use, so two
+ * refreshes sent together carry the same cookie, one wins, and the other gets
+ * a 401 that would sign the tab out even though the winner just set a valid
+ * new cookie. Concurrent callers (several queries hitting an expired access
+ * token at once, or React running the mount effect twice in development)
+ * therefore share one request.
+ */
+export function refresh(): Promise<AuthResponse | null> {
+  inflight ??= doRefresh().finally(() => {
+    inflight = null;
+  });
+  return inflight;
+}
+
+async function doRefresh(): Promise<AuthResponse | null> {
   try {
     const res = await fetch(`${API_URL}/auth/refresh`, { method: "POST", credentials: "include" });
     if (!res.ok) {

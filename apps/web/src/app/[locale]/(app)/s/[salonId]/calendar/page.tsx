@@ -9,13 +9,18 @@ import {
   PAYMENT_METHODS,
   todayIn,
   utcToLocal,
+  windowsForDate,
   type AvailabilityResponse,
   type PaymentMethod,
+  type SalonHours,
   type Service,
   type StaffAppointment,
 } from "@reserivo/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState, type MouseEvent } from "react";
+import { CalendarDays, ChevronLeft, ChevronRight, Info, MousePointerClick, Plus, TriangleAlert } from "lucide-react";
+import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import { FieldError } from "@/components/field-error";
 import { NewAppointmentForm, resolveServiceId, type AppointmentDraft } from "@/components/staff/new-appointment-form";
 import { Badge } from "@/components/ui/badge";
@@ -23,15 +28,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Link } from "@/i18n/navigation";
 import { api, ApiError } from "@/lib/api";
 import { salonKeys, useSalon } from "@/lib/salon-context";
 import { useFormat } from "@/lib/use-format";
+import { ghostPillSm, pillButtonSm, pillSelectSm, textLink } from "@/lib/v3";
 import { cn } from "cn";
 
 /** Day view spans these local hours; appointments outside still render, clamped. */
 const DAY_START = 7 * 60;
 const DAY_END = 21 * 60;
-const PX_PER_MIN = 0.8; // 48px per hour
+const HOUR_PX = 56;
+const PX_PER_MIN = HOUR_PX / 60;
 
 /**
  * Rescheduling is a quarter-hour decision in practice, so the minute picker
@@ -46,7 +54,7 @@ const isQuarter = (minutes: number) => RESCHEDULE_MINUTES.includes(minutes % 60)
 const TIP_PERCENTS = [15, 18, 20, 25];
 
 /**
- * Reads the tip field. Empty is null — nobody recorded one — which is not the
+ * Reads the tip field. Empty is null (nobody recorded one), which is not the
  * same as a recorded zero, so the two must stay distinguishable all the way
  * down to the column. Undefined means the text is not a usable amount.
  */
@@ -59,8 +67,6 @@ function parseTipDollars(input: string): number | null | undefined {
 }
 
 const centsToInput = (cents: number | null) => (cents === null ? "" : (cents / 100).toFixed(2));
-/** Matches the other bare selects in the app; shadcn has no select component here. */
-const SELECT_CLASS = "h-9 rounded-md border border-input bg-transparent px-2 text-sm";
 const yFor = (minutes: number) => (minutes - DAY_START) * PX_PER_MIN;
 
 /** An existing appointment reduced to the span it occupies on one designer's day. */
@@ -69,7 +75,7 @@ interface Busy {
   /** Local minutes: the service itself. */
   start: number;
   end: number;
-  /** end + cleanup buffer — the range nothing else may touch. */
+  /** end + cleanup buffer: the range nothing else may touch. */
   blockEnd: number;
   /** The service has waiting time in it, so something else may sit on top. */
   sharable: boolean;
@@ -114,14 +120,61 @@ function layoutLanes(items: { start: number; end: number; sharable: boolean }[])
   return placed;
 }
 
+/** The stretches of the grid outside opening hours, for the closed-hours hatch. */
+function closedSpans(open: { startMinutes: number; endMinutes: number }[]): [number, number][] {
+  const spans: [number, number][] = [];
+  let cursor = DAY_START;
+  for (const w of open) {
+    if (w.startMinutes > cursor) spans.push([cursor, Math.min(w.startMinutes, DAY_END)]);
+    cursor = Math.max(cursor, w.endMinutes);
+  }
+  if (cursor < DAY_END) spans.push([cursor, DAY_END]);
+  return spans.filter(([a, b]) => b > a);
+}
+
+/** Up to two letters for a column avatar. */
+function initials(name: string): string {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  const picked = words.length > 1 ? [words[0], words[words.length - 1]] : words;
+  return picked.map((w) => Array.from(w)[0] ?? "").join("").toUpperCase();
+}
+
+/**
+ * Block colour. Open appointments are coloured by who booked them, the one
+ * distinction staff read at a glance (lavender: the client online; butter:
+ * staff, which is where walk-ins land). Final states override: completed
+ * greys out, a no-show is red, a cancellation is a dashed outline (DESIGN.md
+ * "Calendar blocks").
+ */
+function blockTone(a: StaffAppointment): string {
+  switch (a.status) {
+    case "COMPLETED":
+      return "bg-surface-muted text-body";
+    case "NO_SHOW":
+      return "bg-destructive/10 text-destructive";
+    case "CANCELLED":
+      return "border border-dashed border-(--cancelled-edge) bg-card text-body [&_.who]:line-through [&_.what]:line-through";
+    default:
+      return cn(
+        a.source === "ONLINE" ? "bg-lavender" : "bg-butter shadow-[inset_0_0_0_1px_var(--border)]",
+        // Awaiting confirmation: the same colour, with a dashed edge to say it is not settled.
+        a.status === "PENDING" && "border border-dashed border-(--cancelled-edge)",
+      );
+  }
+}
+
 export default function CalendarPage() {
   const f = useFormat();
+  const t = useTranslations("schedule");
   const { salon, members, me, isManager } = useSalon();
   const [date, setDate] = useState(() => todayIn(salon.timezone));
   const [selected, setSelected] = useState<StaffAppointment | null>(null);
   const [draft, setDraft] = useState<AppointmentDraft | null>(null);
   const [hover, setHover] = useState<{ designerId: string; minutes: number } | null>(null);
   const [showCancelled, setShowCancelled] = useState(false);
+  /** One designer's column only, or null for everyone. */
+  const [only, setOnly] = useState<string | null>(null);
+  const dateInput = useRef<HTMLInputElement>(null);
   // Ticks so the now-line and the shading over past time keep up without a reload.
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
@@ -131,7 +184,9 @@ export default function CalendarPage() {
   const queryClient = useQueryClient();
 
   const designers = members.filter((m) => m.roles.includes("DESIGNER"));
-  const columns = isManager ? designers : designers.filter((m) => m.id === me?.id);
+  const allowed = isManager ? designers : designers.filter((m) => m.id === me?.id);
+  // A filter pointing at someone no longer bookable falls back to everyone.
+  const columns = allowed.some((m) => m.id === only) ? allowed.filter((m) => m.id === only) : allowed;
   const canPlaceIn = (designerId: string) => isManager || designerId === me?.id;
   // Snap clicks to the salon's slot grid; 15 min at most so the grid stays usable.
   const snap = Math.min(salon.slotIntervalMin, 15);
@@ -145,10 +200,16 @@ export default function CalendarPage() {
     queryKey: salonKeys.services(salon.id),
     queryFn: () => api<Service[]>(`/salons/${salon.id}/services`),
   });
+  const hours = useQuery({
+    queryKey: salonKeys.hours(salon.id),
+    queryFn: () => api<SalonHours>(`/salons/${salon.id}/hours`),
+  });
   const invalidate = () => queryClient.invalidateQueries({ queryKey: [...salonKeys.salon(salon.id), "appointments"] });
 
-  const visible = (appts.data ?? []).filter((a) => showCancelled || a.status !== "CANCELLED");
-  const hours = Array.from({ length: (DAY_END - DAY_START) / 60 }, (_, i) => DAY_START + i * 60);
+  const shownIds = new Set(columns.map((m) => m.id));
+  const dayAppts = (appts.data ?? []).filter((a) => shownIds.has(a.designerId));
+  const visible = dayAppts.filter((a) => showCancelled || a.status !== "CANCELLED");
+  const hourMarks = Array.from({ length: (DAY_END - DAY_START) / 60 }, (_, i) => DAY_START + i * 60);
   const nowLocal = utcToLocal(now, salon.timezone);
   const showNowLine = nowLocal.date === date && nowLocal.minutes >= DAY_START && nowLocal.minutes <= DAY_END;
 
@@ -156,6 +217,10 @@ export default function CalendarPage() {
   const today = todayIn(salon.timezone);
   const pastCutoff = date < today ? DAY_END : date === today ? nowLocal.minutes : null;
   const isPast = (minutes: number) => pastCutoff !== null && minutes < pastCutoff;
+
+  /** Opening hours for this date, by the same rule the booking engine uses. */
+  const open = hours.data ? windowsForDate(date, hours.data.rules, hours.data.exceptions) : [];
+  const closed = hours.data ? closedSpans(open) : [];
 
   /** What actually reserves time. Cancelled appointments free their slot up again. */
   const busy: Busy[] = (appts.data ?? [])
@@ -173,7 +238,7 @@ export default function CalendarPage() {
 
   /**
    * What the eye sees. Every rendered block captures its own click, so a ghost
-   * drawn under one would lie about where clicking lands — including under a
+   * drawn under one would lie about where clicking lands, including under a
    * cancelled block, whose time is free but which is still on screen.
    */
   const drawn = visible.map((a) => {
@@ -196,16 +261,16 @@ export default function CalendarPage() {
     });
     layoutLanes(boxes).forEach((geom, i) => laneOf.set(mine[i].id, geom));
   }
-  /** Horizontal placement for one block, leaving a 4px gutter on each side. */
+  /** Horizontal placement for one block, leaving a 6px gutter on each side. */
   const laneStyle = (id: string) => {
     const { lane, lanes } = laneOf.get(id) ?? { lane: 0, lanes: 1 };
     return {
-      left: "calc(" + (lane * 100) / lanes + "% + 4px)",
-      width: "calc(" + 100 / lanes + "% - 8px)",
+      left: "calc(" + (lane * 100) / lanes + "% + 6px)",
+      width: "calc(" + 100 / lanes + "% - 12px)",
     };
   };
 
-  /** The service the form would use for this designer — what a new booking there would cost in time. */
+  /** The service the form would use for this designer: what a new booking there would cost in time. */
   const serviceFor = (designerId: string): Service | null => {
     const list = services.data ?? [];
     const id = resolveServiceId(list, designerId, draft?.serviceId ?? null);
@@ -213,7 +278,9 @@ export default function CalendarPage() {
   };
   const blockOf = (svc: Service | null) => (svc ? svc.durationMin + svc.bufferMin : snap);
 
-  /** The first existing appointment a booking of `blockMin` starting at `minutes` would run into.
+  /**
+   * The first existing appointment a booking of `blockMin` starting at
+   * `minutes` would run into.
    *
    * This mirrors the database, which refuses an overlap only when neither side
    * can be shared: a sharable booking never clashes, and nothing ever clashes
@@ -225,15 +292,15 @@ export default function CalendarPage() {
       : busy.find((b) => !b.sharable && b.designerId === designerId && minutes < b.blockEnd && minutes + blockMin > b.start);
 
   /**
-   * Only "free" cells are placeable, and only they get a hover preview —
-   * anywhere else the grid stays quiet rather than explaining itself.
-   *  past     — the time has gone.
-   *  occupied — the cursor is inside an appointment (or its cleanup buffer).
-   *  nofit    — the cell is free, but this service would run into the next appointment.
+   * Only "free" cells are placeable, and only they get a hover preview.
+   * Anywhere else the grid stays quiet rather than explaining itself.
+   *  past     the time has gone.
+   *  occupied the cursor is inside an appointment (or its cleanup buffer).
+   *  nofit    the cell is free, but this service would run into the next appointment.
    */
   const cellState = (designerId: string, minutes: number): "past" | "occupied" | "nofit" | "free" => {
     if (isPast(minutes)) return "past";
-    // Being inside a sharable block is not an obstacle — that spare lane is
+    // Being inside a sharable block is not an obstacle: that spare lane is
     // exactly where a second booking goes.
     if (drawn.some((d) => !d.sharable && d.designerId === designerId && minutes >= d.start && minutes < d.end))
       return "occupied";
@@ -263,217 +330,477 @@ export default function CalendarPage() {
     : undefined;
   const conflict =
     ghost && isPast(ghost.minutes!)
-      ? `${f.minutes(ghost.minutes!)} has already passed — pick a time from now on.`
+      ? t("conflict.past", { time: f.minutes(ghost.minutes!) })
       : ghostClash && ghostService
-        ? `${ghostService.name} takes ${f.duration(ghostService.durationMin + ghostService.bufferMin)} including cleanup, so it would run into the ${f.minutes(ghostClash.start)} appointment.`
+        ? t("conflict.clash", {
+            service: ghostService.name,
+            duration: f.duration(ghostService.durationMin + ghostService.bufferMin),
+            time: f.minutes(ghostClash.start),
+          })
         : undefined;
 
+  // The day in numbers, from the same appointments the grid shows.
+  const live = dayAppts.filter((a) => a.status !== "CANCELLED");
+  const cancelled = dayAppts.filter((a) => a.status === "CANCELLED");
+  const bookedMin = live.reduce((sum, a) => sum + a.durationMin, 0);
+  const openMin = open.reduce((sum, w) => sum + (w.endMinutes - w.startMinutes), 0) * columns.length;
+  const stillToCome = live.filter((a) => new Date(a.startAt) > now).length;
+  const upNext = live
+    .filter((a) => date !== today || new Date(a.endAt) > now)
+    .sort((a, b) => a.startAt.localeCompare(b.startAt))
+    .slice(0, 6);
+  const nameOf = (id: string) => members.find((m) => m.id === id)?.displayName ?? "";
+  const select = (a: StaffAppointment) => {
+    setDraft(null);
+    setSelected(a);
+  };
+
   return (
-    <div className="grid gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" aria-label="Previous day" onClick={() => setDate((d) => addDays(d, -1))}>
-            <span aria-hidden="true">←</span>
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
+      <div role="toolbar" aria-label={t("toolbar.label")} className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-1 rounded-full bg-muted p-1 shadow-[inset_0_0_0_1px_var(--border)]">
+          <Button variant="ghost" size="icon" className="size-10 hover:bg-surface-muted" aria-label={t("toolbar.prevDay")} onClick={() => setDate((d) => addDays(d, -1))}>
+            <ChevronLeft aria-hidden />
           </Button>
-          <Button size="sm" variant="outline" onClick={() => setDate(todayIn(salon.timezone))}>
-            Today
+          <Button variant="ghost" size="sm" className={ghostPillSm} disabled={date === today} onClick={() => setDate(today)}>
+            {t("toolbar.today")}
           </Button>
-          <Button size="sm" variant="outline" aria-label="Next day" onClick={() => setDate((d) => addDays(d, 1))}>
-            <span aria-hidden="true">→</span>
+          <Button variant="ghost" size="icon" className="size-10 hover:bg-surface-muted" aria-label={t("toolbar.nextDay")} onClick={() => setDate((d) => addDays(d, 1))}>
+            <ChevronRight aria-hidden />
           </Button>
-          <Input type="date" className="w-40" aria-label="Date" value={date} onChange={(e) => e.target.value && setDate(e.target.value)} />
-          <span className="text-sm text-muted-foreground">{f.localDate(date)}</span>
-        </div>
-        {!draft && !selected && columns.length > 0 && (
-          <p className="text-sm text-muted-foreground">
-            {appts.data?.length ? "Select an appointment for details, or click an empty time to book." : "Click an empty time to book the first appointment."}
-          </p>
-        )}
-        <div className="flex items-center gap-3">
-          <label className="flex items-center gap-2 text-sm text-muted-foreground">
-            <input type="checkbox" checked={showCancelled} onChange={(e) => setShowCancelled(e.target.checked)} />
-            Show cancelled
+          <span className="mx-2 text-base font-semibold whitespace-nowrap" aria-live="polite">
+            {f.localDate(date, "dayLong")}
+          </span>
+          {/* Jump to any date. The native picker does the work; the input stays in the tab order. */}
+          <label className="relative mr-1 grid size-10 cursor-pointer place-items-center rounded-full hover:bg-surface-muted focus-within:ring-3 focus-within:ring-ring">
+            <CalendarDays aria-hidden className="size-4" />
+            <input
+              ref={dateInput}
+              type="date"
+              aria-label={t("toolbar.goToDate")}
+              className="absolute inset-0 cursor-pointer opacity-0"
+              value={date}
+              onClick={() => dateInput.current?.showPicker?.()}
+              onChange={(e) => e.target.value && setDate(e.target.value)}
+            />
           </label>
-          <Button onClick={() => openDraft(columns[0]?.id ?? "", null)} disabled={columns.length === 0}>
-            New appointment
-          </Button>
         </div>
-      </div>
 
-      {columns.length === 0 && (
-        <p className="text-sm text-muted-foreground">Nobody takes appointments yet — give someone the Designer role from the Team tab.</p>
-      )}
-
-      {/* The side column exists only while something is open in it, so an idle
-          schedule gets the full width instead of a 360px strip holding a hint. */}
-      <div className={cn("grid gap-4", (draft || selected) && "lg:grid-cols-[1fr_360px]")}>
-        <div className="overflow-x-auto rounded-xl border bg-card">
-          <div className="grid min-w-[640px]" style={{ gridTemplateColumns: `3.5rem repeat(${columns.length}, minmax(140px, 1fr))` }}>
-            <div className="sticky top-0 z-10 border-b bg-card" />
-            {columns.map((m) => (
-              <div key={m.id} className="sticky top-0 z-10 border-b border-l bg-card px-3 py-2 text-sm font-medium">
-                {m.displayName}
-              </div>
-            ))}
-
-            <div className="relative" style={{ height: yFor(DAY_END) }}>
-              {hours.map((h) => (
-                <div key={h} className="absolute right-2 -translate-y-1/2 text-xs text-muted-foreground" style={{ top: yFor(h) }}>
-                  {f.hour(h)}
-                </div>
-              ))}
-            </div>
-
-            {columns.map((m) => {
-              const editable = canPlaceIn(m.id);
-              const svc = serviceFor(m.id);
+        {allowed.length > 1 && (
+          <div role="group" aria-label={t("toolbar.showDesigner")} className="inline-flex max-w-full gap-1 overflow-x-auto rounded-full bg-muted p-1 shadow-[inset_0_0_0_1px_var(--border)]">
+            {[{ id: null, displayName: t("toolbar.everyone") }, ...allowed].map((m) => {
+              const pressed = (only === null && m.id === null) || (m.id !== null && columns.length === 1 && columns[0].id === m.id);
               return (
-                <div
-                  key={m.id}
-                  className={cn("relative border-l", editable && "cursor-crosshair")}
-                  style={{ height: yFor(DAY_END) }}
-                  onMouseMove={
-                    editable
-                      ? (e) => {
-                          const minutes = minutesAt(e);
-                          setHover(cellState(m.id, minutes) === "free" ? { designerId: m.id, minutes } : null);
-                        }
-                      : undefined
-                  }
-                  onMouseLeave={editable ? () => setHover(null) : undefined}
-                  onClick={
-                    editable
-                      ? (e) => {
-                          const minutes = minutesAt(e);
-                          // Occupied cells and gaps too small for this service are not placeable.
-                          if (cellState(m.id, minutes) === "free") openDraft(m.id, minutes);
-                        }
-                      : undefined
-                  }
+                <button
+                  key={m.id ?? "all"}
+                  type="button"
+                  aria-pressed={pressed}
+                  onClick={() => setOnly(m.id)}
+                  className={cn(
+                    "h-10 shrink-0 rounded-full px-4 text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring",
+                    pressed ? "bg-primary text-primary-foreground" : "hover:bg-surface-muted",
+                  )}
                 >
-                  {hours.map((h) => (
-                    <div key={h} className="absolute inset-x-0 border-t border-border/60" style={{ top: yFor(h) }} />
-                  ))}
-
-                  {/* Time that has gone: shaded and not placeable. Sits under the blocks so past appointments stay readable. */}
-                  {pastCutoff !== null && (
-                    <div
-                      className="pointer-events-none absolute inset-x-0 top-0 bg-muted/60"
-                      style={{ height: Math.max(0, yFor(Math.min(pastCutoff, DAY_END))) }}
-                    />
-                  )}
-
-                  {showNowLine && (
-                    <div className="pointer-events-none absolute inset-x-0 z-10 border-t-2 border-destructive/70" style={{ top: yFor(nowLocal.minutes) }} />
-                  )}
-
-                  {hover && hover.designerId === m.id && !(ghost && ghost.designerId === m.id && ghost.minutes === hover.minutes) && (
-                    <div
-                      className="pointer-events-none absolute inset-x-1 overflow-hidden rounded-md border border-dashed border-primary/50 bg-primary/5 px-2 text-xs leading-tight text-primary"
-                      style={{ top: yFor(hover.minutes), height: Math.max(20, blockOf(svc) * PX_PER_MIN - 2) }}
-                    >
-                      + {f.minutes(hover.minutes)}
-                    </div>
-                  )}
-
-                  {ghost && ghost.designerId === m.id && (
-                    <div
-                      className={cn(
-                        "pointer-events-none absolute inset-x-1 z-10 overflow-hidden rounded-md border-2 border-dashed px-2 py-0.5 text-xs font-medium leading-tight",
-                        conflict ? "border-destructive bg-destructive/10 text-destructive" : "border-primary bg-primary/10 text-primary",
-                      )}
-                      style={{ top: yFor(ghost.minutes!), height: Math.max(22, blockOf(ghostService) * PX_PER_MIN - 2) }}
-                    >
-                      {ghostClash ? "Overlaps" : conflict ? "Past" : "New"} · {f.minutes(ghost.minutes!)}
-                    </div>
-                  )}
-
-                  {visible
-                    .filter((a) => a.designerId === m.id)
-                    .map((a) => {
-                      const start = utcToLocal(new Date(a.startAt), salon.timezone).minutes;
-                      const top = Math.max(0, yFor(start));
-                      const height = Math.max(22, a.durationMin * PX_PER_MIN - 2);
-                      const blocking = a.status !== "CANCELLED";
-                      return (
-                        <div key={a.id}>
-                          {/* Cleanup time: nothing may be booked into it, so show it rather than leaving a deceptive gap. */}
-                          {blocking && a.bufferMin > 0 && (
-                            <div
-                              className="pointer-events-none absolute z-10 rounded-b-md border-x border-b border-dashed border-primary/30 bg-primary/5"
-                              style={{
-                                ...laneStyle(a.id),
-                                top: yFor(start + a.durationMin),
-                                height: a.bufferMin * PX_PER_MIN - 1,
-                              }}
-                            />
-                          )}
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation(); // don't also place a draft under the block
-                              setDraft(null);
-                              setSelected(a);
-                            }}
-                            className={cn(
-                              "absolute z-20 cursor-pointer overflow-hidden rounded-md border px-2 py-1 text-left text-xs leading-tight transition-colors",
-                              a.status === "CONFIRMED" && "border-primary/40 bg-primary/15 hover:bg-primary/25",
-                              a.status === "PENDING" && "border-dashed border-primary/40 bg-primary/5",
-                              a.status === "COMPLETED" && "border-border bg-muted text-muted-foreground",
-                              a.status === "NO_SHOW" && "border-destructive/40 bg-destructive/10 text-destructive",
-                              a.status === "CANCELLED" && "border-border bg-transparent text-muted-foreground line-through",
-                              selected?.id === a.id && "ring-2 ring-ring",
-                            )}
-                            style={{ ...laneStyle(a.id), top, height }}
-                          >
-                            <span className="font-medium">{a.customer.name}</span>
-                            <span className="block truncate opacity-80">{a.serviceName}</span>
-                          </button>
-                        </div>
-                      );
-                    })}
-                </div>
+                  {m.displayName}
+                </button>
               );
             })}
           </div>
-        </div>
+        )}
 
-        <aside className="self-start lg:sticky lg:top-4">
-          {draft && (
-            <NewAppointmentForm
-              draft={draft}
-              onDraftChange={(next) => {
-                setDraft(next);
-                if (next.date !== date) setDate(next.date);
-              }}
-              conflict={conflict}
-              onCreated={() => {
-                setDraft(null);
-                void invalidate();
-              }}
-              onCancel={() => setDraft(null)}
-            />
-          )}
-          {selected && !draft && (
-            <AppointmentPanel
-              // Remount per appointment: the confirm steps, the notes field and
-              // the reschedule time are all per-appointment state, and reusing
-              // the instance would carry a primed confirmation to the next one.
-              key={selected.id}
-              appt={selected}
-              date={date}
-              now={now}
-              canEdit={isManager || selected.designerId === me?.id}
-              onChanged={(a) => {
-                setSelected(a);
-                void invalidate();
-              }}
-              onClose={() => setSelected(null)}
-            />
-          )}
-        </aside>
+        <span className="hidden flex-1 md:block" />
+        <label className="flex items-center gap-3 text-sm text-body">
+          <input
+            type="checkbox"
+            className="size-5 accent-foreground"
+            checked={showCancelled}
+            onChange={(e) => setShowCancelled(e.target.checked)}
+          />
+          {t("toolbar.showCancelled")}
+        </label>
+        <Button className={pillButtonSm} onClick={() => openDraft(columns[0]?.id ?? "", null)} disabled={columns.length === 0}>
+          <Plus aria-hidden />
+          {t("toolbar.newAppointment")}
+        </Button>
       </div>
+
+      {columns.length === 0 ? (
+        <p className="text-sm text-body">
+          {t.rich("noDesigners", {
+            link: (chunks) => (
+              <Link href={`/s/${salon.id}/settings/team`} className={textLink}>
+                {chunks}
+              </Link>
+            ),
+          })}
+        </p>
+      ) : (
+        !draft &&
+        !selected && (
+          <p className="-mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm text-body">
+            <Info aria-hidden className="size-4 shrink-0" />
+            {dayAppts.length ? t("hint.withAppointments") : t("hint.empty")}
+            {isManager && (
+              <Link href={`/s/${salon.id}/settings/hours`} className={textLink}>
+                {t("hint.editHours")}
+              </Link>
+            )}
+          </p>
+        )
+      )}
+
+      <section aria-label={t("tiles.label")} className="grid grid-cols-2 gap-3 md:gap-6 lg:grid-cols-4">
+        <Tile accent label={t("tiles.appointments")} value={String(live.length)}>
+          {live.length === 0
+            ? t("tiles.nothingBooked")
+            : date < today
+              ? t("tiles.completedCount", { count: live.filter((a) => a.status === "COMPLETED").length })
+              : t("tiles.stillToCome", { count: stillToCome })}
+        </Tile>
+        <Tile label={t("tiles.booked")} value={f.duration(bookedMin)}>
+          {openMin > 0
+            ? t("tiles.ofOpen", { open: f.duration(openMin), count: columns.length })
+            : hours.isSuccess
+              ? t("tiles.closedDay")
+              : " "}
+        </Tile>
+        <Tile label={t("tiles.openTime")} value={f.duration(Math.max(0, openMin - bookedMin))}>
+          {t("tiles.freeInside")}
+        </Tile>
+        <Tile label={t("tiles.cancelled")} value={String(cancelled.length)}>
+          {cancelled.length === 0 ? t("tiles.noneCancelled") : showCancelled ? t("tiles.cancelledShown") : t("tiles.cancelledHidden")}
+        </Tile>
+      </section>
+
+      {/* The side column exists only while something is open in it, so an idle
+          schedule gets the full width instead of a strip holding a hint. */}
+      <div className={cn("grid gap-6", (draft || selected) && "lg:grid-cols-[minmax(0,1fr)_380px]")}>
+        {columns.length > 0 && (
+          <section aria-label={t("grid.label")} className="min-w-0 self-start">
+            <div className="relative overflow-x-auto rounded-lg bg-card shadow-[inset_0_0_0_1px_var(--border)]">
+              <div
+                className="grid"
+                style={{
+                  gridTemplateColumns: `5rem repeat(${columns.length}, minmax(180px, 1fr))`,
+                  minWidth: `calc(5rem + ${columns.length * 180}px)`,
+                }}
+              >
+                <div className="border-b border-border" />
+                {columns.map((m) => (
+                  <div key={m.id} className="flex items-center gap-3 border-b border-border px-4 py-3 text-sm font-medium">
+                    <span aria-hidden className="grid size-8 shrink-0 place-items-center rounded-full bg-lavender text-xs font-semibold shadow-[inset_0_0_0_1px_var(--border)]">
+                      {initials(m.displayName)}
+                    </span>
+                    <span className="truncate">{m.displayName}</span>
+                    <span className="ml-auto text-[13px] font-normal whitespace-nowrap text-muted-foreground tabular-nums">
+                      {t("grid.bookedCount", { count: live.filter((a) => a.designerId === m.id).length })}
+                    </span>
+                  </div>
+                ))}
+
+                <div className="relative" style={{ height: yFor(DAY_END) }}>
+                  {hourMarks.slice(1).map((h) => (
+                    <span
+                      key={h}
+                      className="absolute right-2.5 -translate-y-1/2 text-xs whitespace-nowrap text-muted-foreground tabular-nums"
+                      style={{ top: yFor(h) }}
+                    >
+                      {f.hour(h)}
+                    </span>
+                  ))}
+                </div>
+
+                {columns.map((m, index) => {
+                  const editable = canPlaceIn(m.id);
+                  const svc = serviceFor(m.id);
+                  return (
+                    <div
+                      key={m.id}
+                      aria-label={m.displayName}
+                      className={cn("relative border-l border-border", editable && "cursor-copy")}
+                      style={{
+                        height: yFor(DAY_END),
+                        backgroundImage: `repeating-linear-gradient(to bottom, transparent 0 ${HOUR_PX - 1}px, var(--hour-rule) ${HOUR_PX - 1}px ${HOUR_PX}px)`,
+                      }}
+                      onMouseMove={
+                        editable
+                          ? (e) => {
+                              const minutes = minutesAt(e);
+                              setHover(cellState(m.id, minutes) === "free" ? { designerId: m.id, minutes } : null);
+                            }
+                          : undefined
+                      }
+                      onMouseLeave={editable ? () => setHover(null) : undefined}
+                      onClick={
+                        editable
+                          ? (e) => {
+                              const minutes = minutesAt(e);
+                              // Occupied cells and gaps too small for this service are not placeable.
+                              if (cellState(m.id, minutes) === "free") openDraft(m.id, minutes);
+                            }
+                          : undefined
+                      }
+                    >
+                      {/* Outside opening hours: hatched, still bookable by staff (walk-ins, favours). */}
+                      {closed.map(([from, to]) => (
+                        <div
+                          key={from}
+                          className="pointer-events-none absolute inset-x-0"
+                          style={{
+                            top: yFor(from),
+                            height: (to - from) * PX_PER_MIN,
+                            backgroundImage: "repeating-linear-gradient(135deg, var(--closed-hatch) 0 6px, transparent 6px 12px)",
+                          }}
+                        />
+                      ))}
+
+                      {/* Time that has gone: shaded and not placeable. Sits under the blocks so past appointments stay readable. */}
+                      {pastCutoff !== null && (
+                        <div
+                          className="pointer-events-none absolute inset-x-0 top-0 bg-surface-muted/50"
+                          style={{ height: Math.max(0, yFor(Math.min(pastCutoff, DAY_END))) }}
+                        />
+                      )}
+
+                      {showNowLine && (
+                        <div aria-hidden className="pointer-events-none absolute inset-x-0 z-30 h-0.5 bg-foreground" style={{ top: yFor(nowLocal.minutes) }}>
+                          {index === 0 && <span className="absolute -top-1 -left-[5px] size-2.5 rounded-full bg-foreground" />}
+                        </div>
+                      )}
+
+                      {hover && hover.designerId === m.id && !(ghost && ghost.designerId === m.id && ghost.minutes === hover.minutes) && (
+                        <div
+                          className="pointer-events-none absolute inset-x-1.5 overflow-hidden rounded-sm px-1.5 text-xs leading-tight shadow-[inset_0_0_0_1.5px_var(--foreground)]"
+                          style={{ top: yFor(hover.minutes), height: Math.max(18, blockOf(svc) * PX_PER_MIN - 2) }}
+                        >
+                          {f.minutes(hover.minutes)}
+                        </div>
+                      )}
+
+                      {ghost && ghost.designerId === m.id && (
+                        <div
+                          className={cn(
+                            "pointer-events-none absolute inset-x-1.5 z-10 flex items-start gap-1 overflow-hidden rounded-sm px-1.5 py-1 text-xs font-medium leading-tight",
+                            conflict
+                              ? "border-[1.5px] border-dashed border-destructive bg-card text-destructive"
+                              : "bg-lavender/60 shadow-[inset_0_0_0_2px_var(--foreground)]",
+                          )}
+                          style={{ top: yFor(ghost.minutes!), height: Math.max(22, blockOf(ghostService) * PX_PER_MIN - 2) }}
+                        >
+                          {conflict && <TriangleAlert aria-hidden className="size-3 shrink-0" />}
+                          {ghostClash ? t("grid.ghostOverlaps") : conflict ? t("grid.ghostPast") : t("grid.ghostNew")} · {f.minutes(ghost.minutes!)}
+                        </div>
+                      )}
+
+                      {visible
+                        .filter((a) => a.designerId === m.id)
+                        .map((a) => {
+                          const start = utcToLocal(new Date(a.startAt), salon.timezone).minutes;
+                          const top = Math.max(0, yFor(start));
+                          const height = Math.max(22, a.durationMin * PX_PER_MIN - 2);
+                          const blocking = a.status !== "CANCELLED";
+                          const short = a.durationMin <= 30;
+                          return (
+                            <div key={a.id}>
+                              {/* Cleanup time: nothing may be booked into it, so show it rather than leaving a deceptive gap. */}
+                              {blocking && a.bufferMin > 0 && (
+                                <div
+                                  className="pointer-events-none absolute z-10 rounded-b-sm border-x border-b border-dashed border-(--cancelled-edge)"
+                                  style={{ ...laneStyle(a.id), top: top + height, height: a.bufferMin * PX_PER_MIN }}
+                                />
+                              )}
+                              <button
+                                type="button"
+                                aria-label={t("grid.block", {
+                                  status: f.status(a.status),
+                                  client: a.customer.name,
+                                  service: a.serviceName,
+                                  start: f.minutes(start),
+                                  end: f.minutes(start + a.durationMin),
+                                  source: a.source === "ONLINE" ? t("grid.sourceOnline") : t("grid.sourceStaff"),
+                                })}
+                                onClick={(e) => {
+                                  e.stopPropagation(); // don't also place a draft under the block
+                                  select(a);
+                                }}
+                                className={cn(
+                                  "absolute z-20 flex cursor-pointer flex-col overflow-hidden rounded-sm px-2 text-left transition-shadow outline-none hover:shadow-[inset_0_0_0_1.5px_var(--foreground)] focus-visible:ring-3 focus-visible:ring-ring",
+                                  short ? "justify-center" : "gap-px py-1",
+                                  blockTone(a),
+                                  selected?.id === a.id && "shadow-[inset_0_0_0_2px_var(--foreground)]",
+                                )}
+                                style={{ ...laneStyle(a.id), top, height }}
+                              >
+                                <span className="flex min-w-0 items-baseline gap-1.5">
+                                  <span className="text-xs whitespace-nowrap text-body tabular-nums">{f.minutes(start)}</span>
+                                  <span className="who truncate text-sm leading-tight font-medium">{a.customer.name}</span>
+                                </span>
+                                {!short && <span className="what truncate text-xs leading-tight text-body">{a.serviceName}</span>}
+                              </button>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {appts.isSuccess && visible.length === 0 && (
+                <div className="pointer-events-none absolute inset-0 top-14 grid place-items-center p-4">
+                  <div className="grid justify-items-center gap-4 rounded-2xl bg-card px-8 py-6 shadow-[inset_0_0_0_1px_var(--border)]">
+                    <Image src="/images/mona-binoculars.png" alt="" width={538} height={720} className="h-auto w-[120px] md:w-[150px]" />
+                    <p className="flex items-center gap-2 rounded-full bg-butter px-6 py-3 text-sm font-medium">
+                      <MousePointerClick aria-hidden className="size-4 shrink-0" />
+                      {date < today ? t("grid.emptyPast") : t("grid.emptyFuture")}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <ul aria-label={t("legend.label")} className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-[13px] text-body">
+              <LegendItem className="bg-lavender">{t("legend.online")}</LegendItem>
+              <LegendItem className="bg-butter shadow-[inset_0_0_0_1px_var(--border)]">{t("legend.staff")}</LegendItem>
+              {/* The final states read the same words as the status pills and the panel badge. */}
+              <LegendItem className="bg-surface-muted">{f.status("COMPLETED")}</LegendItem>
+              <LegendItem className="bg-destructive/10">{f.status("NO_SHOW")}</LegendItem>
+              <LegendItem className="border border-dashed border-(--cancelled-edge) bg-card">{f.status("CANCELLED")}</LegendItem>
+              <LegendItem className="bg-[repeating-linear-gradient(135deg,var(--closed-hatch)_0_3px,transparent_3px_6px)] shadow-[inset_0_0_0_1px_var(--border)]">
+                {t("legend.closed")}
+              </LegendItem>
+            </ul>
+          </section>
+        )}
+
+        {(draft || selected) && (
+          <aside className="self-start lg:sticky lg:top-4">
+            {draft && (
+              <NewAppointmentForm
+                draft={draft}
+                onDraftChange={(next) => {
+                  setDraft(next);
+                  if (next.date !== date) setDate(next.date);
+                }}
+                conflict={conflict}
+                onCreated={() => {
+                  setDraft(null);
+                  void invalidate();
+                }}
+                onCancel={() => setDraft(null)}
+              />
+            )}
+            {selected && !draft && (
+              <AppointmentPanel
+                // Remount per appointment: the confirm steps, the notes field and
+                // the reschedule time are all per-appointment state, and reusing
+                // the instance would carry a primed confirmation to the next one.
+                key={selected.id}
+                appt={selected}
+                date={date}
+                now={now}
+                canEdit={isManager || selected.designerId === me?.id}
+                onChanged={(a) => {
+                  setSelected(a);
+                  void invalidate();
+                }}
+                onClose={() => setSelected(null)}
+              />
+            )}
+          </aside>
+        )}
+      </div>
+
+      {columns.length > 0 && (
+        <section aria-labelledby="up-next" className="overflow-x-auto rounded-lg bg-muted p-4 shadow-[inset_0_0_0_1px_var(--border)] md:p-6">
+          <h2 id="up-next" className="mb-4 text-[28px] leading-[1.3]">
+            {date === today ? t("upNext.upNext") : t("upNext.thisDay")}
+          </h2>
+          {upNext.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{t("upNext.nothingElse")}</p>
+          ) : (
+            <UpNextTable rows={upNext} nameOf={nameOf} onSelect={select} timezone={salon.timezone} showDesigner={columns.length > 1} />
+          )}
+        </section>
+      )}
     </div>
+  );
+}
+
+/** A stat tile (DESIGN.md "Stat tiles"). The value is Geist, never the serif. */
+function Tile({ label, value, accent, children }: { label: string; value: string; accent?: boolean; children: ReactNode }) {
+  return (
+    <div className={cn("grid content-start gap-2 rounded-lg p-4 md:p-6", accent ? "bg-lavender" : "bg-card shadow-[inset_0_0_0_1px_var(--border)]")}>
+      <span className="text-sm font-medium">{label}</span>
+      <span className="text-[28px] leading-[1.1] font-semibold tracking-[-0.02em] whitespace-nowrap tabular-nums md:text-4xl">{value}</span>
+      <span className={cn("text-sm", accent ? "text-body" : "text-muted-foreground")}>{children}</span>
+    </div>
+  );
+}
+
+function LegendItem({ className, children }: { className: string; children: ReactNode }) {
+  return (
+    <li className="flex items-center gap-2">
+      <span aria-hidden className={cn("size-3.5 rounded-xs", className)} />
+      {children}
+    </li>
+  );
+}
+
+function UpNextTable({
+  rows,
+  nameOf,
+  onSelect,
+  timezone,
+  showDesigner,
+}: {
+  rows: StaffAppointment[];
+  nameOf: (designerId: string) => string;
+  onSelect: (a: StaffAppointment) => void;
+  timezone: string;
+  showDesigner: boolean;
+}) {
+  const f = useFormat();
+  const t = useTranslations("schedule.upNext");
+  const th = "px-3 pb-3 text-left text-sm font-medium whitespace-nowrap text-muted-foreground";
+  const td = "border-t border-border px-3 py-3 align-middle";
+  return (
+    <table className="w-full border-collapse text-sm">
+      <thead>
+        <tr>
+          <th className={th}>{t("time")}</th>
+          <th className={th}>{t("client")}</th>
+          <th className={th}>{t("service")}</th>
+          {showDesigner && <th className={cn(th, "hidden sm:table-cell")}>{t("designer")}</th>}
+          <th className={cn(th, "text-right")}>{t("length")}</th>
+          <th className={th}>{t("status")}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((a) => (
+          <tr key={a.id}>
+            <td className={cn(td, "font-medium whitespace-nowrap tabular-nums")}>{f.inTz(a.startAt, timezone, "time")}</td>
+            <td className={td}>
+              <button type="button" className={cn(textLink, "text-left")} onClick={() => onSelect(a)}>
+                {a.customer.name}
+              </button>
+            </td>
+            <td className={td}>{a.serviceName}</td>
+            {showDesigner && <td className={cn(td, "hidden sm:table-cell")}>{nameOf(a.designerId)}</td>}
+            <td className={cn(td, "text-right whitespace-nowrap tabular-nums")}>{f.duration(a.durationMin)}</td>
+            <td className={td}>
+              <span
+                className={cn(
+                  "inline-flex h-6 items-center rounded-full px-2.5 text-xs font-medium whitespace-nowrap",
+                  a.status === "COMPLETED" ? "bg-surface-muted" : a.source === "ONLINE" ? "bg-lavender" : "bg-butter shadow-[inset_0_0_0_1px_var(--border)]",
+                )}
+              >
+                {f.status(a.status)}
+              </span>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }
 
@@ -489,13 +816,14 @@ function TipEditor({
   saving: boolean;
   onSave: (cents: number | null) => void;
 }) {
+  const t = useTranslations("schedule.panel");
   const [value, setValue] = useState(() => centsToInput(tipCents));
   const parsed = parseTipDollars(value);
   const pct = tipCents !== null && priceCents > 0 ? Math.round((tipCents / priceCents) * 1000) / 10 : null;
 
   return (
     <div className="grid gap-1.5">
-      <Label htmlFor="appt-tip-saved">Tip</Label>
+      <Label htmlFor="appt-tip-saved">{t("tip")}</Label>
       <div className="flex flex-wrap items-center gap-1.5">
         <Input
           id="appt-tip-saved"
@@ -520,15 +848,11 @@ function TipEditor({
           disabled={saving || parsed === undefined || parsed === tipCents}
           onClick={() => parsed !== undefined && onSave(parsed)}
         >
-          Save
+          {t("save")}
         </Button>
       </div>
       <p className="text-xs text-muted-foreground">
-        {parsed === undefined
-          ? "Enter a dollar amount, or clear the field to record nothing."
-          : pct !== null
-            ? `${pct}% of the service price.`
-            : "Not recorded."}
+        {parsed === undefined ? t("tipInvalid") : pct !== null ? t("tipPct", { pct }) : t("tipNotRecorded")}
       </p>
     </div>
   );
@@ -551,6 +875,7 @@ function AppointmentPanel({
   onClose: () => void;
 }) {
   const f = useFormat();
+  const t = useTranslations("schedule.panel");
   const { salon, members } = useSalon();
   const [reason, setReason] = useState("");
   const [confirmNoShow, setConfirmNoShow] = useState(false);
@@ -617,22 +942,22 @@ function AppointmentPanel({
   const canComplete = now >= completeFrom;
 
   return (
-    <Card>
+    <Card className="rounded-2xl bg-card ring-border">
       <CardHeader className="flex flex-row items-start justify-between gap-3">
         <div>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex flex-wrap items-center gap-2 font-display text-[22px] leading-tight font-medium tracking-[-0.01em]">
             {appt.customer.name}
             <Badge variant={open ? "default" : "outline"}>{f.status(appt.status)}</Badge>
           </CardTitle>
           <CardDescription>
-            {appt.serviceName} · {f.cents(appt.priceCents)} · with {designer}
+            {t("summary", { service: appt.serviceName, price: f.cents(appt.priceCents), designer: designer ?? "" })}
             <br />
             {f.inTz(appt.startAt, salon.timezone)} – {f.inTz(appt.endAt, salon.timezone, "time")}
-            {appt.bufferMin ? ` (+${appt.bufferMin} min buffer)` : ""}
+            {appt.bufferMin ? ` ${t("buffer", { duration: f.duration(appt.bufferMin) })}` : ""}
           </CardDescription>
         </div>
         <Button size="xs" variant="ghost" onClick={onClose}>
-          Close
+          {t("close")}
         </Button>
       </CardHeader>
       <CardContent className="grid gap-4 text-sm">
@@ -641,16 +966,16 @@ function AppointmentPanel({
         )}
         {appt.notes && (
           <p>
-            <span className="text-muted-foreground">Customer note:</span> {appt.notes}
+            <span className="text-muted-foreground">{t("customerNote")}</span> {appt.notes}
           </p>
         )}
-        {appt.cancelReason && <p className="text-muted-foreground">Cancelled: {appt.cancelReason}</p>}
-        <p className="text-xs text-muted-foreground">Booked {appt.source === "ONLINE" ? "online" : "by staff"}.</p>
+        {appt.cancelReason && <p className="text-muted-foreground">{t("cancelledReason", { reason: appt.cancelReason })}</p>}
+        <p className="text-xs text-muted-foreground">{appt.source === "ONLINE" ? t("bookedOnline") : t("bookedStaff")}</p>
 
         {canEdit && (
           <>
             <div className="grid gap-1.5">
-              <Label htmlFor="appt-notes">Internal notes</Label>
+              <Label htmlFor="appt-notes">{t("internalNotes")}</Label>
               <Input id="appt-notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
               <Button
                 size="xs"
@@ -659,28 +984,26 @@ function AppointmentPanel({
                 disabled={update.isPending}
                 onClick={() => update.mutate({ internalNotes: notes || null })}
               >
-                Save notes
+                {t("saveNotes")}
               </Button>
             </div>
 
             {open && (
               <>
                 <div className="grid gap-1.5 border-t pt-4">
-                  <Label htmlFor="appt-move-hour">Move to</Label>
+                  <Label htmlFor="appt-move-hour">{t("moveTo")}</Label>
                   {reschedule.isPending && timesChecked && (
-                    <p className="text-xs text-muted-foreground">Finding open times…</p>
+                    <p className="text-xs text-muted-foreground">{t("findingTimes")}</p>
                   )}
                   {nothingOpen && (
-                    <p className="text-xs text-muted-foreground">
-                      Nothing left on this day fits {appt.serviceName}. Pick another day on the calendar first.
-                    </p>
+                    <p className="text-xs text-muted-foreground">{t("nothingFits", { service: appt.serviceName })}</p>
                   )}
                   {chosen !== null && !nothingOpen && !(reschedule.isPending && timesChecked) && (
                     <>
                       <div className="flex flex-wrap items-center gap-2">
                         <select
                           id="appt-move-hour"
-                          className={SELECT_CLASS}
+                          className={pillSelectSm}
                           value={Math.floor(chosen / 60)}
                           onChange={(e) => {
                             const hour = Number(e.target.value);
@@ -696,8 +1019,8 @@ function AppointmentPanel({
                           ))}
                         </select>
                         <select
-                          aria-label="Minutes past the hour"
-                          className={SELECT_CLASS}
+                          aria-label={t("minutesPast")}
+                          className={pillSelectSm}
                           value={chosen % 60}
                           onChange={(e) => setMoveMinutes(Math.floor(chosen / 60) * 60 + Number(e.target.value))}
                         >
@@ -715,13 +1038,11 @@ function AppointmentPanel({
                             update.mutate({ startAt: localToUtc(date, chosen, salon.timezone).toISOString() })
                           }
                         >
-                          Reschedule
+                          {t("reschedule")}
                         </Button>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        {timesChecked
-                          ? "Only times that are still open and fit the service are listed."
-                          : "This service was removed, so open times could not be checked."}
+                        {timesChecked ? t("onlyOpen") : t("serviceRemoved")}
                       </p>
                     </>
                   )}
@@ -734,7 +1055,7 @@ function AppointmentPanel({
                         disabled={!canComplete || update.isPending}
                         onClick={() => setConfirmComplete(true)}
                       >
-                        Completed
+                        {t("complete")}
                       </Button>
                     )}
                     {!confirmNoShow && (
@@ -744,30 +1065,25 @@ function AppointmentPanel({
                         disabled={!canNoShow || update.isPending}
                         onClick={() => setConfirmNoShow(true)}
                       >
-                        No-show
+                        {t("noShow")}
                       </Button>
                     )}
                   </div>
                   {!canComplete && (
                     <p className="text-xs text-muted-foreground">
-                      This appointment starts at {f.inTz(completeFrom, salon.timezone, "time")}. It can be
-                      completed from then.
+                      {t("completeFrom", { time: f.inTz(completeFrom, salon.timezone, "time") })}
                     </p>
                   )}
                   {!canNoShow && (
                     <p className="text-xs text-muted-foreground">
-                      No-show can be marked from {f.inTz(markableFrom, salon.timezone, "time")}, {NO_SHOW_GRACE_MIN} minutes
-                      after the start.
+                      {t("noShowFrom", { time: f.inTz(markableFrom, salon.timezone, "time"), grace: NO_SHOW_GRACE_MIN })}
                     </p>
                   )}
                   {confirmComplete && (
-                    <div className="grid gap-3 rounded-md border border-primary/40 bg-primary/5 p-3">
-                      <p className="text-xs">
-                        Mark {appt.customer.name}&rsquo;s {appt.serviceName} as completed? Completed is final &mdash;
-                        unlike a no-show, it cannot be undone.
-                      </p>
+                    <div className="grid gap-3 rounded-lg bg-lavender p-3">
+                      <p className="text-xs">{t("confirmComplete", { client: appt.customer.name, service: appt.serviceName })}</p>
                       <div className="grid gap-1.5">
-                        <p className="text-xs text-muted-foreground">How did they pay? Optional.</p>
+                        <p className="text-xs text-muted-foreground">{t("howPaid")}</p>
                         <div className="flex flex-wrap gap-1.5">
                           {PAYMENT_METHODS.map((method) => (
                             <Button
@@ -784,7 +1100,7 @@ function AppointmentPanel({
                       </div>
                       <div className="grid gap-1.5">
                         <Label htmlFor="appt-tip" className="text-xs font-normal text-muted-foreground">
-                          Tip? Optional.
+                          {t("tipOptional")}
                         </Label>
                         <div className="flex flex-wrap items-center gap-1.5">
                           <Input
@@ -806,7 +1122,7 @@ function AppointmentPanel({
                             </Button>
                           ))}
                         </div>
-                        {tipCents === undefined && <p className="text-xs text-destructive">Enter a dollar amount.</p>}
+                        {tipCents === undefined && <p className="text-xs text-destructive">{t("enterAmount")}</p>}
                       </div>
                       <div className="flex gap-2">
                         <Button
@@ -817,19 +1133,17 @@ function AppointmentPanel({
                             update.mutate({ status: "COMPLETED", paymentMethod: payment, tipCents });
                           }}
                         >
-                          Yes, complete
+                          {t("yesComplete")}
                         </Button>
                         <Button size="sm" variant="ghost" onClick={() => setConfirmComplete(false)}>
-                          Not yet
+                          {t("notYet")}
                         </Button>
                       </div>
                     </div>
                   )}
                   {confirmNoShow && (
-                    <div className="grid gap-2 rounded-md border border-destructive/40 bg-destructive/5 p-3">
-                      <p className="text-xs">
-                        Mark {appt.customer.name} as a no-show? It counts on their record in the customer list. You can undo it.
-                      </p>
+                    <div className="grid gap-2 rounded-lg bg-destructive/10 p-3">
+                      <p className="text-xs">{t("confirmNoShow", { client: appt.customer.name })}</p>
                       <div className="flex gap-2">
                         <Button
                           size="sm"
@@ -840,25 +1154,25 @@ function AppointmentPanel({
                             update.mutate({ status: "NO_SHOW" });
                           }}
                         >
-                          Yes, no-show
+                          {t("yesNoShow")}
                         </Button>
                         <Button size="sm" variant="ghost" onClick={() => setConfirmNoShow(false)}>
-                          Keep as booked
+                          {t("keepBooked")}
                         </Button>
                       </div>
                     </div>
                   )}
                   <div className="flex gap-2">
-                    <Input placeholder="Cancel reason (optional)" value={reason} onChange={(e) => setReason(e.target.value)} />
+                    <Input placeholder={t("cancelReason")} value={reason} onChange={(e) => setReason(e.target.value)} />
                     <Button
                       size="sm"
                       variant="destructive"
                       disabled={update.isPending}
                       onClick={() => {
-                        if (confirm("Cancel this appointment?")) update.mutate({ status: "CANCELLED", cancelReason: reason || undefined });
+                        if (confirm(t("cancelConfirm"))) update.mutate({ status: "CANCELLED", cancelReason: reason || undefined });
                       }}
                     >
-                      Cancel
+                      {t("cancel")}
                     </Button>
                   </div>
                 </div>
@@ -868,7 +1182,7 @@ function AppointmentPanel({
             {appt.status === "COMPLETED" && (
               <div className="grid gap-3 border-t pt-4">
                 <div className="grid gap-1.5">
-                  <Label>Payment</Label>
+                  <Label>{t("payment")}</Label>
                   <div className="flex flex-wrap gap-1.5">
                     {PAYMENT_METHODS.map((method) => (
                       <Button
@@ -884,9 +1198,7 @@ function AppointmentPanel({
                     ))}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {appt.paymentMethod
-                      ? "Tap again to clear it."
-                      : "Not recorded. This is a note for the salon, not a payment."}
+                    {appt.paymentMethod ? t("tapToClear") : t("paymentNotRecorded")}
                   </p>
                 </div>
                 <TipEditor
@@ -908,9 +1220,9 @@ function AppointmentPanel({
                   disabled={update.isPending}
                   onClick={() => update.mutate({ status: "CONFIRMED" })}
                 >
-                  Undo no-show
+                  {t("undoNoShow")}
                 </Button>
-                <p className="text-xs text-muted-foreground">Puts it back to booked, as long as nothing else has taken the time.</p>
+                <p className="text-xs text-muted-foreground">{t("undoHint")}</p>
               </div>
             )}
             <FieldError message={update.error instanceof ApiError ? update.error.message : undefined} />

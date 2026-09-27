@@ -70,19 +70,19 @@ export class RatingsService {
       where: { id: designerId, status: 'ACTIVE', roles: { has: 'DESIGNER' } },
       select: { id: true, salonId: true },
     });
-    if (!designer) throw new NotFoundException('That designer does not take appointments');
+    if (!designer) throw new NotFoundException('That team member does not take appointments');
 
     const customer = await this.prisma.customer.findFirst({
       where: { salonId: designer.salonId, userId: user.id },
       select: { id: true },
     });
-    if (!customer) throw new ForbiddenException('You can rate a designer once they have finished a service for you');
+    if (!customer) throw new ForbiddenException('You can rate a team member once they have finished a service for you');
 
     const completed = await this.prisma.appointment.count({
       where: { customerId: customer.id, designerId: designer.id, status: 'COMPLETED' },
     });
     if (completed === 0) {
-      throw new ForbiddenException('You can rate a designer once they have finished a service for you');
+      throw new ForbiddenException('You can rate a team member once they have finished a service for you');
     }
 
     const row = await this.prisma.designerRating.upsert({

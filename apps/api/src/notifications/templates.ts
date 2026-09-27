@@ -86,7 +86,7 @@ export function render(event: NotificationEvent, webUrl: string): RenderedEmail 
       const hours = Math.round(event.data.expiresInMinutes / 60);
       const lines = [
         `Hi ${event.to.name},`,
-        'Confirm this address so we can show you your bookings and let salons reach you.',
+        'Confirm this address so we can show you your bookings and let businesses reach you.',
         `The link works once and expires in ${hours} hour${hours === 1 ? '' : 's'}.`,
       ];
       const cta = { label: 'Confirm my email', href: event.data.link };

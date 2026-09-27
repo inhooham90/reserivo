@@ -32,7 +32,7 @@ export class InvitationsService {
       where: { salonId, status: 'ACTIVE', user: { email: input.email } },
       select: { id: true },
     });
-    if (existingMember) throw new ConflictException('That person is already a member of this salon');
+    if (existingMember) throw new ConflictException('That person is already a member of this business');
 
     const token = randomBytes(32).toString('base64url');
     const now = new Date();

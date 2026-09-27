@@ -14,10 +14,10 @@ export const LEGAL = {
   /** The company that operates the service. */
   legalName: 'Akkija',
   address: '500 7th Ave, 8th Floor, New York, NY 10018',
-  supportEmail: 'james@morrri.com',
+  supportEmail: 'team@morrri.com',
   jurisdiction: 'the State of New York, United States',
   /** Shown at the top of both documents; bump when the text changes. */
-  lastUpdated: '24 September 2026',
+  lastUpdated: '26 September 2026',
   /** Named in the privacy policy, because a reader is entitled to know. */
   processors: [
     { name: 'Resend', purpose: 'sending email' },

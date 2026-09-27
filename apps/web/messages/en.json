@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Morrri",
-    "description": "Online booking for hair and nail salons."
+    "description": "Online booking for businesses that run on appointments."
   },
   "common": {
     "loading": "Loading…",
@@ -14,8 +14,8 @@
   "labels": {
     "role": {
       "MANAGER": "Manager",
-      "DESIGNER": "Designer",
-      "OWNER_STYLIST": "Owner-stylist"
+      "DESIGNER": "Takes appointments",
+      "OWNER_STYLIST": "Owner, takes appointments"
     },
     "status": {
       "PENDING": "Pending",
@@ -34,40 +34,72 @@
   },
   "home": {
     "signIn": "Sign in",
+    "dashboard": "Dashboard",
     "hero": {
-      "title": "Online booking your salon and your stylists will both love.",
-      "subtitle": "Give every designer their own schedule and services, keep client contact details private, and manage it all from one place.",
+      "title": "Online booking your business and your team will both love.",
+      "subtitle": "Give every team member their own schedule and services, keep client contact details private, and manage it all from one place.",
       "cta": "Get started",
-      "imageAlt": "A stylist cutting a client's hair in a small salon with terracotta walls"
+      "imageAlt": "Mona, the Morrri cat, as a hair stylist with scissors",
+      "secondaryCta": "See how it works"
     },
     "about": {
       "title": "What {product} is",
-      "body": "{product} is appointment booking software for hair and nail salons in the United States. A salon signs up, adds its stylists, services and opening hours, and gets a booking page of its own at <url>morrri.com/your-salon</url> to share with clients. Clients book on that page (no account needed) and the salon manages the day from one calendar.",
-      "notASalon": "We sell software to salons. We are not a salon, and we do not take a cut of a booking."
+      "body": "{product} is booking software for appointment-based businesses in the United States, from barbers and nail studios to spas, tutors and clinics. A business signs up, adds its team, services and opening hours, and gets a booking page of its own at <url>morrri.com/your-business</url> to share with clients. Clients book on that page (no account needed) and the business manages the day from one calendar.",
+      "notASalon": "We sell software to businesses. We are not the business you book with, and we do not take a cut of a booking."
     },
     "features": {
       "page": {
-        "title": "A page per salon",
-        "body": "Your stylists, your services, your prices and your hours, at an address you can print on a card.",
-        "imageAlt": "A nail technician filing a client's nails at a white table"
+        "title": "A page per business",
+        "body": "Your team, your services, your prices and your hours, at an address you can print on a card."
       },
       "calendar": {
         "title": "One calendar",
-        "body": "Every chair on one screen, with double bookings caught before they happen and walk-ins added by hand."
+        "body": "Your whole team on one screen, with double bookings caught before they happen and walk-ins added by hand."
       },
       "clients": {
         "title": "Clients you keep",
-        "body": "Visit history, notes and tags stay with the salon, and clients message you without either side swapping phone numbers."
+        "body": "Visit history, notes and tags stay with your business, and clients message you without either side swapping phone numbers."
+      },
+      "title": "One place for the whole working day",
+      "preview": {
+        "womensCut": "Women's cut",
+        "rootTouchUp": "Root touch-up",
+        "blowout": "Blowout",
+        "trim": "Trim",
+        "balayage": "Balayage",
+        "overlaps": "Overlaps {time}",
+        "walkIn": "Walk-in",
+        "beardTrim": "Beard trim",
+        "gelManicure": "Gel manicure",
+        "acrylicFill": "Acrylic fill",
+        "cutAndStyle": "Women's cut & style",
+        "pickTime": "Pick a time",
+        "visits": "{count, plural, one {# visit} other {# visits}}",
+        "prefers": "Prefers {name}",
+        "colorClient": "Color client",
+        "numberHidden": "Number hidden, messages go through {product}"
       }
     },
     "reminders": {
       "title": "Appointment reminders",
-      "body": "Every booking gets a confirmation by email straight away, and a reminder before the appointment. A client who gives a mobile number while booking can also tick a box to get that reminder as a text message: appointment reminders only, never marketing, and never without asking. The whole program, including the exact wording of the opt-in, is set out at <link>morrri.com/sms</link>."
+      "body": "Every booking gets a confirmation by email straight away, and a reminder before the appointment. A client who gives a mobile number while booking can also tick a box to get that reminder as a text message: appointment reminders only, never marketing, and never without asking. The whole program, including the exact wording of the opt-in, is set out at <link>morrri.com/sms</link>.",
+      "steps": {
+        "listLabel": "What a client receives",
+        "confirmTitle": "Confirmation by email",
+        "confirmBody": "Straight away, for every booking",
+        "reminderTitle": "Reminder by email",
+        "reminderBody": "Before the appointment",
+        "textTitle": "Reminder by text, if they opt in",
+        "textBody": "Appointment reminders only, never marketing"
+      }
     },
     "operator": {
       "title": "Who operates {product}",
       "body": "{product} is operated by {legalName}, {address}. Email <email>{supportEmail}</email> with a question about the service, an account or a message you received."
-    }
+    },
+    "navLabel": "Main",
+    "howItWorks": "How it works",
+    "remindersNav": "Reminders"
   },
   "footer": {
     "terms": "Terms",
@@ -87,7 +119,7 @@
       "time": "Time",
       "details": "Your details"
     },
-    "settingUp": "This salon is still setting up its menu.",
+    "settingUp": "This business is still setting up its menu.",
     "summary": {
       "title": "Your booking",
       "service": "Service",
@@ -98,7 +130,7 @@
       "nothing": "Nothing chosen yet.",
       "timezone": "Times shown in {tz}.",
       "cancellation": "{hours, plural, one {Free cancellation online up to # hour before your appointment.} other {Free cancellation online up to # hours before your appointment.}}",
-      "payAtSalon": "Pay at the salon."
+      "payAtSalon": "Pay in person."
     },
     "serviceWith": "{service} <muted>with {designer}</muted>",
     "back": {
@@ -120,14 +152,14 @@
       "name": "Name",
       "email": "Email",
       "phone": "Phone (optional)",
-      "notes": "Anything the stylist should know? (optional)",
+      "notes": "Anything your team member should know? (optional)",
       "submit": "Confirm booking",
       "submitting": "Booking…"
     },
     "done": {
       "title": "You’re booked",
       "summary": "{service} with {designer} at {salon}",
-      "payAtSalon": "{price} · pay at the salon.",
+      "payAtSalon": "{price} · pay in person.",
       "cancelUntil": "Cancel free online until {time}.",
       "seeAppointments": "See my appointments",
       "createAccount": "<link>Create an account</link> with the same email to manage or cancel this booking online."
@@ -150,7 +182,7 @@
     },
     "register": {
       "title": "Create your account",
-      "description": "Set up your salon in a couple of minutes.",
+      "description": "Set up your business in a couple of minutes.",
       "name": "Your name",
       "submit": "Create account",
       "submitting": "Creating…",
@@ -184,7 +216,24 @@
       "oneMoment": "One moment.",
       "seeAppointments": "See my appointments",
       "freshOne": "Sign in and we’ll offer to send a fresh one. <link>Sign in</link>"
-    }
+    },
+    "frame": {
+      "navLabel": "Account",
+      "home": "Home",
+      "signIn": "Sign in",
+      "signUp": "Create account",
+      "panelLabel": "About {product}",
+      "chip": "Online booking for small businesses",
+      "headline": "Your whole team on one screen, simply sorted",
+      "body": "Give everyone their own schedule and services, keep client contact details private, and manage it all from one place.",
+      "point1": "Clients book without an account",
+      "point2": "Reminders by email, and by text if they opt in",
+      "monaAlt": "Mona the cat checking a business’s paperwork with a magnifying glass"
+    },
+    "show": "Show",
+    "hide": "Hide",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "nav": {
     "actingAs": "Acting as {name}. Every action is recorded against your admin account.",
@@ -206,27 +255,171 @@
       "messages": "Messages",
       "settings": "Settings",
       "bookingPage": "Booking page: <link>/{slug}</link> · {timezone}",
-      "switch": "Switch salon",
-      "noAccess": "You do not have access to this salon.",
-      "tabsLabel": "Salon sections"
+      "switch": "Switch business",
+      "noAccess": "You do not have access to this business.",
+      "tabsLabel": "Business sections"
     },
     "menu": {
-      "yourSalons": "Your salons",
-      "setUp": "Set up a salon"
+      "yourSalons": "Your businesses",
+      "setUp": "Set up a business"
     },
     "primaryLabel": "Main"
   },
+  "schedule": {
+    "toolbar": {
+      "label": "Calendar controls",
+      "prevDay": "Previous day",
+      "today": "Today",
+      "nextDay": "Next day",
+      "goToDate": "Go to date",
+      "showDesigner": "Show team member",
+      "everyone": "Everyone",
+      "showCancelled": "Show cancelled",
+      "newAppointment": "New appointment"
+    },
+    "noDesigners": "Nobody takes appointments yet. Give someone the “Takes appointments” role under <link>Settings, Team</link>.",
+    "hint": {
+      "withAppointments": "Select an appointment for details, or click an empty time to book.",
+      "empty": "Click an empty time to book.",
+      "editHours": "Edit business hours"
+    },
+    "tiles": {
+      "label": "Day summary",
+      "appointments": "Appointments",
+      "nothingBooked": "Nothing booked yet",
+      "completedCount": "{count} completed",
+      "stillToCome": "{count} still to come",
+      "booked": "Booked time",
+      "ofOpen": "of {open} open across {count, plural, one {# team member} other {# team members}}",
+      "closedDay": "The business is closed this day",
+      "openTime": "Open time",
+      "freeInside": "Free inside business hours",
+      "cancelled": "Cancelled",
+      "noneCancelled": "None this day",
+      "cancelledShown": "Shown with a dashed outline",
+      "cancelledHidden": "Tick Show cancelled to see them"
+    },
+    "grid": {
+      "label": "Day calendar",
+      "bookedCount": "{count} booked",
+      "ghostNew": "New",
+      "ghostPast": "Past",
+      "ghostOverlaps": "Overlaps",
+      "block": "{status}: {client}, {service}, {start} to {end}, {source}",
+      "sourceOnline": "booked online",
+      "sourceStaff": "booked by staff",
+      "emptyPast": "Nothing was booked on this day.",
+      "emptyFuture": "Click an empty time to book the first appointment."
+    },
+    "conflict": {
+      "past": "{time} has already passed. Pick a time from now on.",
+      "clash": "{service} takes {duration} including cleanup, so it would run into the {time} appointment."
+    },
+    "legend": {
+      "label": "Legend",
+      "online": "Booked online",
+      "staff": "Booked by staff",
+      "closed": "Outside business hours"
+    },
+    "upNext": {
+      "upNext": "Up next",
+      "thisDay": "This day",
+      "nothingElse": "Nothing else booked for this day.",
+      "time": "Time",
+      "client": "Client",
+      "service": "Service",
+      "designer": "Team member",
+      "length": "Length",
+      "status": "Status"
+    },
+    "panel": {
+      "summary": "{service} · {price} · with {designer}",
+      "buffer": "(+{duration} buffer)",
+      "close": "Close",
+      "customerNote": "Customer note:",
+      "cancelledReason": "Cancelled: {reason}",
+      "bookedOnline": "Booked online.",
+      "bookedStaff": "Booked by staff.",
+      "internalNotes": "Internal notes",
+      "saveNotes": "Save notes",
+      "moveTo": "Move to",
+      "findingTimes": "Finding open times…",
+      "nothingFits": "Nothing left on this day fits {service}. Pick another day on the calendar first.",
+      "minutesPast": "Minutes past the hour",
+      "reschedule": "Reschedule",
+      "onlyOpen": "Only times that are still open and fit the service are listed.",
+      "serviceRemoved": "This service was removed, so open times could not be checked.",
+      "complete": "Completed",
+      "noShow": "No-show",
+      "completeFrom": "This appointment starts at {time}. It can be completed from then.",
+      "noShowFrom": "No-show can be marked from {time}, {grace} minutes after the start.",
+      "confirmComplete": "Mark {client}’s {service} as completed? Completed is final: unlike a no-show, it cannot be undone.",
+      "howPaid": "How did they pay? Optional.",
+      "tipOptional": "Tip? Optional.",
+      "enterAmount": "Enter a dollar amount.",
+      "yesComplete": "Yes, complete",
+      "notYet": "Not yet",
+      "confirmNoShow": "Mark {client} as a no-show? It counts on their record in the customer list. You can undo it.",
+      "yesNoShow": "Yes, no-show",
+      "keepBooked": "Keep as booked",
+      "cancelReason": "Cancel reason (optional)",
+      "cancelConfirm": "Cancel this appointment?",
+      "cancel": "Cancel",
+      "payment": "Payment",
+      "tapToClear": "Tap again to clear it.",
+      "paymentNotRecorded": "Not recorded. This is a note for the business, not a payment.",
+      "undoNoShow": "Undo no-show",
+      "undoHint": "Puts it back to booked, as long as nothing else has taken the time.",
+      "tip": "Tip",
+      "save": "Save",
+      "tipInvalid": "Enter a dollar amount, or clear the field to record nothing.",
+      "tipPct": "{pct}% of the service price.",
+      "tipNotRecorded": "Not recorded."
+    },
+    "form": {
+      "title": "New appointment",
+      "hint": "Click the calendar to pick a time, choose a slot, or type one. Overlaps are refused.",
+      "designer": "Team member",
+      "service": "Service",
+      "noServices": "No active services for this team member",
+      "blocks": "Blocks {total} including {cleanup} cleanup.",
+      "date": "Date",
+      "time": "Time",
+      "offGrid": "{time} is outside published hours or off the slot grid. Staff may still book it, and nothing else is booked then.",
+      "openSlots": "Open slots",
+      "noSlots": "Nothing open in published hours for this service.",
+      "customer": "Customer",
+      "selectedCustomer": "Selected customer",
+      "change": "Change",
+      "search": "Search existing by name, phone or email…",
+      "orNew": "…or add a new one:",
+      "name": "Name",
+      "phone": "Phone",
+      "email": "Email",
+      "internalNotes": "Internal notes",
+      "booking": "Booking…",
+      "bookAt": "Book {service} at {time}",
+      "book": "Book"
+    }
+  },
   "settings": {
     "navLabel": "Settings sections",
-    "noDesigners": "Nobody takes appointments yet. Give someone the Designer role on the Team page.",
+    "dialog": {
+      "search": "Search settings",
+      "close": "Close settings",
+      "account": "Account",
+      "noMatch": "No settings match.",
+      "unsaved": "Unsaved changes"
+    },
+    "noDesigners": "Nobody takes appointments yet. Give someone the “Takes appointments” role on the Team page.",
     "sections": {
       "salon": {
-        "label": "Salon",
+        "label": "Business",
         "hint": "Name, time zone, booking rules, reminders"
       },
       "team": {
         "label": "Team",
-        "hint": "Designers, roles, invitations"
+        "hint": "Team members, roles, invitations"
       },
       "services": {
         "label": "Services",
@@ -234,25 +427,32 @@
       },
       "hours": {
         "label": "Hours",
-        "hint": "Opening hours and each designer's week"
+        "hint": "Opening hours and each team member's week"
       },
       "yourSalons": {
-        "label": "Your salons",
+        "label": "Your businesses",
         "hint": "Switch between them, or start another"
       }
     },
     "salon": {
-      "title": "Salon",
+      "title": "Business",
       "linkStays": "Your booking link stays /{slug}.",
       "name": "Name",
       "timezone": "Time zone",
       "timezoneHint": "Working hours are wall-clock times in this zone.",
       "policies": "Booking policies",
       "policiesHint": "What customers may do on the public page.",
-      "slotGrid": "Slot grid (min)",
-      "leadTime": "Minimum notice (min)",
-      "maxAdvance": "Book up to (days ahead)",
-      "cancelWindow": "Free cancel until (hours before)",
+      "slotGrid": "Slot grid",
+      "slotGridHint": "Start times offered on the booking page.",
+      "leadTime": "Minimum notice",
+      "leadTimeHint": "How soon before a start time a client can still book.",
+      "maxAdvance": "Book up to",
+      "maxAdvanceHint": "How far ahead the calendar opens.",
+      "cancelWindow": "Free cancel until",
+      "cancelWindowHint": "Clients can cancel for free up to this many hours before.",
+      "unitHours": "hours before",
+      "unitDays": "days ahead",
+      "unitMinutes": "minutes",
       "reminders": "Reminders",
       "remindersHint": "When to remind a customer before their appointment. Always by email; also by text once that customer has agreed to one and SMS is switched on for the platform.",
       "reminderHours": "{hours, plural, one {# hour before} other {# hours before}}",
@@ -263,21 +463,22 @@
       "saved": "Saved"
     },
     "roles": {
-      "managerHint": "Team, salon hours, settings, customer contact details",
+      "managerHint": "Team, business hours, settings, customer contact details",
       "designerHint": "Takes appointments: own services and hours, shown on the booking page",
       "pickOne": "Pick at least one."
     },
     "team": {
       "members": "Members",
+      "you": "You",
       "edit": "Edit",
       "close": "Close",
       "remove": "Remove",
-      "confirmRemove": "Remove {name} from the salon?",
+      "confirmRemove": "Remove {name} from the business?",
       "removeFailed": "Could not remove",
       "displayName": "Display name",
       "bio": "Bio",
       "roles": "Roles",
-      "hoursSeeded": "Their hours will start as a copy of the salon hours.",
+      "hoursSeeded": "Their hours will start as a copy of the business hours.",
       "save": "Save",
       "saving": "Saving…",
       "inviteTitle": "Invite someone",
@@ -294,7 +495,10 @@
     },
     "services": {
       "title": "Services",
-      "none": "No services yet. Add the first one on the right.",
+      "forDesigner": "{name}’s services",
+      "designer": "Team member",
+      "emptyTitle": "No services yet",
+      "emptyBody": "Add what you offer and what it costs. Clients choose from these on your booking page.",
       "hidden": "Hidden",
       "doubleBooking": "Double booking",
       "buffer": "+ {duration} buffer",
@@ -307,7 +511,7 @@
       "formHint": "Durations in 5-minute steps. Buffer is cleanup time after. Over {min} minutes you can allow double booking.",
       "name": "Name",
       "category": "Category",
-      "categoryPlaceholder": "Cut, Color, Nails…",
+      "categoryPlaceholder": "Cuts, Massage, Lessons…",
       "price": "Price ($)",
       "minutes": "Minutes",
       "bufferLabel": "Buffer",
@@ -320,29 +524,30 @@
       "saving": "Saving…"
     },
     "hours": {
-      "salonTitle": "Salon hours",
+      "salonTitle": "Business hours",
       "salonHint": "When the shop is open, in {timezone}. Everyone who takes appointments schedules inside these.",
       "opening": "Opening hours",
       "openingHint": "Add a second window for a lunch closure.",
       "closures": "Closures & special days",
       "closuresHint": "Holidays, early closes, one-off openings. Applies to everyone.",
-      "designerTitle": "Designer hours",
-      "managerDesigner": "Your hours and your team’s. Each schedule must fit inside the salon hours.",
-      "managerOnly": "You don’t take appointments. Set each designer’s schedule here.",
-      "designerOnly": "Your working hours. They must fit inside the salon hours.",
+      "designerTitle": "Team member hours",
+      "designerPick": "Team member",
+      "managerDesigner": "Your hours and your team’s. Each schedule must fit inside the business hours.",
+      "managerOnly": "You don’t take appointments. Set each team member’s schedule here.",
+      "designerOnly": "Your working hours. They must fit inside the business hours.",
       "week": "{name}’s week",
       "weekly": "Weekly hours",
-      "weekHint": "Salon hours are shown under each day as the limit.",
+      "weekHint": "Business hours are shown under each day as the limit.",
       "daysOff": "Days off & changes",
-      "daysOffHint": "Overrides the weekly hours for one date, within the salon’s hours.",
-      "salonClosed": "Salon closed",
+      "daysOffHint": "Overrides the weekly hours for one date, within business hours.",
+      "salonClosed": "Business closed",
       "off": "Off",
       "remove": "Remove",
       "addWindow": "Add window",
       "addHours": "Add hours",
       "save": "Save",
       "saving": "Saving…",
-      "outside": "{day}: outside salon hours ({limits}).",
+      "outside": "{day}: outside business hours ({limits}).",
       "closedLower": "closed",
       "nothingUpcoming": "Nothing upcoming.",
       "closed": "Closed",
@@ -361,27 +566,28 @@
       "endTime": "End time"
     },
     "yourSalons": {
-      "loadFailed": "Couldn’t load your salons",
+      "loadFailed": "Couldn’t load your businesses",
       "checkConnection": "Check your connection and try again.",
       "retry": "Retry",
-      "setUpTitle": "Set up your salon",
+      "setUpTitle": "Set up your business",
       "setUpHint": "Your booking page, your team and your hours all hang off this. You can change any of it later.",
       "justBooking": "Just here to book an appointment? <link>Your appointments</link> has everything you have booked.",
-      "title": "Your salons",
+      "title": "Your businesses",
       "hint": "Opening one takes you to its schedule.",
+      "aside": "Hours, team, services and reminders all live in Settings.",
       "settings": "Settings",
       "open": "Open",
-      "createAnother": "Create another salon"
+      "createAnother": "Create another business"
     },
     "createSalon": {
-      "title": "Create a salon",
+      "title": "Create a business",
       "description": "You become its first manager.",
       "name": "Name",
       "url": "Booking URL",
       "timezone": "Time zone",
       "takesAppointments": "I also take appointments myself",
-      "takesHint": "Solo operators and owner-stylists. You can change this later under Settings → Team.",
-      "create": "Create salon",
+      "takesHint": "Solo operators and owners who take appointments. You can change this later under Settings → Team.",
+      "create": "Create business",
       "creating": "Creating…"
     }
   },
@@ -393,8 +599,8 @@
     "siteAdmin": "Site admin",
     "stats": {
       "users": "Users",
-      "salons": "Salons",
-      "designers": "Designers",
+      "salons": "Businesses",
+      "designers": "Bookable team members",
       "customers": "Customers",
       "appointments": "Appointments",
       "upcoming": "Upcoming",
@@ -402,16 +608,16 @@
       "staff": "Staff",
       "services": "Services"
     },
-    "search": "Search people by name or email, salons by name or link…",
+    "search": "Search people by name or email, businesses by name or link…",
     "people": "People",
     "matchingUsers": "Matching users",
     "newestSignups": "Newest signups",
     "noUsers": "No users match.",
-    "salonCount": "{count, plural, one {# salon} other {# salons}}",
-    "salons": "Salons",
-    "matchingSalons": "Matching salons",
-    "newestSalons": "Newest salons",
-    "noSalons": "No salons match.",
+    "salonCount": "{count, plural, one {# business} other {# businesses}}",
+    "salons": "Businesses",
+    "matchingSalons": "Matching businesses",
+    "newestSalons": "Newest businesses",
+    "noSalons": "No businesses match.",
     "salonCounts": "{staff} staff · {appts} appts",
     "status": {
       "INVITED": "invited",
@@ -419,15 +625,15 @@
       "REMOVED": "removed"
     },
     "salon": {
-      "back": "All salons",
-      "notFound": "No such salon.",
+      "back": "All businesses",
+      "notFound": "No such business.",
       "created": "created {date}",
       "bookingPage": "Booking page",
       "openWorkspace": "Open workspace",
       "policies": "Slots every {slot} min · {lead} min notice · books {days} days ahead · free cancellation until {hours}h before.",
       "team": "Team",
       "teamHint": "Roles and access",
-      "seeAudit": "See this salon’s audit log"
+      "seeAudit": "See this business’s audit log"
     },
     "user": {
       "back": "All users",
@@ -440,18 +646,18 @@
       "cannotAdmins": "Site admins cannot act as one another.",
       "isYou": "This is you.",
       "worksAt": "Works at",
-      "noMemberships": "Not a member of any salon.",
-      "memberships": "Salon memberships",
+      "noMemberships": "Not a member of any business.",
+      "memberships": "Business memberships",
       "asName": "as {name}",
       "booksAt": "Books at",
       "noClients": "No client records.",
-      "clientRecords": "Salons holding a client record",
+      "clientRecords": "Businesses holding a client record",
       "appointments": "{count, plural, one {# appointment} other {# appointments}}"
     },
     "log": {
       "title": "Audit log",
       "everyChange": "Every change, newest first.",
-      "filtered": "Filtered to one salon.",
+      "filtered": "Filtered to one business.",
       "showAll": "Show all",
       "entity": "Entity",
       "entityPlaceholder": "salons, appointments…",
@@ -470,19 +676,19 @@
   },
   "unsubscribe": {
     "metaTitle": "Unsubscribe · {product}",
-    "metaDescription": "Choose which emails you get from salons on {product}.",
+    "metaDescription": "Choose which emails you get from businesses on {product}.",
     "oneMoment": "One moment…",
     "expiredTitle": "That link has expired",
-    "expiredBody": "It may already have been used, or the salon may no longer hold a record for it. Replying to any email from the salon will reach them directly.",
+    "expiredBody": "It may already have been used, or the business may no longer hold a record for it. Replying to any email from the business will reach them directly.",
     "title": {
       "NONE": "You’re still on {salon}’s list",
       "SALON": "{salon} won’t send you promotions again",
-      "MARKETING": "No salon on {product} will send you promotions",
+      "MARKETING": "No business on {product} will send you promotions",
       "ALL": "{product} won’t email you at all"
     },
     "summary": {
       "NONE": "{salon} may email you about offers and news again. Pick what should stop, if anything.",
-      "SALON": "Done, no further click needed. If you’d rather stop more than this one salon, choose below.",
+      "SALON": "Done, no further click needed. If you’d rather stop more than this one business, choose below.",
       "MARKETING": "Booking confirmations and reminders still arrive, because they are part of a booking, not marketing.",
       "ALL": "That includes confirmations and reminders for appointments you book. Sign-in and password-reset emails you ask for still arrive."
     },
@@ -491,11 +697,11 @@
     "option": {
       "SALON": {
         "label": "Promotions from {salon}",
-        "hint": "Other salons you book with can still email you. Booking confirmations and reminders still arrive."
+        "hint": "Other businesses you book with can still email you. Booking confirmations and reminders still arrive."
       },
       "MARKETING": {
-        "label": "Promotions from every salon on {product}",
-        "hint": "Includes salons you book with in the future. Booking confirmations and reminders still arrive."
+        "label": "Promotions from every business on {product}",
+        "hint": "Includes businesses you book with in the future. Booking confirmations and reminders still arrive."
       },
       "ALL": {
         "label": "Every email from {product}",

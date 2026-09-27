@@ -3,6 +3,7 @@
 import type { AuthResponse, CurrentUser, LoginInput, RegisterInput } from "@reserivo/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useRouter } from "@/i18n/navigation";
 import { api, refresh, setAccessToken } from "./api";
 
 type Status = "loading" | "authenticated" | "anonymous";
@@ -106,4 +107,20 @@ export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");
   return ctx;
+}
+
+/**
+ * For the sign-in and create-account pages: someone already signed in has no
+ * use for them, so send them on to `to` (the dashboard, or ?next=) as soon as
+ * the session is known. Returns the status so the page can hold back its form
+ * meanwhile. Reset-password and verify-email deliberately do not use this:
+ * they arrive from an email link and must work whoever is signed in.
+ */
+export function useRedirectIfSignedIn(to: string): Status {
+  const { status } = useAuth();
+  const router = useRouter();
+  useEffect(() => {
+    if (status === "authenticated") router.replace(to);
+  }, [status, to, router]);
+  return status;
 }

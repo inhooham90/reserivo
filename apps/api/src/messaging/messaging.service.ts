@@ -78,7 +78,7 @@ export class MessagingService {
    */
   async startMine(user: AuthenticatedUser, input: StartConversationInput): Promise<Thread> {
     const customer = await this.prisma.customer.findFirst({ where: { salonId: input.salonId, ...this.ownedBy(user) } });
-    if (!customer) throw new ForbiddenException('You can message a salon once you have booked with them.');
+    if (!customer) throw new ForbiddenException('You can message a business once you have booked with them.');
     if (!customer.userId) await this.prisma.customer.update({ where: { id: customer.id }, data: { userId: user.id } });
 
     await this.members.findDesigner(input.salonId, input.designerId);
@@ -141,7 +141,7 @@ export class MessagingService {
   /** Staff may open a thread with a customer who has an account; guests cannot be reached through the relay. */
   async startStaff(tenant: TenantContext, input: StaffStartConversationInput, user: AuthenticatedUser): Promise<Thread> {
     const designerId = input.designerId ?? tenant.membership?.id;
-    if (!designerId) throw new ConflictException('Choose which designer this conversation belongs to');
+    if (!designerId) throw new ConflictException('Choose which team member this conversation belongs to');
     assertCanManageMember(tenant, designerId);
     await this.members.findDesigner(tenant.salonId, designerId);
 
@@ -203,7 +203,7 @@ export class MessagingService {
     const conv = await this.prisma.conversation.findFirst({ where: { id: conversationId, salonId: tenant.salonId }, include: CONV_INCLUDE });
     if (!conv) throw new NotFoundException('Conversation not found');
     if (!isManager(tenant) && conv.designerId !== tenant.membership?.id) {
-      throw new ForbiddenException('This conversation belongs to another designer');
+      throw new ForbiddenException('This conversation belongs to another team member');
     }
     return conv;
   }

@@ -211,7 +211,7 @@ describe('Phase 2 (e2e)', () => {
     // Widen the window past the booking: 14 days > 7 days out → already too late to self-cancel.
     await api().patch(`/salons/${salonId}`).set(auth(mgrToken)).send({ cancelWindowHours: 24 * 14 }).expect(200);
     const late = await api().post(`/me/appointments/${clientApptId}/cancel`).set(auth(cliToken)).expect(409);
-    expect(late.body.message).toMatch(/contact the salon/i);
+    expect(late.body.message).toMatch(/contact the business/i);
     await api().patch(`/salons/${salonId}`).set(auth(mgrToken)).send({ cancelWindowHours: 24 }).expect(200);
 
     const ok = await api().post(`/me/appointments/${clientApptId}/cancel`).set(auth(cliToken)).expect(200);

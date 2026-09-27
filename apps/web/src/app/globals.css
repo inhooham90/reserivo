@@ -12,7 +12,16 @@
  * with any reasonable accent.
  */
 
-@custom-variant dark (@media (prefers-color-scheme: dark));
+/* The v3 surface (.theme-morrri) is light-only, so dark: utilities never apply
+   inside it, whatever the OS says. Without this the shadcn components tint
+   their inputs and hovers for a dark ground that is not there. */
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    &:where(:not(.theme-morrri, .theme-morrri *)) {
+      @slot;
+    }
+  }
+}
 
 @theme inline {
   --color-background: var(--background);
@@ -70,6 +79,13 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  /* Morrri v3 surfaces (DESIGN.md). Defined only inside .theme-morrri for now. */
+  --color-lavender: var(--lavender);
+  --color-butter: var(--butter);
+  --color-body: var(--body);
+  --color-surface-muted: var(--surface-muted);
+  --color-scrim: var(--scrim);
+  --font-display: var(--font-newsreader), var(--font-cjk, serif), Georgia, serif;
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -165,6 +181,80 @@
     --sidebar-accent-foreground: oklch(0.94 0.012 70);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.73 0.12 42);
+  }
+}
+
+/*
+ * Morrri v3 (DESIGN.md at the repo root), rolled out one surface at a time.
+ * Everything under .theme-morrri takes the new palette; the rest of the app
+ * keeps the warm-editorial tokens above until its turn comes. Overriding the
+ * shadcn variables here means the existing ui components pick it up as-is.
+ *
+ * The scope sits on white; the sign-in frame adds the lavender page itself
+ * (DESIGN.md "v3 page rule"). DESIGN.md defines no dark palette, so this scope is light-only for now:
+ * color-scheme and every token are pinned regardless of the OS setting.
+ * Contrast (on white unless noted): ink 18.23:1, body 9.43:1, muted 5.66:1
+ * (4.70:1 on lavender), input edge 3.64:1, white on navy 18.33:1, error 6.57:1.
+ */
+.theme-morrri {
+  color-scheme: light;
+  --background: #ffffff;
+  --foreground: #15141f;
+  --card: #ffffff;
+  --card-foreground: #15141f;
+  --popover: #ffffff;
+  --popover-foreground: #15141f;
+  --primary: #12122a;
+  --primary-foreground: #ffffff;
+  --secondary: #fdfee9;
+  --secondary-foreground: #15141f;
+  --muted: #f8f8fc;
+  --muted-foreground: #66657a;
+  --accent: #f0f0f6;
+  --accent-foreground: #15141f;
+  --destructive: #b42318;
+  --destructive-foreground: #ffffff;
+  --border: rgb(18 18 42 / 0.12);
+  --input: #85849a;
+  --ring: #12122a;
+  --radius: 0.5rem;
+
+  --lavender: #e9e8fc;
+  --butter: #fdfee9;
+  --body: #45445a;
+  --surface-muted: #f0f0f6;
+  /* DESIGN.md "Line tints": hour rules, the closed-hours hatch and the
+     cancelled outline in the calendar grid. */
+  --hour-rule: rgb(18 18 42 / 0.06);
+  --closed-hatch: rgb(18 18 42 / 0.035);
+  --cancelled-edge: rgb(18 18 42 / 0.32);
+  /* DESIGN.md "App surfaces": the scrim behind the settings dialog. */
+  --scrim: rgb(21 20 31 / 0.4);
+}
+
+/* DESIGN.md "Shapes": every control on the v3 surface is a pill. Unlayered on
+   purpose so it beats the components' own radius utilities; it sets the
+   radius and nothing else, so per-site sizes and padding still apply. */
+.theme-morrri :is([data-slot="button"], [data-slot="input"], [data-slot="badge"]) {
+  border-radius: 9999px;
+}
+
+@layer base {
+  /* Layered, unlike the tokens above: an unlayered background here would
+     beat every Tailwind utility and stop a page opting into bg-lavender. */
+  .theme-morrri {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-feature-settings: "cv09", "cv03", "cv04", "cv11";
+  }
+
+  /* PP Kyoto is the designed heading face; Newsreader stands in until the
+     licence is bought (same sizes, see DESIGN.md "Typography"). */
+  .theme-morrri :is(h1, h2, h3) {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    font-variation-settings: normal;
   }
 }
 

@@ -39,7 +39,7 @@ export function LocaleSwitcher({ className }: { className?: string }) {
       </Menu.Trigger>
       <Menu.Portal>
         <Menu.Positioner sideOffset={6} align="end" className="z-50">
-          <Menu.Popup className="min-w-40 rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-md outline-none">
+          <Menu.Popup className="theme-morrri min-w-40 rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-md outline-none">
             <Menu.RadioGroup
               value={locale}
               onValueChange={(next) => {

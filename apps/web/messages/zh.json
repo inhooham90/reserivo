@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Morrri",
-    "description": "美发与美甲沙龙在线预约。"
+    "description": "面向预约制商家的在线预约。"
   },
   "common": {
     "loading": "加载中…",
@@ -14,8 +14,8 @@
   "labels": {
     "role": {
       "MANAGER": "店长",
-      "DESIGNER": "发型师",
-      "OWNER_STYLIST": "店主兼发型师"
+      "DESIGNER": "接受预约",
+      "OWNER_STYLIST": "店主（接受预约）"
     },
     "status": {
       "PENDING": "待确认",
@@ -34,40 +34,72 @@
   },
   "home": {
     "signIn": "登录",
+    "dashboard": "工作台",
     "hero": {
-      "title": "沙龙和发型师都会喜欢的在线预约。",
-      "subtitle": "让每位发型师拥有自己的日程和服务项目，保护客户联系方式，一切都在一处管理。",
+      "title": "商家和团队都会喜欢的在线预约。",
+      "subtitle": "让每位团队成员拥有自己的日程和服务项目，保护客户联系方式，一切都在一处管理。",
       "cta": "开始使用",
-      "imageAlt": "在赤陶色墙面的小沙龙里，发型师正在为客人剪发"
+      "imageAlt": "Morrri 的猫咪 Mona 扮成拿着剪刀的发型师",
+      "secondaryCta": "了解使用方式"
     },
     "about": {
       "title": "{product} 是什么",
-      "body": "{product} 是为美国美发和美甲沙龙打造的预约软件。沙龙注册后添加发型师、服务项目和营业时间，即可获得一个专属预约页面 <url>morrri.com/your-salon</url>，分享给客户。客户无需注册账号即可在该页面预约，沙龙则在同一个日历中安排每一天。",
-      "notASalon": "我们向沙龙出售软件。我们不是沙龙，也不从任何一笔预约中抽成。"
+      "body": "{product} 是为美国预约制商家打造的预约软件，从理发店、美甲工作室到水疗馆、家教和诊所都适用。商家注册后添加团队成员、服务项目和营业时间，即可获得一个专属预约页面 <url>morrri.com/your-business</url>，分享给客户。客户无需注册账号即可在该页面预约，商家则在同一个日历中安排每一天。",
+      "notASalon": "我们向商家出售软件。我们不是你预约的那家店，也不从任何一笔预约中抽成。"
     },
     "features": {
       "page": {
-        "title": "每家沙龙一个页面",
-        "body": "你的发型师、服务、价格和营业时间，都在一个可以印在名片上的网址里。",
-        "imageAlt": "美甲师在白色桌面上为客人修锉指甲"
+        "title": "每个商家一个页面",
+        "body": "你的团队、服务、价格和营业时间，都在一个可以印在名片上的网址里。"
       },
       "calendar": {
         "title": "一个日历",
-        "body": "所有座位尽在一屏，重复预约在发生前就被拦下，临时到店的客人可手动添加。"
+        "body": "整个团队尽在一屏，重复预约在发生前就被拦下，临时到店的客人可手动添加。"
       },
       "clients": {
         "title": "留得住的客户",
-        "body": "到店记录、备注和标签都留在沙龙，客户与你互发消息，双方都无需交换电话号码。"
+        "body": "到店记录、备注和标签都留在你的商家，客户与你互发消息，双方都无需交换电话号码。"
+      },
+      "title": "一处掌握整个工作日",
+      "preview": {
+        "womensCut": "女士剪发",
+        "rootTouchUp": "补染发根",
+        "blowout": "吹造型",
+        "trim": "修剪",
+        "balayage": "挑染",
+        "overlaps": "{time} 时间重叠",
+        "walkIn": "临时到店",
+        "beardTrim": "修胡子",
+        "gelManicure": "凝胶美甲",
+        "acrylicFill": "水晶甲补填",
+        "cutAndStyle": "女士剪发和造型",
+        "pickTime": "选择时间",
+        "visits": "{count, plural, other {到店 # 次}}",
+        "prefers": "偏好 {name}",
+        "colorClient": "染发客户",
+        "numberHidden": "号码已隐藏，消息通过 {product} 传递"
       }
     },
     "reminders": {
       "title": "预约提醒",
-      "body": "每笔预约都会立即通过电子邮件确认，并在到店前发送提醒。预约时填写手机号码的客户还可以勾选一个选项，通过短信接收这条提醒：只发送预约提醒，绝不发送营销信息，未经同意绝不发送。完整说明（包括同意条款的原文）请见 <link>morrri.com/sms</link>。"
+      "body": "每笔预约都会立即通过电子邮件确认，并在到店前发送提醒。预约时填写手机号码的客户还可以勾选一个选项，通过短信接收这条提醒：只发送预约提醒，绝不发送营销信息，未经同意绝不发送。完整说明（包括同意条款的原文）请见 <link>morrri.com/sms</link>。",
+      "steps": {
+        "listLabel": "客户会收到的消息",
+        "confirmTitle": "邮件确认",
+        "confirmBody": "每次预约后立即发送",
+        "reminderTitle": "邮件提醒",
+        "reminderBody": "预约前发送",
+        "textTitle": "短信提醒（需客户同意）",
+        "textBody": "仅限预约提醒，绝不发送营销信息"
+      }
     },
     "operator": {
       "title": "{product} 的运营方",
       "body": "{product} 由 {legalName}（{address}）运营。如对服务、账号或收到的消息有疑问，请发送邮件至 <email>{supportEmail}</email>。"
-    }
+    },
+    "navLabel": "主导航",
+    "howItWorks": "使用方式",
+    "remindersNav": "提醒"
   },
   "footer": {
     "terms": "服务条款",
@@ -87,11 +119,11 @@
       "time": "时间",
       "details": "你的信息"
     },
-    "settingUp": "这家沙龙仍在准备服务项目。",
+    "settingUp": "这家商家仍在准备服务项目。",
     "summary": {
       "title": "你的预约",
       "service": "服务",
-      "with": "发型师",
+      "with": "团队成员",
       "when": "时间",
       "chooseTime": "请选择时间",
       "price": "价格",
@@ -120,7 +152,7 @@
       "name": "姓名",
       "email": "电子邮件",
       "phone": "电话（选填）",
-      "notes": "有什么想告诉发型师的吗？（选填）",
+      "notes": "有什么想告诉团队成员的吗？（选填）",
       "submit": "确认预约",
       "submitting": "正在预约…"
     },
@@ -150,7 +182,7 @@
     },
     "register": {
       "title": "创建账号",
-      "description": "几分钟即可设置好你的沙龙。",
+      "description": "几分钟即可设置好你的商家。",
       "name": "你的姓名",
       "submit": "创建账号",
       "submitting": "正在创建…",
@@ -184,7 +216,24 @@
       "oneMoment": "请稍候。",
       "seeAppointments": "查看我的预约",
       "freshOne": "登录后我们会为你重新发送链接。<link>登录</link>"
-    }
+    },
+    "frame": {
+      "navLabel": "账户",
+      "home": "首页",
+      "signIn": "登录",
+      "signUp": "创建账户",
+      "panelLabel": "关于 {product}",
+      "chip": "面向小型商家的在线预约",
+      "headline": "整个团队一屏掌握，井井有条",
+      "body": "让每位成员拥有自己的日程和服务，保护客户联系方式的隐私，一切都在一处管理。",
+      "point1": "客户无需注册即可预约",
+      "point2": "邮件提醒，客户同意后也可短信提醒",
+      "monaAlt": "猫咪 Mona 正用放大镜查看商家的文件"
+    },
+    "show": "显示",
+    "hide": "隐藏",
+    "showPassword": "显示密码",
+    "hidePassword": "隐藏密码"
   },
   "nav": {
     "actingAs": "正在以 {name} 的身份操作。所有操作都会记录在你的管理员账号下。",
@@ -206,27 +255,171 @@
       "messages": "消息",
       "settings": "设置",
       "bookingPage": "预约页面：<link>/{slug}</link> · {timezone}",
-      "switch": "切换沙龙",
-      "noAccess": "你无权访问这家沙龙。",
-      "tabsLabel": "沙龙分区"
+      "switch": "切换商家",
+      "noAccess": "你无权访问这家商家。",
+      "tabsLabel": "商家分区"
     },
     "menu": {
-      "yourSalons": "我的沙龙",
-      "setUp": "创建沙龙"
+      "yourSalons": "我的商家",
+      "setUp": "创建商家"
     },
     "primaryLabel": "主导航"
   },
+  "schedule": {
+    "toolbar": {
+      "label": "日历控件",
+      "prevDay": "前一天",
+      "today": "今天",
+      "nextDay": "后一天",
+      "goToDate": "跳转到日期",
+      "showDesigner": "选择团队成员",
+      "everyone": "全部",
+      "showCancelled": "显示已取消",
+      "newAppointment": "新建预约"
+    },
+    "noDesigners": "还没有人接受预约。请在<link>设置中的团队</link>里为某人分配“接受预约”角色。",
+    "hint": {
+      "withAppointments": "选择预约查看详情，或点击空闲时间进行预约。",
+      "empty": "点击空闲时间进行预约。",
+      "editHours": "编辑营业时间"
+    },
+    "tiles": {
+      "label": "当日概览",
+      "appointments": "预约",
+      "nothingBooked": "还没有预约",
+      "completedCount": "已完成 {count} 个",
+      "stillToCome": "还有 {count} 个",
+      "booked": "已预约时长",
+      "ofOpen": "{count} 位团队成员共 {open} 营业时间",
+      "closedDay": "本日店铺休息",
+      "openTime": "空闲时长",
+      "freeInside": "营业时间内的空闲时间",
+      "cancelled": "已取消",
+      "noneCancelled": "本日没有取消",
+      "cancelledShown": "以虚线框显示",
+      "cancelledHidden": "勾选“显示已取消”即可查看"
+    },
+    "grid": {
+      "label": "当日日历",
+      "bookedCount": "{count} 个预约",
+      "ghostNew": "新预约",
+      "ghostPast": "已过",
+      "ghostOverlaps": "冲突",
+      "block": "{status}：{client}，{service}，{start} 至 {end}，{source}",
+      "sourceOnline": "在线预约",
+      "sourceStaff": "员工预约",
+      "emptyPast": "这一天没有预约。",
+      "emptyFuture": "点击空闲时间，添加第一个预约。"
+    },
+    "conflict": {
+      "past": "{time} 已经过去。请选择现在之后的时间。",
+      "clash": "{service} 含清理时间需要 {duration}，会与 {time} 的预约冲突。"
+    },
+    "legend": {
+      "label": "图例",
+      "online": "在线预约",
+      "staff": "员工预约",
+      "closed": "非营业时间"
+    },
+    "upNext": {
+      "upNext": "接下来",
+      "thisDay": "当日预约",
+      "nothingElse": "这一天没有其他预约。",
+      "time": "时间",
+      "client": "客户",
+      "service": "服务",
+      "designer": "团队成员",
+      "length": "时长",
+      "status": "状态"
+    },
+    "panel": {
+      "summary": "{service} · {price} · 团队成员 {designer}",
+      "buffer": "（另加 {duration} 清理时间）",
+      "close": "关闭",
+      "customerNote": "客户备注：",
+      "cancelledReason": "取消原因：{reason}",
+      "bookedOnline": "在线预约。",
+      "bookedStaff": "员工预约。",
+      "internalNotes": "内部备注",
+      "saveNotes": "保存备注",
+      "moveTo": "改到",
+      "findingTimes": "正在查找空闲时间…",
+      "nothingFits": "这一天已没有可容纳 {service} 的时间。请先在日历上选择其他日期。",
+      "minutesPast": "分钟",
+      "reschedule": "改期",
+      "onlyOpen": "只列出仍然空闲且适合该服务的时间。",
+      "serviceRemoved": "该服务已被删除，无法查询空闲时间。",
+      "complete": "完成",
+      "noShow": "未到店",
+      "completeFrom": "该预约 {time} 开始，届时才能标记为完成。",
+      "noShowFrom": "开始 {grace} 分钟后（{time}）起可以标记为未到店。",
+      "confirmComplete": "将 {client} 的 {service} 标记为已完成？完成是最终状态，与未到店不同，无法撤销。",
+      "howPaid": "付款方式（可选）",
+      "tipOptional": "小费（可选）",
+      "enterAmount": "请输入美元金额。",
+      "yesComplete": "确认完成",
+      "notYet": "暂不",
+      "confirmNoShow": "将 {client} 标记为未到店？这会记录在客户列表中，之后可以撤销。",
+      "yesNoShow": "确认未到店",
+      "keepBooked": "保持预约",
+      "cancelReason": "取消原因（可选）",
+      "cancelConfirm": "确定取消此预约？",
+      "cancel": "取消预约",
+      "payment": "付款",
+      "tapToClear": "再点一次可清除。",
+      "paymentNotRecorded": "未记录。这只是店内备注，并非付款。",
+      "undoNoShow": "撤销未到店",
+      "undoHint": "只要这段时间没有被其他预约占用，就会恢复为已预约。",
+      "tip": "小费",
+      "save": "保存",
+      "tipInvalid": "请输入美元金额，或清空表示不记录。",
+      "tipPct": "服务价格的 {pct}%。",
+      "tipNotRecorded": "未记录。"
+    },
+    "form": {
+      "title": "新建预约",
+      "hint": "点击日历选择时间、选择空闲时段或直接输入。时间冲突的预约无法创建。",
+      "designer": "团队成员",
+      "service": "服务",
+      "noServices": "该团队成员没有可用的服务",
+      "blocks": "共占用 {total}，含 {cleanup} 清理时间。",
+      "date": "日期",
+      "time": "时间",
+      "offGrid": "{time} 不在公开营业时间内或不在时段网格上。员工仍可预约，该时间没有其他预约。",
+      "openSlots": "空闲时段",
+      "noSlots": "该服务在公开营业时间内没有空闲时段。",
+      "customer": "客户",
+      "selectedCustomer": "已选客户",
+      "change": "更换",
+      "search": "按姓名、电话或邮箱搜索已有客户…",
+      "orNew": "…或添加新客户：",
+      "name": "姓名",
+      "phone": "电话",
+      "email": "邮箱",
+      "internalNotes": "内部备注",
+      "booking": "预约中…",
+      "bookAt": "预约 {time} 的 {service}",
+      "book": "预约"
+    }
+  },
   "settings": {
     "navLabel": "设置分区",
-    "noDesigners": "还没有人接受预约。请在团队页面为某人分配发型师角色。",
+    "dialog": {
+      "search": "搜索设置",
+      "close": "关闭设置",
+      "account": "账户",
+      "noMatch": "没有匹配的设置。",
+      "unsaved": "有未保存的更改"
+    },
+    "noDesigners": "还没有人接受预约。请在团队页面为某人分配“接受预约”角色。",
     "sections": {
       "salon": {
-        "label": "沙龙",
+        "label": "商家",
         "hint": "名称、时区、预约规则、提醒"
       },
       "team": {
         "label": "团队",
-        "hint": "发型师、角色、邀请"
+        "hint": "团队成员、角色、邀请"
       },
       "services": {
         "label": "服务",
@@ -234,25 +427,32 @@
       },
       "hours": {
         "label": "营业时间",
-        "hint": "沙龙营业时间和每位发型师的周排班"
+        "hint": "商家营业时间和每位团队成员的周排班"
       },
       "yourSalons": {
-        "label": "我的沙龙",
-        "hint": "在沙龙之间切换，或新建一家"
+        "label": "我的商家",
+        "hint": "在商家之间切换，或新建一个"
       }
     },
     "salon": {
-      "title": "沙龙",
+      "title": "商家",
       "linkStays": "你的预约链接保持为 /{slug}。",
       "name": "名称",
       "timezone": "时区",
       "timezoneHint": "工作时间按此时区的当地时间计算。",
       "policies": "预约规则",
       "policiesHint": "客户在公开预约页面上可以做什么。",
-      "slotGrid": "时段间隔（分钟）",
-      "leadTime": "最短提前时间（分钟）",
-      "maxAdvance": "最多可提前预约（天）",
-      "cancelWindow": "免费取消截止（提前小时数）",
+      "slotGrid": "时段间隔",
+      "slotGridHint": "预约页面上提供的开始时间间隔。",
+      "leadTime": "最短提前时间",
+      "leadTimeHint": "客户最晚可在开始前多久预约。",
+      "maxAdvance": "最多可提前预约",
+      "maxAdvanceHint": "日历向后开放的时长。",
+      "cancelWindow": "免费取消截止",
+      "cancelWindowHint": "客户可在开始前这么多小时内免费取消。",
+      "unitHours": "小时前",
+      "unitDays": "天",
+      "unitMinutes": "分钟",
       "reminders": "提醒",
       "remindersHint": "在预约前何时提醒客户。始终通过邮件发送；客户同意且平台开启短信后，也会发送短信。",
       "reminderHours": "{hours, plural, other {提前 # 小时}}",
@@ -263,21 +463,22 @@
       "saved": "已保存"
     },
     "roles": {
-      "managerHint": "团队、沙龙营业时间、设置、客户联系方式",
+      "managerHint": "团队、商家营业时间、设置、客户联系方式",
       "designerHint": "接受预约：拥有自己的服务和工作时间，显示在预约页面上",
       "pickOne": "请至少选择一项。"
     },
     "team": {
       "members": "成员",
+      "you": "你",
       "edit": "编辑",
       "close": "关闭",
       "remove": "移除",
-      "confirmRemove": "要将 {name} 移出沙龙吗？",
+      "confirmRemove": "要将 {name} 移出商家吗？",
       "removeFailed": "无法移除",
       "displayName": "显示名称",
       "bio": "简介",
       "roles": "角色",
-      "hoursSeeded": "其工作时间将以沙龙营业时间为初始值。",
+      "hoursSeeded": "其工作时间将以商家营业时间为初始值。",
       "save": "保存",
       "saving": "正在保存…",
       "inviteTitle": "邀请成员",
@@ -294,7 +495,10 @@
     },
     "services": {
       "title": "服务",
-      "none": "还没有服务。请在右侧添加第一项。",
+      "forDesigner": "{name} 的服务",
+      "designer": "团队成员",
+      "emptyTitle": "还没有服务",
+      "emptyBody": "添加你提供的服务和价格。客户会在预约页面上从中选择。",
       "hidden": "已隐藏",
       "doubleBooking": "可重叠预约",
       "buffer": "+ 整理 {duration}",
@@ -307,7 +511,7 @@
       "formHint": "时长以 5 分钟为单位。整理时间是服务结束后的清理时间。超过 {min} 分钟的服务可以允许重叠预约。",
       "name": "名称",
       "category": "类别",
-      "categoryPlaceholder": "剪发、染发、美甲…",
+      "categoryPlaceholder": "剪发、按摩、课程…",
       "price": "价格（$）",
       "minutes": "时长（分钟）",
       "bufferLabel": "整理时间",
@@ -320,29 +524,30 @@
       "saving": "正在保存…"
     },
     "hours": {
-      "salonTitle": "沙龙营业时间",
+      "salonTitle": "商家营业时间",
       "salonHint": "店铺的营业时间，按 {timezone}。所有接受预约的人都在此时间内排班。",
       "opening": "营业时间",
       "openingHint": "如有午休，可添加第二个时段。",
       "closures": "休息日和特殊日期",
       "closuresHint": "节假日、提前打烊、临时营业。对所有人生效。",
-      "designerTitle": "发型师工作时间",
-      "managerDesigner": "你和团队的工作时间。每份排班都必须在沙龙营业时间之内。",
-      "managerOnly": "你不接受预约。请在这里为每位发型师设置排班。",
-      "designerOnly": "你的工作时间，必须在沙龙营业时间之内。",
+      "designerTitle": "团队成员工作时间",
+      "designerPick": "团队成员",
+      "managerDesigner": "你和团队的工作时间。每份排班都必须在商家营业时间之内。",
+      "managerOnly": "你不接受预约。请在这里为每位团队成员设置排班。",
+      "designerOnly": "你的工作时间，必须在商家营业时间之内。",
       "week": "{name} 的一周",
       "weekly": "每周工作时间",
-      "weekHint": "每天下方显示的沙龙营业时间即为上限。",
+      "weekHint": "每天下方显示的商家营业时间即为上限。",
       "daysOff": "休息日和调整",
-      "daysOffHint": "在沙龙营业时间内，覆盖某一天的每周工作时间。",
-      "salonClosed": "沙龙休息",
+      "daysOffHint": "在商家营业时间内，覆盖某一天的每周工作时间。",
+      "salonClosed": "不营业",
       "off": "休息",
       "remove": "删除",
       "addWindow": "添加时段",
       "addHours": "添加时间",
       "save": "保存",
       "saving": "正在保存…",
-      "outside": "{day}：超出沙龙营业时间（{limits}）。",
+      "outside": "{day}：超出商家营业时间（{limits}）。",
       "closedLower": "休息",
       "nothingUpcoming": "暂无安排。",
       "closed": "休息",
@@ -361,27 +566,28 @@
       "endTime": "结束时间"
     },
     "yourSalons": {
-      "loadFailed": "无法加载你的沙龙",
+      "loadFailed": "无法加载你的商家",
       "checkConnection": "请检查网络连接后重试。",
       "retry": "重试",
-      "setUpTitle": "创建你的沙龙",
+      "setUpTitle": "创建你的商家",
       "setUpHint": "你的预约页面、团队和营业时间都以此为基础。之后都可以修改。",
       "justBooking": "只是来预约的？你预约过的所有内容都在<link>我的预约</link>里。",
-      "title": "我的沙龙",
-      "hint": "打开一家沙龙会进入它的日程。",
+      "title": "我的商家",
+      "hint": "打开一个商家会进入它的日程。",
+      "aside": "营业时间、团队、服务和提醒都在设置里。",
       "settings": "设置",
       "open": "打开",
-      "createAnother": "再创建一家沙龙"
+      "createAnother": "再创建一个商家"
     },
     "createSalon": {
-      "title": "创建沙龙",
+      "title": "创建商家",
       "description": "你将成为它的第一位店长。",
       "name": "名称",
       "url": "预约网址",
       "timezone": "时区",
       "takesAppointments": "我自己也接受预约",
-      "takesHint": "适用于个人工作室和店主兼发型师。之后可在 设置 → 团队 中更改。",
-      "create": "创建沙龙",
+      "takesHint": "适用于个人经营者和亲自接受预约的店主。之后可在 设置 → 团队 中更改。",
+      "create": "创建商家",
       "creating": "正在创建…"
     }
   },
@@ -393,8 +599,8 @@
     "siteAdmin": "站点管理员",
     "stats": {
       "users": "用户",
-      "salons": "沙龙",
-      "designers": "发型师",
+      "salons": "商家",
+      "designers": "接受预约的成员",
       "customers": "客户",
       "appointments": "预约",
       "upcoming": "即将到来",
@@ -402,16 +608,16 @@
       "staff": "员工",
       "services": "服务"
     },
-    "search": "按姓名或邮箱搜索用户，按名称或链接搜索沙龙…",
+    "search": "按姓名或邮箱搜索用户，按名称或链接搜索商家…",
     "people": "用户",
     "matchingUsers": "匹配的用户",
     "newestSignups": "最新注册",
     "noUsers": "没有匹配的用户。",
-    "salonCount": "{count, plural, other {# 家沙龙}}",
-    "salons": "沙龙",
-    "matchingSalons": "匹配的沙龙",
-    "newestSalons": "最新沙龙",
-    "noSalons": "没有匹配的沙龙。",
+    "salonCount": "{count, plural, other {# 个商家}}",
+    "salons": "商家",
+    "matchingSalons": "匹配的商家",
+    "newestSalons": "最新商家",
+    "noSalons": "没有匹配的商家。",
     "salonCounts": "{staff} 名员工 · {appts} 个预约",
     "status": {
       "INVITED": "已邀请",
@@ -419,15 +625,15 @@
       "REMOVED": "已移除"
     },
     "salon": {
-      "back": "全部沙龙",
-      "notFound": "找不到该沙龙。",
+      "back": "全部商家",
+      "notFound": "找不到该商家。",
       "created": "创建于 {date}",
       "bookingPage": "预约页面",
       "openWorkspace": "打开工作区",
       "policies": "时段间隔 {slot} 分钟 · 至少提前 {lead} 分钟 · 可提前 {days} 天预约 · 开始前 {hours} 小时可免费取消。",
       "team": "团队",
       "teamHint": "角色和权限",
-      "seeAudit": "查看这家沙龙的审计日志"
+      "seeAudit": "查看这个商家的审计日志"
     },
     "user": {
       "back": "全部用户",
@@ -440,18 +646,18 @@
       "cannotAdmins": "站点管理员之间不能互相代为操作。",
       "isYou": "这是你自己。",
       "worksAt": "任职于",
-      "noMemberships": "不属于任何沙龙。",
-      "memberships": "沙龙成员身份",
+      "noMemberships": "不属于任何商家。",
+      "memberships": "商家成员身份",
       "asName": "名称为 {name}",
       "booksAt": "预约于",
       "noClients": "没有客户记录。",
-      "clientRecords": "保存其客户记录的沙龙",
+      "clientRecords": "保存其客户记录的商家",
       "appointments": "{count, plural, other {# 个预约}}"
     },
     "log": {
       "title": "审计日志",
       "everyChange": "所有变更，按时间倒序。",
-      "filtered": "已筛选为一家沙龙。",
+      "filtered": "已筛选为一个商家。",
       "showAll": "显示全部",
       "entity": "对象",
       "entityPlaceholder": "salons, appointments…",
@@ -460,7 +666,7 @@
       "when": "时间",
       "who": "操作人",
       "action": "操作",
-      "where": "沙龙",
+      "where": "商家",
       "actingAs": "以 {name} 身份",
       "payload": "数据",
       "loadMore": "加载更多",
@@ -470,19 +676,19 @@
   },
   "unsubscribe": {
     "metaTitle": "退订 · {product}",
-    "metaDescription": "选择你希望从 {product} 上的沙龙收到哪些邮件。",
+    "metaDescription": "选择你希望从 {product} 上的商家收到哪些邮件。",
     "oneMoment": "请稍候…",
     "expiredTitle": "该链接已失效",
-    "expiredBody": "它可能已被使用，或者沙龙已不再保留相关记录。直接回复沙龙发来的任何邮件即可联系到他们。",
+    "expiredBody": "它可能已被使用，或者商家已不再保留相关记录。直接回复商家发来的任何邮件即可联系到他们。",
     "title": {
       "NONE": "你仍在 {salon} 的邮件列表中",
       "SALON": "{salon} 不会再给你发送推广邮件",
-      "MARKETING": "{product} 上的任何沙龙都不会再给你发送推广邮件",
+      "MARKETING": "{product} 上的任何商家都不会再给你发送推广邮件",
       "ALL": "{product} 不会再给你发送任何邮件"
     },
     "summary": {
       "NONE": "{salon} 可以再次给你发送优惠和新闻邮件。如需停止，请在下方选择。",
-      "SALON": "已完成，无需再点击。如果你想停止的不只是这一家沙龙，请在下方选择。",
+      "SALON": "已完成，无需再点击。如果你想停止的不只是这一个商家，请在下方选择。",
       "MARKETING": "预约确认和提醒仍会照常发送，因为它们属于预约本身，而非营销。",
       "ALL": "包括你所预约项目的确认和提醒。你主动申请的登录和重置密码邮件仍会发送。"
     },
@@ -491,11 +697,11 @@
     "option": {
       "SALON": {
         "label": "来自 {salon} 的推广邮件",
-        "hint": "你预约的其他沙龙仍可给你发邮件。预约确认和提醒仍会照常发送。"
+        "hint": "你预约的其他商家仍可给你发邮件。预约确认和提醒仍会照常发送。"
       },
       "MARKETING": {
-        "label": "{product} 上所有沙龙的推广邮件",
-        "hint": "包括你今后预约的沙龙。预约确认和提醒仍会照常发送。"
+        "label": "{product} 上所有商家的推广邮件",
+        "hint": "包括你今后预约的商家。预约确认和提醒仍会照常发送。"
       },
       "ALL": {
         "label": "{product} 的所有邮件",

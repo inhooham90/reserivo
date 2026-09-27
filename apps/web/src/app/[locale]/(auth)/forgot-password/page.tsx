@@ -6,9 +6,9 @@ import { Link } from "@/i18n/navigation";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
+import { AuthCard, authLink, pillButton, pillInput } from "@/components/auth/auth-card";
 import { FieldError } from "@/components/field-error";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api, ApiError } from "@/lib/api";
@@ -31,43 +31,35 @@ export default function ForgotPasswordPage() {
   });
 
   return (
-    <main id="main" tabIndex={-1} className="flex flex-1 items-center justify-center p-6 outline-none">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle role="heading" aria-level={1}>{t("forgot.title")}</CardTitle>
-          <CardDescription>
-            {sent ? t("forgot.checkInbox") : t("forgot.description")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {sent ? (
-            // Deliberately the same message whether or not the address exists.
-            <div className="grid gap-3 text-sm">
-              <p>{t("forgot.sent")}</p>
-              <Link href="/login" className="underline">
-                {t("forgot.back")}
-              </Link>
-            </div>
-          ) : (
-            <form onSubmit={onSubmit} className="grid gap-4" noValidate>
-              <div className="grid gap-1.5">
-                <Label htmlFor="fp-email">{t("email")}</Label>
-                <Input id="fp-email" type="email" autoComplete="email" {...form.register("email")} />
-                <FieldError message={form.formState.errors.email?.message} />
-              </div>
-              <FieldError message={serverError ?? undefined} />
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? t("forgot.submitting") : t("forgot.submit")}
-              </Button>
-              <p className="text-center text-sm text-muted-foreground">
-                <Link href="/login" className="underline">
-                  {t("forgot.back")}
-                </Link>
-              </p>
-            </form>
-          )}
-        </CardContent>
-      </Card>
-    </main>
+    <AuthCard title={t("forgot.title")} description={sent ? t("forgot.checkInbox") : t("forgot.description")}>
+      {sent ? (
+        // Deliberately the same message whether or not the address exists.
+        <div className="grid gap-6">
+          <p className="text-base text-body">{t("forgot.sent")}</p>
+          <p>
+            <Link href="/login" className={authLink}>
+              {t("forgot.back")}
+            </Link>
+          </p>
+        </div>
+      ) : (
+        <form onSubmit={onSubmit} className="grid gap-6" noValidate>
+          <div className="grid gap-2">
+            <Label htmlFor="fp-email">{t("email")}</Label>
+            <Input id="fp-email" type="email" autoComplete="email" className={pillInput} {...form.register("email")} />
+            <FieldError message={form.formState.errors.email?.message} />
+          </div>
+          <FieldError message={serverError ?? undefined} />
+          <Button type="submit" className={pillButton} disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting ? t("forgot.submitting") : t("forgot.submit")}
+          </Button>
+          <p className="text-center">
+            <Link href="/login" className={authLink}>
+              {t("forgot.back")}
+            </Link>
+          </p>
+        </form>
+      )}
+    </AuthCard>
   );
 }

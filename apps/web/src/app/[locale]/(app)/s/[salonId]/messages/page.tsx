@@ -57,7 +57,7 @@ function StaffMessages() {
             value={designerFilter}
             onChange={(e) => setDesignerFilter(e.target.value)}
           >
-            <option value="">All designers</option>
+            <option value="">All team members</option>
             {designers.map((d) => (
               <option key={d.id} value={d.id}>
                 {d.displayName}

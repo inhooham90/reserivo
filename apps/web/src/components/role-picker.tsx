@@ -23,33 +23,33 @@ export function RolePicker({
     onChange(next);
   };
   return (
-    <div className="grid gap-1.5 text-sm">
-      <label className="flex items-start gap-2">
+    <div className="grid gap-2 text-sm">
+      <label className="flex cursor-pointer items-start gap-3 rounded-lg p-4 shadow-[inset_0_0_0_1px_var(--border)] has-[:checked]:shadow-[inset_0_0_0_1px_var(--foreground)] has-[:disabled]:cursor-not-allowed">
         <input
           id={`${idPrefix}-manager`}
           type="checkbox"
-          className="mt-0.5"
+          className="mt-0.5 size-4 shrink-0 accent-foreground"
           checked={value.includes("MANAGER")}
           disabled={disabled}
           onChange={(e) => toggle("MANAGER")(e.target.checked)}
         />
         <span>
           <span className="font-medium">{f.role("MANAGER")}</span>
-          <span className="block text-xs text-muted-foreground">{t("managerHint")}</span>
+          <span className="mt-0.5 block text-muted-foreground">{t("managerHint")}</span>
         </span>
       </label>
-      <label className="flex items-start gap-2">
+      <label className="flex cursor-pointer items-start gap-3 rounded-lg p-4 shadow-[inset_0_0_0_1px_var(--border)] has-[:checked]:shadow-[inset_0_0_0_1px_var(--foreground)] has-[:disabled]:cursor-not-allowed">
         <input
           id={`${idPrefix}-designer`}
           type="checkbox"
-          className="mt-0.5"
+          className="mt-0.5 size-4 shrink-0 accent-foreground"
           checked={value.includes("DESIGNER")}
           disabled={disabled}
           onChange={(e) => toggle("DESIGNER")(e.target.checked)}
         />
         <span>
           <span className="font-medium">{f.role("DESIGNER")}</span>
-          <span className="block text-xs text-muted-foreground">{t("designerHint")}</span>
+          <span className="mt-0.5 block text-muted-foreground">{t("designerHint")}</span>
         </span>
       </label>
       {value.length === 0 && <p className="text-xs text-destructive">{t("pickOne")}</p>}

@@ -6,14 +6,15 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { Suspense, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
+import { AuthCard, authLink, pillButton, pillInput } from "@/components/auth/auth-card";
+import { PasswordInput } from "@/components/auth/password-input";
 import { FieldError } from "@/components/field-error";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ApiError } from "@/lib/api";
 import { LEGAL } from "@/lib/legal";
-import { useAuth } from "@/lib/auth";
+import { useAuth, useRedirectIfSignedIn } from "@/lib/auth";
 import { useNextPath } from "@/lib/use-next-path";
 
 function LoginForm() {
@@ -22,6 +23,7 @@ function LoginForm() {
   const common = useTranslations("common");
   const router = useRouter();
   const nextPath = useNextPath();
+  const status = useRedirectIfSignedIn(nextPath);
   const [serverError, setServerError] = useState<string | null>(null);
   const form = useForm<LoginInput>({ resolver: zodResolver(loginSchema), defaultValues: { email: "", password: "" } });
 
@@ -35,47 +37,42 @@ function LoginForm() {
     }
   });
 
+  // Signed in already: the hook above is on its way to the dashboard.
+  if (status === "authenticated") return null;
+
   return (
-    <main id="main" tabIndex={-1} className="flex flex-1 items-center justify-center p-6 outline-none">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle role="heading" aria-level={1}>{t("login.title")}</CardTitle>
-          <CardDescription>{t("login.description", { product: LEGAL.product })}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={onSubmit} className="grid gap-4" noValidate>
-            <div className="grid gap-1.5">
-              <Label htmlFor="email">{t("email")}</Label>
-              <Input id="email" type="email" autoComplete="email" {...form.register("email")} />
-              <FieldError message={form.formState.errors.email?.message} />
-            </div>
-            <div className="grid gap-1.5">
-              <Label htmlFor="password">{t("password")}</Label>
-              <Input id="password" type="password" autoComplete="current-password" {...form.register("password")} />
-              <FieldError message={form.formState.errors.password?.message} />
-            </div>
-            <FieldError message={serverError ?? undefined} />
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? t("login.submitting") : t("login.submit")}
-            </Button>
-            <p className="text-center text-sm text-muted-foreground">
-              <Link href="/forgot-password" className="underline">
-                {t("login.forgot")}
-              </Link>
-            </p>
-            <p className="text-center text-sm text-muted-foreground">
-              {t.rich("login.newHere", {
-                link: (chunks) => (
-                  <Link href="/register" className="underline">
-                    {chunks}
-                  </Link>
-                ),
-              })}
-            </p>
-          </form>
-        </CardContent>
-      </Card>
-    </main>
+    <AuthCard title={t("login.title")} description={t("login.description", { product: LEGAL.product })}>
+      <form onSubmit={onSubmit} className="grid gap-6" noValidate>
+        <div className="grid gap-2">
+          <Label htmlFor="email">{t("email")}</Label>
+          <Input id="email" type="email" autoComplete="email" className={pillInput} {...form.register("email")} />
+          <FieldError message={form.formState.errors.email?.message} />
+        </div>
+        <div className="grid gap-2">
+          <div className="flex items-baseline justify-between gap-4">
+            <Label htmlFor="password">{t("password")}</Label>
+            <Link href="/forgot-password" className={authLink}>
+              {t("login.forgot")}
+            </Link>
+          </div>
+          <PasswordInput id="password" autoComplete="current-password" {...form.register("password")} />
+          <FieldError message={form.formState.errors.password?.message} />
+        </div>
+        <FieldError message={serverError ?? undefined} />
+        <Button type="submit" className={pillButton} disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? t("login.submitting") : t("login.submit")}
+        </Button>
+      </form>
+      <p className="mt-8 text-center text-sm text-body">
+        {t.rich("login.newHere", {
+          link: (chunks) => (
+            <Link href="/register" className={authLink}>
+              {chunks}
+            </Link>
+          ),
+        })}
+      </p>
+    </AuthCard>
   );
 }
 

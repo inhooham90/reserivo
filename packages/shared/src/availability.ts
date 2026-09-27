@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { weekdayOf } from './time';
 
 /**
  * Working hours are stored as local wall-clock minutes from midnight in the
@@ -117,6 +118,36 @@ export function intersectWindows(a: Window[], b: Window[]): Window[] {
     }
   }
   return out.sort((p, q) => p.startMinutes - q.startMinutes);
+}
+
+export interface RuleLike {
+  weekday: number;
+  startMinutes: number;
+  endMinutes: number;
+}
+
+export interface ExceptionLike {
+  date: string;
+  type: 'OFF' | 'CUSTOM';
+  startMinutes: number | null;
+  endMinutes: number | null;
+}
+
+/**
+ * The working windows for one date: an OFF exception wins, then CUSTOM windows
+ * replace the weekly rules, otherwise the weekday's rules apply.
+ */
+export function windowsForDate(date: string, rules: RuleLike[], exceptions: ExceptionLike[]): Window[] {
+  const todays = exceptions.filter((e) => e.date === date);
+  if (todays.some((e) => e.type === 'OFF')) return [];
+
+  const custom = todays.filter((e) => e.type === 'CUSTOM' && e.startMinutes !== null && e.endMinutes !== null);
+  if (custom.length) {
+    return custom.map((e) => ({ startMinutes: e.startMinutes!, endMinutes: e.endMinutes! }));
+  }
+
+  const weekday = weekdayOf(date);
+  return rules.filter((r) => r.weekday === weekday).map((r) => ({ startMinutes: r.startMinutes, endMinutes: r.endMinutes }));
 }
 
 /** True when `w` lies entirely inside one of `bounds`. */

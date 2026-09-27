@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Morrri",
-    "description": "Reservas en línea para peluquerías y salones de uñas."
+    "description": "Reservas en línea para negocios que trabajan con cita."
   },
   "common": {
     "loading": "Cargando…",
@@ -14,8 +14,8 @@
   "labels": {
     "role": {
       "MANAGER": "Gerente",
-      "DESIGNER": "Estilista",
-      "OWNER_STYLIST": "Propietario-estilista"
+      "DESIGNER": "Acepta citas",
+      "OWNER_STYLIST": "Propietario, acepta citas"
     },
     "status": {
       "PENDING": "Pendiente",
@@ -34,40 +34,72 @@
   },
   "home": {
     "signIn": "Iniciar sesión",
+    "dashboard": "Panel",
     "hero": {
-      "title": "Reservas en línea que tu salón y tus estilistas van a adorar.",
-      "subtitle": "Dale a cada estilista su propia agenda y servicios, mantén privados los datos de tus clientes y gestiónalo todo desde un solo lugar.",
+      "title": "Reservas en línea que tu negocio y tu equipo van a adorar.",
+      "subtitle": "Dale a cada miembro del equipo su propia agenda y servicios, mantén privados los datos de tus clientes y gestiónalo todo desde un solo lugar.",
       "cta": "Empezar",
-      "imageAlt": "Una estilista cortando el pelo a una clienta en un pequeño salón de paredes terracota"
+      "imageAlt": "Mona, la gata de Morrri, vestida de estilista con unas tijeras",
+      "secondaryCta": "Ver cómo funciona"
     },
     "about": {
       "title": "Qué es {product}",
-      "body": "{product} es un software de reservas para peluquerías y salones de uñas en Estados Unidos. El salón se registra, añade a sus estilistas, sus servicios y su horario, y obtiene su propia página de reservas en <url>morrri.com/your-salon</url> para compartir con sus clientes. Los clientes reservan en esa página (sin necesidad de cuenta) y el salón organiza el día desde un solo calendario.",
-      "notASalon": "Vendemos software a salones. No somos un salón y no nos quedamos con ninguna parte de una reserva."
+      "body": "{product} es un software de reservas para negocios que trabajan con cita en Estados Unidos, desde barberías y estudios de uñas hasta spas, tutores y clínicas. El negocio se registra, añade a su equipo, sus servicios y su horario, y obtiene su propia página de reservas en <url>morrri.com/your-business</url> para compartir con sus clientes. Los clientes reservan en esa página (sin necesidad de cuenta) y el negocio organiza el día desde un solo calendario.",
+      "notASalon": "Vendemos software a negocios. No somos el negocio donde reservas y no nos quedamos con ninguna parte de una reserva."
     },
     "features": {
       "page": {
-        "title": "Una página por salón",
-        "body": "Tus estilistas, tus servicios, tus precios y tu horario, en una dirección que puedes imprimir en una tarjeta.",
-        "imageAlt": "Una manicurista limando las uñas de una clienta en una mesa blanca"
+        "title": "Una página por negocio",
+        "body": "Tu equipo, tus servicios, tus precios y tu horario, en una dirección que puedes imprimir en una tarjeta."
       },
       "calendar": {
         "title": "Un solo calendario",
-        "body": "Todas las sillas en una pantalla, con las reservas duplicadas detectadas antes de que ocurran y los clientes sin cita añadidos a mano."
+        "body": "Todo tu equipo en una pantalla, con las reservas duplicadas detectadas antes de que ocurran y los clientes sin cita añadidos a mano."
       },
       "clients": {
         "title": "Clientes que se quedan contigo",
-        "body": "El historial de visitas, las notas y las etiquetas se quedan en el salón, y tus clientes te escriben sin que ninguna de las partes tenga que dar su número."
+        "body": "El historial de visitas, las notas y las etiquetas se quedan en tu negocio, y tus clientes te escriben sin que ninguna de las partes tenga que dar su número."
+      },
+      "title": "Un solo lugar para toda la jornada",
+      "preview": {
+        "womensCut": "Corte de mujer",
+        "rootTouchUp": "Retoque de raíz",
+        "blowout": "Secado con cepillo",
+        "trim": "Despunte",
+        "balayage": "Balayage",
+        "overlaps": "Se solapa a las {time}",
+        "walkIn": "Sin cita",
+        "beardTrim": "Arreglo de barba",
+        "gelManicure": "Manicura de gel",
+        "acrylicFill": "Relleno acrílico",
+        "cutAndStyle": "Corte y peinado de mujer",
+        "pickTime": "Elegir hora",
+        "visits": "{count, plural, one {# visita} other {# visitas}}",
+        "prefers": "Prefiere a {name}",
+        "colorClient": "Clienta de color",
+        "numberHidden": "Número oculto, los mensajes pasan por {product}"
       }
     },
     "reminders": {
       "title": "Recordatorios de citas",
-      "body": "Cada reserva recibe al instante una confirmación por correo electrónico y un recordatorio antes de la cita. Quien deja un número de móvil al reservar también puede marcar una casilla para recibir ese recordatorio por mensaje de texto: solo recordatorios de citas, nunca publicidad y nunca sin pedir permiso. Todo el programa, incluido el texto exacto del consentimiento, se explica en <link>morrri.com/sms</link>."
+      "body": "Cada reserva recibe al instante una confirmación por correo electrónico y un recordatorio antes de la cita. Quien deja un número de móvil al reservar también puede marcar una casilla para recibir ese recordatorio por mensaje de texto: solo recordatorios de citas, nunca publicidad y nunca sin pedir permiso. Todo el programa, incluido el texto exacto del consentimiento, se explica en <link>morrri.com/sms</link>.",
+      "steps": {
+        "listLabel": "Lo que recibe un cliente",
+        "confirmTitle": "Confirmación por correo",
+        "confirmBody": "Al momento, para cada reserva",
+        "reminderTitle": "Recordatorio por correo",
+        "reminderBody": "Antes de la cita",
+        "textTitle": "Recordatorio por SMS, si lo acepta",
+        "textBody": "Solo recordatorios de citas, nunca publicidad"
+      }
     },
     "operator": {
       "title": "Quién opera {product}",
       "body": "{product} es operado por {legalName}, {address}. Escribe a <email>{supportEmail}</email> si tienes una pregunta sobre el servicio, una cuenta o un mensaje que recibiste."
-    }
+    },
+    "navLabel": "Principal",
+    "howItWorks": "Cómo funciona",
+    "remindersNav": "Recordatorios"
   },
   "footer": {
     "terms": "Términos",
@@ -87,7 +119,7 @@
       "time": "Hora",
       "details": "Tus datos"
     },
-    "settingUp": "Este salón todavía está preparando su menú.",
+    "settingUp": "Este negocio todavía está preparando su menú.",
     "summary": {
       "title": "Tu reserva",
       "service": "Servicio",
@@ -98,7 +130,7 @@
       "nothing": "Todavía no has elegido nada.",
       "timezone": "Horarios en {tz}.",
       "cancellation": "{hours, plural, one {Cancelación gratuita en línea hasta # hora antes de tu cita.} other {Cancelación gratuita en línea hasta # horas antes de tu cita.}}",
-      "payAtSalon": "Pagas en el salón."
+      "payAtSalon": "Pagas en persona."
     },
     "serviceWith": "{service} <muted>con {designer}</muted>",
     "back": {
@@ -120,14 +152,14 @@
       "name": "Nombre",
       "email": "Correo electrónico",
       "phone": "Teléfono (opcional)",
-      "notes": "¿Algo que tu estilista deba saber? (opcional)",
+      "notes": "¿Algo que deba saber quien te atienda? (opcional)",
       "submit": "Confirmar reserva",
       "submitting": "Reservando…"
     },
     "done": {
       "title": "¡Reserva confirmada!",
       "summary": "{service} con {designer} en {salon}",
-      "payAtSalon": "{price} · pagas en el salón.",
+      "payAtSalon": "{price} · pagas en persona.",
       "cancelUntil": "Puedes cancelar gratis en línea hasta el {time}.",
       "seeAppointments": "Ver mis citas",
       "createAccount": "<link>Crea una cuenta</link> con el mismo correo para gestionar o cancelar esta reserva en línea."
@@ -150,7 +182,7 @@
     },
     "register": {
       "title": "Crea tu cuenta",
-      "description": "Configura tu salón en un par de minutos.",
+      "description": "Configura tu negocio en un par de minutos.",
       "name": "Tu nombre",
       "submit": "Crear cuenta",
       "submitting": "Creando…",
@@ -184,7 +216,24 @@
       "oneMoment": "Un momento.",
       "seeAppointments": "Ver mis citas",
       "freshOne": "Inicia sesión y te ofreceremos enviarte uno nuevo. <link>Iniciar sesión</link>"
-    }
+    },
+    "frame": {
+      "navLabel": "Cuenta",
+      "home": "Inicio",
+      "signIn": "Iniciar sesión",
+      "signUp": "Crear cuenta",
+      "panelLabel": "Acerca de {product}",
+      "chip": "Reservas en línea para pequeños negocios",
+      "headline": "Todo tu equipo en una sola pantalla, bien organizado",
+      "body": "Dale a cada persona su propia agenda y servicios, mantén privados los datos de contacto de tus clientes y gestiónalo todo desde un solo lugar.",
+      "point1": "Los clientes reservan sin crear una cuenta",
+      "point2": "Recordatorios por correo, y por SMS si lo aceptan",
+      "monaAlt": "La gata Mona revisando los papeles de un negocio con una lupa"
+    },
+    "show": "Mostrar",
+    "hide": "Ocultar",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña"
   },
   "nav": {
     "actingAs": "Estás actuando como {name}. Cada acción queda registrada en tu cuenta de administrador.",
@@ -206,27 +255,171 @@
       "messages": "Mensajes",
       "settings": "Ajustes",
       "bookingPage": "Página de reservas: <link>/{slug}</link> · {timezone}",
-      "switch": "Cambiar de salón",
-      "noAccess": "No tienes acceso a este salón.",
-      "tabsLabel": "Secciones del salón"
+      "switch": "Cambiar de negocio",
+      "noAccess": "No tienes acceso a este negocio.",
+      "tabsLabel": "Secciones del negocio"
     },
     "menu": {
-      "yourSalons": "Tus salones",
-      "setUp": "Crear un salón"
+      "yourSalons": "Tus negocios",
+      "setUp": "Crear un negocio"
     },
     "primaryLabel": "Principal"
   },
+  "schedule": {
+    "toolbar": {
+      "label": "Controles del calendario",
+      "prevDay": "Día anterior",
+      "today": "Hoy",
+      "nextDay": "Día siguiente",
+      "goToDate": "Ir a una fecha",
+      "showDesigner": "Mostrar miembro del equipo",
+      "everyone": "Todos",
+      "showCancelled": "Mostrar canceladas",
+      "newAppointment": "Nueva cita"
+    },
+    "noDesigners": "Nadie acepta citas todavía. Asigna a alguien el rol «Acepta citas» en <link>Ajustes, Equipo</link>.",
+    "hint": {
+      "withAppointments": "Selecciona una cita para ver los detalles, o haz clic en un hueco libre para reservar.",
+      "empty": "Haz clic en un hueco libre para reservar.",
+      "editHours": "Editar el horario del negocio"
+    },
+    "tiles": {
+      "label": "Resumen del día",
+      "appointments": "Citas",
+      "nothingBooked": "Aún no hay citas",
+      "completedCount": "{count, plural, one {# completada} other {# completadas}}",
+      "stillToCome": "{count, plural, one {Queda #} other {Quedan #}}",
+      "booked": "Tiempo reservado",
+      "ofOpen": "de {open} disponibles entre {count, plural, one {# miembro del equipo} other {# miembros del equipo}}",
+      "closedDay": "El negocio cierra este día",
+      "openTime": "Tiempo libre",
+      "freeInside": "Libre dentro del horario del negocio",
+      "cancelled": "Canceladas",
+      "noneCancelled": "Ninguna este día",
+      "cancelledShown": "Se muestran con borde discontinuo",
+      "cancelledHidden": "Marca Mostrar canceladas para verlas"
+    },
+    "grid": {
+      "label": "Calendario del día",
+      "bookedCount": "{count, plural, one {# cita} other {# citas}}",
+      "ghostNew": "Nueva",
+      "ghostPast": "Pasada",
+      "ghostOverlaps": "Se solapa",
+      "block": "{status}: {client}, {service}, de {start} a {end}, {source}",
+      "sourceOnline": "reservada en línea",
+      "sourceStaff": "reservada por el personal",
+      "emptyPast": "No hubo citas este día.",
+      "emptyFuture": "Haz clic en un hueco libre para reservar la primera cita."
+    },
+    "conflict": {
+      "past": "{time} ya ha pasado. Elige una hora a partir de ahora.",
+      "clash": "{service} dura {duration} con la limpieza, así que se solaparía con la cita de las {time}."
+    },
+    "legend": {
+      "label": "Leyenda",
+      "online": "Reservada en línea",
+      "staff": "Reservada por el personal",
+      "closed": "Fuera del horario del negocio"
+    },
+    "upNext": {
+      "upNext": "Próximas",
+      "thisDay": "Este día",
+      "nothingElse": "No hay más citas este día.",
+      "time": "Hora",
+      "client": "Cliente",
+      "service": "Servicio",
+      "designer": "Miembro del equipo",
+      "length": "Duración",
+      "status": "Estado"
+    },
+    "panel": {
+      "summary": "{service} · {price} · con {designer}",
+      "buffer": "(+{duration} de limpieza)",
+      "close": "Cerrar",
+      "customerNote": "Nota del cliente:",
+      "cancelledReason": "Cancelada: {reason}",
+      "bookedOnline": "Reservada en línea.",
+      "bookedStaff": "Reservada por el personal.",
+      "internalNotes": "Notas internas",
+      "saveNotes": "Guardar notas",
+      "moveTo": "Mover a",
+      "findingTimes": "Buscando horas libres…",
+      "nothingFits": "No queda hueco este día para {service}. Elige primero otro día en el calendario.",
+      "minutesPast": "Minutos",
+      "reschedule": "Cambiar hora",
+      "onlyOpen": "Solo se muestran las horas libres en las que cabe el servicio.",
+      "serviceRemoved": "Este servicio se eliminó, así que no se pudieron comprobar las horas libres.",
+      "complete": "Completada",
+      "noShow": "No se presentó",
+      "completeFrom": "Esta cita empieza a las {time}. Se puede completar a partir de entonces.",
+      "noShowFrom": "Se puede marcar como no presentada a partir de las {time}, {grace} minutos después del inicio.",
+      "confirmComplete": "¿Marcar {service} de {client} como completada? Completada es definitivo: a diferencia de una ausencia, no se puede deshacer.",
+      "howPaid": "¿Cómo pagó? Opcional.",
+      "tipOptional": "¿Propina? Opcional.",
+      "enterAmount": "Introduce un importe en dólares.",
+      "yesComplete": "Sí, completar",
+      "notYet": "Todavía no",
+      "confirmNoShow": "¿Marcar que {client} no se presentó? Cuenta en su historial de la lista de clientes. Puedes deshacerlo.",
+      "yesNoShow": "Sí, no se presentó",
+      "keepBooked": "Mantener la cita",
+      "cancelReason": "Motivo de la cancelación (opcional)",
+      "cancelConfirm": "¿Cancelar esta cita?",
+      "cancel": "Cancelar cita",
+      "payment": "Pago",
+      "tapToClear": "Toca otra vez para quitarlo.",
+      "paymentNotRecorded": "Sin registrar. Es una nota para el negocio, no un pago.",
+      "undoNoShow": "Deshacer ausencia",
+      "undoHint": "La vuelve a dejar como reservada, siempre que nadie haya ocupado esa hora.",
+      "tip": "Propina",
+      "save": "Guardar",
+      "tipInvalid": "Introduce un importe en dólares, o deja el campo vacío para no registrar nada.",
+      "tipPct": "{pct}% del precio del servicio.",
+      "tipNotRecorded": "Sin registrar."
+    },
+    "form": {
+      "title": "Nueva cita",
+      "hint": "Haz clic en el calendario para elegir una hora, elige un hueco o escríbela. No se permiten solapamientos.",
+      "designer": "Miembro del equipo",
+      "service": "Servicio",
+      "noServices": "Este miembro del equipo no tiene servicios activos",
+      "blocks": "Ocupa {total}, con {cleanup} de limpieza.",
+      "date": "Fecha",
+      "time": "Hora",
+      "offGrid": "{time} está fuera del horario publicado o de la cuadrícula de horarios. El personal puede reservarla igualmente, y no hay nada más reservado a esa hora.",
+      "openSlots": "Huecos libres",
+      "noSlots": "No hay huecos en el horario publicado para este servicio.",
+      "customer": "Cliente",
+      "selectedCustomer": "Cliente seleccionado",
+      "change": "Cambiar",
+      "search": "Buscar por nombre, teléfono o email…",
+      "orNew": "…o añade uno nuevo:",
+      "name": "Nombre",
+      "phone": "Teléfono",
+      "email": "Email",
+      "internalNotes": "Notas internas",
+      "booking": "Reservando…",
+      "bookAt": "Reservar {service} a las {time}",
+      "book": "Reservar"
+    }
+  },
   "settings": {
     "navLabel": "Secciones de ajustes",
-    "noDesigners": "Todavía nadie acepta citas. Asigna a alguien el rol de estilista en la página Equipo.",
+    "dialog": {
+      "search": "Buscar ajustes",
+      "close": "Cerrar ajustes",
+      "account": "Cuenta",
+      "noMatch": "Ningún ajuste coincide.",
+      "unsaved": "Cambios sin guardar"
+    },
+    "noDesigners": "Todavía nadie acepta citas. Asigna a alguien el rol «Acepta citas» en la página Equipo.",
     "sections": {
       "salon": {
-        "label": "Salón",
+        "label": "Negocio",
         "hint": "Nombre, zona horaria, reglas de reserva, recordatorios"
       },
       "team": {
         "label": "Equipo",
-        "hint": "Estilistas, roles, invitaciones"
+        "hint": "Miembros del equipo, roles, invitaciones"
       },
       "services": {
         "label": "Servicios",
@@ -234,25 +427,32 @@
       },
       "hours": {
         "label": "Horario",
-        "hint": "Horario del salón y la semana de cada estilista"
+        "hint": "Horario del negocio y la semana de cada miembro del equipo"
       },
       "yourSalons": {
-        "label": "Tus salones",
+        "label": "Tus negocios",
         "hint": "Cambia entre ellos o crea otro"
       }
     },
     "salon": {
-      "title": "Salón",
+      "title": "Negocio",
       "linkStays": "Tu enlace de reservas sigue siendo /{slug}.",
       "name": "Nombre",
       "timezone": "Zona horaria",
       "timezoneHint": "El horario de trabajo se expresa en la hora local de esta zona.",
       "policies": "Reglas de reserva",
       "policiesHint": "Lo que los clientes pueden hacer en la página pública.",
-      "slotGrid": "Intervalo de horarios (min)",
-      "leadTime": "Antelación mínima (min)",
-      "maxAdvance": "Reservar hasta (días de antelación)",
-      "cancelWindow": "Cancelación gratuita hasta (horas antes)",
+      "slotGrid": "Intervalo de horarios",
+      "slotGridHint": "Horas de inicio que se ofrecen en la página de reservas.",
+      "leadTime": "Antelación mínima",
+      "leadTimeHint": "Con cuánta antelación a la hora de inicio puede reservar un cliente.",
+      "maxAdvance": "Reservar hasta",
+      "maxAdvanceHint": "Hasta cuándo se abre el calendario.",
+      "cancelWindow": "Cancelación gratuita hasta",
+      "cancelWindowHint": "Los clientes pueden cancelar gratis hasta estas horas antes.",
+      "unitHours": "horas antes",
+      "unitDays": "días antes",
+      "unitMinutes": "minutos",
       "reminders": "Recordatorios",
       "remindersHint": "Cuándo recordar la cita al cliente. Siempre por correo; también por SMS cuando el cliente lo ha aceptado y los SMS están activados en la plataforma.",
       "reminderHours": "{hours, plural, one {# hora antes} other {# horas antes}}",
@@ -263,21 +463,22 @@
       "saved": "Guardado"
     },
     "roles": {
-      "managerHint": "Equipo, horario del salón, ajustes, datos de contacto de clientes",
+      "managerHint": "Equipo, horario del negocio, ajustes, datos de contacto de clientes",
       "designerHint": "Acepta citas: sus propios servicios y horario, visibles en la página de reservas",
       "pickOne": "Elige al menos uno."
     },
     "team": {
       "members": "Miembros",
+      "you": "Tú",
       "edit": "Editar",
       "close": "Cerrar",
       "remove": "Quitar",
-      "confirmRemove": "¿Quitar a {name} del salón?",
+      "confirmRemove": "¿Quitar a {name} del negocio?",
       "removeFailed": "No se pudo quitar",
       "displayName": "Nombre visible",
       "bio": "Biografía",
       "roles": "Roles",
-      "hoursSeeded": "Su horario empezará como una copia del horario del salón.",
+      "hoursSeeded": "Su horario empezará como una copia del horario del negocio.",
       "save": "Guardar",
       "saving": "Guardando…",
       "inviteTitle": "Invitar a alguien",
@@ -294,7 +495,10 @@
     },
     "services": {
       "title": "Servicios",
-      "none": "Todavía no hay servicios. Añade el primero a la derecha.",
+      "forDesigner": "Servicios de {name}",
+      "designer": "Miembro del equipo",
+      "emptyTitle": "Todavía no hay servicios",
+      "emptyBody": "Añade lo que ofreces y cuánto cuesta. Los clientes eligen entre estos en tu página de reservas.",
       "hidden": "Oculto",
       "doubleBooking": "Reserva doble",
       "buffer": "+ {duration} de margen",
@@ -307,7 +511,7 @@
       "formHint": "Duración en pasos de 5 minutos. El margen es el tiempo de limpieza posterior. A partir de {min} minutos puedes permitir reservas dobles.",
       "name": "Nombre",
       "category": "Categoría",
-      "categoryPlaceholder": "Corte, color, uñas…",
+      "categoryPlaceholder": "Cortes, masajes, clases…",
       "price": "Precio ($)",
       "minutes": "Minutos",
       "bufferLabel": "Margen",
@@ -320,29 +524,30 @@
       "saving": "Guardando…"
     },
     "hours": {
-      "salonTitle": "Horario del salón",
+      "salonTitle": "Horario del negocio",
       "salonHint": "Cuándo está abierto el local, en {timezone}. Quien acepta citas organiza su agenda dentro de este horario.",
       "opening": "Horario de apertura",
       "openingHint": "Añade un segundo tramo si cierras al mediodía.",
       "closures": "Cierres y días especiales",
       "closuresHint": "Festivos, cierres anticipados, aperturas puntuales. Se aplica a todos.",
-      "designerTitle": "Horario de estilistas",
-      "managerDesigner": "Tu horario y el de tu equipo. Cada agenda debe caber dentro del horario del salón.",
-      "managerOnly": "No aceptas citas. Define aquí la agenda de cada estilista.",
-      "designerOnly": "Tu horario de trabajo. Debe caber dentro del horario del salón.",
+      "designerTitle": "Horario de los miembros del equipo",
+      "designerPick": "Miembro del equipo",
+      "managerDesigner": "Tu horario y el de tu equipo. Cada agenda debe caber dentro del horario del negocio.",
+      "managerOnly": "No aceptas citas. Define aquí la agenda de cada miembro del equipo.",
+      "designerOnly": "Tu horario de trabajo. Debe caber dentro del horario del negocio.",
       "week": "La semana de {name}",
       "weekly": "Horario semanal",
-      "weekHint": "Bajo cada día se muestra el horario del salón como límite.",
+      "weekHint": "Bajo cada día se muestra el horario del negocio como límite.",
       "daysOff": "Días libres y cambios",
-      "daysOffHint": "Sustituye el horario semanal de una fecha, dentro del horario del salón.",
-      "salonClosed": "Salón cerrado",
+      "daysOffHint": "Sustituye el horario semanal de una fecha, dentro del horario del negocio.",
+      "salonClosed": "Negocio cerrado",
       "off": "Libre",
       "remove": "Quitar",
       "addWindow": "Añadir tramo",
       "addHours": "Añadir horario",
       "save": "Guardar",
       "saving": "Guardando…",
-      "outside": "{day}: fuera del horario del salón ({limits}).",
+      "outside": "{day}: fuera del horario del negocio ({limits}).",
       "closedLower": "cerrado",
       "nothingUpcoming": "Nada próximo.",
       "closed": "Cerrado",
@@ -361,27 +566,28 @@
       "endTime": "Hora de fin"
     },
     "yourSalons": {
-      "loadFailed": "No se pudieron cargar tus salones",
+      "loadFailed": "No se pudieron cargar tus negocios",
       "checkConnection": "Revisa tu conexión y vuelve a intentarlo.",
       "retry": "Reintentar",
-      "setUpTitle": "Crea tu salón",
+      "setUpTitle": "Crea tu negocio",
       "setUpHint": "Tu página de reservas, tu equipo y tu horario parten de aquí. Puedes cambiar todo más adelante.",
       "justBooking": "¿Solo vienes a reservar una cita? En <link>Mis citas</link> tienes todo lo que has reservado.",
-      "title": "Tus salones",
+      "title": "Tus negocios",
       "hint": "Al abrir uno, vas a su agenda.",
+      "aside": "El horario, el equipo, los servicios y los recordatorios están en Ajustes.",
       "settings": "Ajustes",
       "open": "Abrir",
-      "createAnother": "Crear otro salón"
+      "createAnother": "Crear otro negocio"
     },
     "createSalon": {
-      "title": "Crear un salón",
+      "title": "Crear un negocio",
       "description": "Te conviertes en su primer gerente.",
       "name": "Nombre",
       "url": "URL de reservas",
       "timezone": "Zona horaria",
       "takesAppointments": "Yo también acepto citas",
-      "takesHint": "Para quienes trabajan solos o son propietarios y estilistas. Puedes cambiarlo más adelante en Ajustes → Equipo.",
-      "create": "Crear salón",
+      "takesHint": "Para quienes trabajan solos o son propietarios y atienden citas. Puedes cambiarlo más adelante en Ajustes → Equipo.",
+      "create": "Crear negocio",
       "creating": "Creando…"
     }
   },
@@ -393,8 +599,8 @@
     "siteAdmin": "Admin del sitio",
     "stats": {
       "users": "Usuarios",
-      "salons": "Salones",
-      "designers": "Estilistas",
+      "salons": "Negocios",
+      "designers": "Miembros que aceptan citas",
       "customers": "Clientes",
       "appointments": "Citas",
       "upcoming": "Próximas",
@@ -402,16 +608,16 @@
       "staff": "Personal",
       "services": "Servicios"
     },
-    "search": "Busca personas por nombre o correo, y salones por nombre o enlace…",
+    "search": "Busca personas por nombre o correo, y negocios por nombre o enlace…",
     "people": "Personas",
     "matchingUsers": "Usuarios que coinciden",
     "newestSignups": "Registros más recientes",
     "noUsers": "Ningún usuario coincide.",
-    "salonCount": "{count, plural, one {# salón} other {# salones}}",
-    "salons": "Salones",
-    "matchingSalons": "Salones que coinciden",
-    "newestSalons": "Salones más recientes",
-    "noSalons": "Ningún salón coincide.",
+    "salonCount": "{count, plural, one {# negocio} other {# negocios}}",
+    "salons": "Negocios",
+    "matchingSalons": "Negocios que coinciden",
+    "newestSalons": "Negocios más recientes",
+    "noSalons": "Ningún negocio coincide.",
     "salonCounts": "{staff} personal · {appts} citas",
     "status": {
       "INVITED": "invitado",
@@ -419,15 +625,15 @@
       "REMOVED": "retirado"
     },
     "salon": {
-      "back": "Todos los salones",
-      "notFound": "Ese salón no existe.",
+      "back": "Todos los negocios",
+      "notFound": "Ese negocio no existe.",
       "created": "creado el {date}",
       "bookingPage": "Página de reservas",
       "openWorkspace": "Abrir espacio de trabajo",
       "policies": "Horarios cada {slot} min · {lead} min de antelación · reservas hasta {days} días antes · cancelación gratuita hasta {hours} h antes.",
       "team": "Equipo",
       "teamHint": "Roles y acceso",
-      "seeAudit": "Ver el registro de auditoría de este salón"
+      "seeAudit": "Ver el registro de auditoría de este negocio"
     },
     "user": {
       "back": "Todos los usuarios",
@@ -440,18 +646,18 @@
       "cannotAdmins": "Los administradores del sitio no pueden actuar como otro administrador.",
       "isYou": "Eres tú.",
       "worksAt": "Trabaja en",
-      "noMemberships": "No pertenece a ningún salón.",
-      "memberships": "Membresías de salones",
+      "noMemberships": "No pertenece a ningún negocio.",
+      "memberships": "Membresías de negocios",
       "asName": "como {name}",
       "booksAt": "Reserva en",
       "noClients": "No hay fichas de cliente.",
-      "clientRecords": "Salones con una ficha de cliente",
+      "clientRecords": "Negocios con una ficha de cliente",
       "appointments": "{count, plural, one {# cita} other {# citas}}"
     },
     "log": {
       "title": "Registro de auditoría",
       "everyChange": "Todos los cambios, del más reciente al más antiguo.",
-      "filtered": "Filtrado a un salón.",
+      "filtered": "Filtrado a un negocio.",
       "showAll": "Ver todo",
       "entity": "Entidad",
       "entityPlaceholder": "salons, appointments…",
@@ -470,19 +676,19 @@
   },
   "unsubscribe": {
     "metaTitle": "Darse de baja · {product}",
-    "metaDescription": "Elige qué correos recibes de los salones en {product}.",
+    "metaDescription": "Elige qué correos recibes de los negocios en {product}.",
     "oneMoment": "Un momento…",
     "expiredTitle": "Ese enlace ha caducado",
-    "expiredBody": "Puede que ya se haya usado, o que el salón ya no tenga tu ficha. Si respondes a cualquier correo del salón, le llegará directamente.",
+    "expiredBody": "Puede que ya se haya usado, o que el negocio ya no tenga tu ficha. Si respondes a cualquier correo del negocio, le llegará directamente.",
     "title": {
       "NONE": "Sigues en la lista de {salon}",
       "SALON": "{salon} no volverá a enviarte promociones",
-      "MARKETING": "Ningún salón de {product} te enviará promociones",
+      "MARKETING": "Ningún negocio de {product} te enviará promociones",
       "ALL": "{product} no te enviará ningún correo"
     },
     "summary": {
       "NONE": "{salon} puede volver a enviarte ofertas y novedades. Elige qué quieres dejar de recibir, si hay algo.",
-      "SALON": "Listo, no tienes que hacer nada más. Si prefieres dejar de recibir correos de más de un salón, elige abajo.",
+      "SALON": "Listo, no tienes que hacer nada más. Si prefieres dejar de recibir correos de más de un negocio, elige abajo.",
       "MARKETING": "Seguirás recibiendo las confirmaciones y recordatorios de tus citas, porque forman parte de la reserva, no son publicidad.",
       "ALL": "Incluye las confirmaciones y recordatorios de las citas que reserves. Los correos de inicio de sesión y de restablecimiento de contraseña que pidas seguirán llegando."
     },
@@ -491,11 +697,11 @@
     "option": {
       "SALON": {
         "label": "Promociones de {salon}",
-        "hint": "Los demás salones donde reservas podrán seguir escribiéndote. Las confirmaciones y recordatorios de citas siguen llegando."
+        "hint": "Los demás negocios donde reservas podrán seguir escribiéndote. Las confirmaciones y recordatorios de citas siguen llegando."
       },
       "MARKETING": {
-        "label": "Promociones de todos los salones de {product}",
-        "hint": "Incluye los salones donde reserves en el futuro. Las confirmaciones y recordatorios de citas siguen llegando."
+        "label": "Promociones de todos los negocios de {product}",
+        "hint": "Incluye los negocios donde reserves en el futuro. Las confirmaciones y recordatorios de citas siguen llegando."
       },
       "ALL": {
         "label": "Todos los correos de {product}",

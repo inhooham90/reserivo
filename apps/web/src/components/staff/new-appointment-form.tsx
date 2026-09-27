@@ -11,6 +11,7 @@ import {
   type StaffBookAppointmentInput,
 } from "@reserivo/shared";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { FieldError } from "@/components/field-error";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { api, ApiError } from "@/lib/api";
 import { salonKeys, useSalon } from "@/lib/salon-context";
 import { useFormat } from "@/lib/use-format";
+import { pillInputSm, pillSelectSm } from "@/lib/v3";
 import { cn } from "cn";
 
 /**
@@ -66,6 +68,8 @@ export function NewAppointmentForm({
   onCancel: () => void;
 }) {
   const f = useFormat();
+  const t = useTranslations("schedule.form");
+  const common = useTranslations("common");
   const { salon, members, me, isManager } = useSalon();
   const designers = members.filter((m) => m.roles.includes("DESIGNER"));
   const choosable = isManager ? designers : designers.filter((m) => m.id === me?.id);
@@ -110,10 +114,10 @@ export function NewAppointmentForm({
   const setMinutes = (m: number | null) => onDraftChange({ ...draft, minutes: m });
 
   return (
-    <Card>
+    <Card className="rounded-2xl bg-card ring-border">
       <CardHeader>
-        <CardTitle>New appointment</CardTitle>
-        <CardDescription>Click the calendar to pick a time, choose a slot, or type one. Overlaps are refused.</CardDescription>
+        <CardTitle className="font-display text-[22px] leading-tight font-medium tracking-[-0.01em]">{t("title")}</CardTitle>
+        <CardDescription>{t("hint")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form
@@ -140,10 +144,10 @@ export function NewAppointmentForm({
         >
           {choosable.length > 1 && (
             <div className="grid gap-1.5">
-              <Label htmlFor="na-designer">Designer</Label>
+              <Label htmlFor="na-designer">{t("designer")}</Label>
               <select
                 id="na-designer"
-                className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
+                className={pillSelectSm}
                 value={designerId}
                 onChange={(e) => onDraftChange({ ...draft, designerId: e.target.value })}
               >
@@ -157,14 +161,14 @@ export function NewAppointmentForm({
           )}
 
           <div className="grid gap-1.5">
-            <Label htmlFor="na-service">Service</Label>
+            <Label htmlFor="na-service">{t("service")}</Label>
             <select
               id="na-service"
-              className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
+              className={pillSelectSm}
               value={serviceId ?? ""}
               onChange={(e) => onDraftChange({ ...draft, serviceId: e.target.value })}
             >
-              {mine.length === 0 && <option value="">No active services for this designer</option>}
+              {mine.length === 0 && <option value="">{t("noServices")}</option>}
               {mine.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name} · {f.duration(s.durationMin)} · {f.cents(s.priceCents)}
@@ -173,15 +177,15 @@ export function NewAppointmentForm({
             </select>
             {service && service.bufferMin > 0 && (
               <p className="text-xs text-muted-foreground">
-                Blocks {f.duration(service.durationMin + service.bufferMin)} including {service.bufferMin} min cleanup.
+                {t("blocks", { total: f.duration(service.durationMin + service.bufferMin), cleanup: f.duration(service.bufferMin) })}
               </p>
             )}
           </div>
 
           <div className="grid grid-cols-[1fr_auto] items-end gap-3">
             <div className="grid gap-1.5">
-              <Label htmlFor="na-date">Date</Label>
-              <Input
+              <Label htmlFor="na-date">{t("date")}</Label>
+              <Input className={pillInputSm}
                 id="na-date"
                 type="date"
                 value={date}
@@ -189,12 +193,12 @@ export function NewAppointmentForm({
               />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="na-time">Time</Label>
+              <Label htmlFor="na-time">{t("time")}</Label>
               <Input
                 id="na-time"
                 type="time"
                 step={300}
-                className="w-32"
+                className={cn(pillInputSm, "w-32")}
                 value={minutes === null ? "" : minutesToHHMM(minutes)}
                 onChange={(e) => setMinutes(e.target.value ? hhmmToMinutes(e.target.value) : null)}
                 aria-invalid={Boolean(conflict)}
@@ -209,14 +213,14 @@ export function NewAppointmentForm({
             !onGrid &&
             availability.isSuccess && (
               <p className="text-xs text-muted-foreground">
-                {f.minutes(minutes)} is outside published hours or off the slot grid — fine for staff, and nothing else is booked then.
+                {t("offGrid", { time: f.minutes(minutes) })}
               </p>
             )
           )}
 
           <div className="grid gap-1.5">
-            <Label>Open slots</Label>
-            {availability.isPending && serviceId && <p className="text-xs text-muted-foreground">Loading…</p>}
+            <Label>{t("openSlots")}</Label>
+            {availability.isPending && serviceId && <p className="text-xs text-muted-foreground">{common("loading")}</p>}
             {slots.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {slots.map((s) => (
@@ -225,8 +229,8 @@ export function NewAppointmentForm({
                     type="button"
                     onClick={() => setMinutes(s.startMinutes)}
                     className={cn(
-                      "rounded-md border px-2 py-1 text-xs transition-colors",
-                      minutes === s.startMinutes ? "border-primary bg-primary text-primary-foreground" : "hover:bg-accent",
+                      "h-8 rounded-full px-3 text-xs font-medium tabular-nums transition-colors shadow-[inset_0_0_0_1px_var(--border)]",
+                      minutes === s.startMinutes ? "bg-foreground text-background shadow-none" : "bg-card hover:bg-surface-muted",
                     )}
                   >
                     {f.minutes(s.startMinutes)}
@@ -235,24 +239,24 @@ export function NewAppointmentForm({
               </div>
             )}
             {serviceId && availability.isSuccess && slots.length === 0 && (
-              <p className="text-xs text-muted-foreground">Nothing open in published hours for this service.</p>
+              <p className="text-xs text-muted-foreground">{t("noSlots")}</p>
             )}
           </div>
 
           <div className="grid gap-1.5 border-t pt-4">
-            <Label htmlFor="na-customer">Customer</Label>
+            <Label htmlFor="na-customer">{t("customer")}</Label>
             {customerId ? (
-              <div className="flex items-center justify-between rounded-md border px-3 py-2 text-sm">
-                <span>{customers.data?.find((c) => c.id === customerId)?.name ?? "Selected customer"}</span>
+              <div className="flex items-center justify-between rounded-full px-4 py-1.5 text-sm shadow-[inset_0_0_0_1px_var(--input)]">
+                <span>{customers.data?.find((c) => c.id === customerId)?.name ?? t("selectedCustomer")}</span>
                 <Button size="xs" variant="ghost" onClick={() => setCustomerId(null)}>
-                  Change
+                  {t("change")}
                 </Button>
               </div>
             ) : (
               <>
-                <Input id="na-customer" placeholder="Search existing by name, phone or email…" value={q} onChange={(e) => setQ(e.target.value)} />
+                <Input className={pillInputSm} id="na-customer" placeholder={t("search")} value={q} onChange={(e) => setQ(e.target.value)} />
                 {customers.data && customers.data.length > 0 && (
-                  <ul className="divide-y rounded-md border text-sm">
+                  <ul className="divide-y divide-border overflow-hidden rounded-lg text-sm shadow-[inset_0_0_0_1px_var(--border)]">
                     {customers.data.map((c) => (
                       <li key={c.id}>
                         <button
@@ -267,12 +271,12 @@ export function NewAppointmentForm({
                     ))}
                   </ul>
                 )}
-                <p className="text-xs text-muted-foreground">…or add a new one:</p>
+                <p className="text-xs text-muted-foreground">{t("orNew")}</p>
                 <div className="grid gap-2">
-                  <Input placeholder="Name" value={newCustomer.name} onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })} />
+                  <Input className={pillInputSm} placeholder={t("name")} value={newCustomer.name} onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })} />
                   <div className="grid grid-cols-2 gap-2">
-                    <Input placeholder="Phone" type="tel" value={newCustomer.phone} onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })} />
-                    <Input placeholder="Email" type="email" value={newCustomer.email} onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })} />
+                    <Input className={pillInputSm} placeholder={t("phone")} type="tel" value={newCustomer.phone} onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })} />
+                    <Input className={pillInputSm} placeholder={t("email")} type="email" value={newCustomer.email} onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })} />
                   </div>
                 </div>
               </>
@@ -280,17 +284,17 @@ export function NewAppointmentForm({
           </div>
 
           <div className="grid gap-1.5">
-            <Label htmlFor="na-notes">Internal notes</Label>
-            <Input id="na-notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
+            <Label htmlFor="na-notes">{t("internalNotes")}</Label>
+            <Input className={pillInputSm} id="na-notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
           </div>
 
           <FieldError message={book.error instanceof ApiError ? book.error.message : undefined} />
           <div className="flex gap-2">
             <Button type="submit" disabled={!canSubmit || book.isPending}>
-              {book.isPending ? "Booking…" : service && minutes !== null ? `Book ${service.name} at ${f.minutes(minutes)}` : "Book"}
+              {book.isPending ? t("booking") : service && minutes !== null ? t("bookAt", { service: service.name, time: f.minutes(minutes) }) : t("book")}
             </Button>
             <Button type="button" variant="ghost" onClick={onCancel}>
-              Cancel
+              {common("cancel")}
             </Button>
           </div>
         </form>

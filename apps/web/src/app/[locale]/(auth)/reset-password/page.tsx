@@ -5,10 +5,10 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Suspense, useState } from "react";
+import { AuthCard, authLink, pillButton } from "@/components/auth/auth-card";
+import { PasswordInput } from "@/components/auth/password-input";
 import { FieldError } from "@/components/field-error";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -51,51 +51,44 @@ function ResetPassword() {
   };
 
   return (
-    <main id="main" tabIndex={-1} className="flex flex-1 items-center justify-center p-6 outline-none">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle role="heading" aria-level={1}>{t("title")}</CardTitle>
-          <CardDescription>{t("description")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {!token ? (
-            <div className="grid gap-3 text-sm">
-              <p className="text-destructive">{t("missingToken")}</p>
-              <Link href="/forgot-password" className="underline">
-                {t("sendAnother")}
-              </Link>
-            </div>
-          ) : (
-            <form
-              className="grid gap-4"
-              onSubmit={(e) => {
-                e.preventDefault();
-                void submit();
-              }}
-            >
-              <div className="grid gap-1.5">
-                <Label htmlFor="rp-password">{t("newPassword")}</Label>
-                <Input
-                  id="rp-password"
-                  type="password"
-                  autoComplete="new-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <FieldError message={error ?? undefined} />
-              </div>
-              <Button type="submit" disabled={busy}>
-                {busy ? t("submitting") : t("submit")}
-              </Button>
-              <p className="text-center text-sm text-muted-foreground">
-                <Link href="/forgot-password" className="underline">
-                  {t("expired")}
-                </Link>
-              </p>
-            </form>
-          )}
-        </CardContent>
-      </Card>
-    </main>
+    <AuthCard title={t("title")} description={t("description")}>
+      {!token ? (
+        <div className="grid gap-6">
+          <p className="text-base text-destructive">{t("missingToken")}</p>
+          <p>
+            <Link href="/forgot-password" className={authLink}>
+              {t("sendAnother")}
+            </Link>
+          </p>
+        </div>
+      ) : (
+        <form
+          className="grid gap-6"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void submit();
+          }}
+        >
+          <div className="grid gap-2">
+            <Label htmlFor="rp-password">{t("newPassword")}</Label>
+            <PasswordInput
+              id="rp-password"
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <FieldError message={error ?? undefined} />
+          </div>
+          <Button type="submit" className={pillButton} disabled={busy}>
+            {busy ? t("submitting") : t("submit")}
+          </Button>
+          <p className="text-center">
+            <Link href="/forgot-password" className={authLink}>
+              {t("expired")}
+            </Link>
+          </p>
+        </form>
+      )}
+    </AuthCard>
   );
 }

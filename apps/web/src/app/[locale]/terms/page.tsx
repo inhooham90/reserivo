@@ -5,28 +5,29 @@ import { LEGAL } from "@/lib/legal";
 
 export const metadata: Metadata = {
   title: `Terms of Service · ${LEGAL.product}`,
-  description: `The terms on which ${LEGAL.product} is provided to salons and their clients.`,
+  description: `The terms on which ${LEGAL.product} is provided to businesses and their clients.`,
 };
 
 export default function TermsPage() {
   return (
-    <LegalPage title="Terms of Service">
+    <LegalPage doc="terms" title="Terms of Service">
       <p>
-        These terms cover your use of {LEGAL.product}, an online booking service for hair and nail salons operated by{" "}
-        {LEGAL.legalName}. By creating an account or booking an appointment through {LEGAL.product}, you agree to them.
+        These terms cover your use of {LEGAL.product}, an online booking service for small businesses that take
+        appointments, operated by {LEGAL.legalName}. By creating an account or booking an appointment through{" "}
+        {LEGAL.product}, you agree to them.
       </p>
 
       <h2>1. What {LEGAL.product} is</h2>
       <p>
-        {LEGAL.product} is software. It gives a salon a public booking page, a calendar, a record of its clients, and a
-        way to message them. We provide the software; we do not provide salon services.
+        {LEGAL.product} is software. It gives a business a public booking page, a calendar, a record of its clients,
+        and a way to message them. We provide the software; we do not provide the services a business offers.
       </p>
 
-      <h2>2. Bookings are between the client and the salon</h2>
+      <h2>2. Bookings are between the client and the business</h2>
       <p>
-        When you book an appointment, your agreement is with the salon — the service, the price, the cancellation
+        When you book an appointment, your agreement is with the business — the service, the price, the cancellation
         policy and the result are theirs. {LEGAL.legalName} is not a party to it. Questions about an appointment should
-        go to the salon.
+        go to the business.
       </p>
 
       <h2>3. Your account</h2>
@@ -40,13 +41,13 @@ export default function TermsPage() {
         <li>Tell us promptly if you think someone else has access</li>
       </ul>
 
-      <h2>4. If you run a salon on {LEGAL.product}</h2>
+      <h2>4. If you run a business on {LEGAL.product}</h2>
       <p>You are responsible for:</p>
       <ul>
         <li>The accuracy of your services, prices, hours and policies</li>
         <li>
           Having a lawful basis to hold your clients’ information, and answering their requests about it — the client
-          records in your salon are yours
+          records in your business are yours
         </li>
         <li>
           Contacting clients only as sections 6 and 7 allow — texts only where the client asked for them, email only
@@ -59,10 +60,10 @@ export default function TermsPage() {
       <ul>
         <li>Do not use {LEGAL.product} unlawfully, or to harass anyone</li>
         <li>
-          Do not send spam through the platform. A salon may email its own clients under section 7; it may not email
+          Do not send spam through the platform. A business may email its own clients under section 7; it may not email
           people it has no relationship with, buy or rent a list, or send to anyone who has unsubscribed
         </li>
-        <li>Do not try to reach another salon’s data, or interfere with the service or its security</li>
+        <li>Do not try to reach another business’s data, or interfere with the service or its security</li>
         <li>Do not scrape, resell or rebrand the service without our written agreement</li>
       </ul>
 
@@ -75,7 +76,7 @@ export default function TermsPage() {
       <h2>6. Text messages</h2>
       <p>
         {LEGAL.product} sends appointment reminders by text. The program is operated by {LEGAL.legalName} on behalf of
-        the salon you booked with, and messages identify both.
+        the business you booked with, and messages identify both.
       </p>
       <p>
         <strong>Opting in.</strong> Reminders are sent only to clients who gave a mobile number while booking and
@@ -97,12 +98,12 @@ export default function TermsPage() {
         <a href={`mailto:${LEGAL.supportEmail}`} className="underline">
           {LEGAL.supportEmail}
         </a>
-        . You can also untick the reminder box the next time you book, or ask the salon.
+        . You can also untick the reminder box the next time you book, or ask the business.
       </p>
       <p>
         <strong>Delivery.</strong> Carriers do not guarantee delivery, and neither do we. {LEGAL.legalName} is not
         liable for a reminder that arrives late or not at all, and a missed reminder does not change the terms of your
-        appointment with the salon.
+        appointment with the business.
       </p>
       <p>
         How your number is handled is set out in our{" "}
@@ -117,31 +118,31 @@ export default function TermsPage() {
         own marketing.
       </p>
       <p>
-        <strong>If you run a salon:</strong> the <em>text messaging</em> features of {LEGAL.product} may not be used
+        <strong>If you run a business:</strong> the <em>text messaging</em> features of {LEGAL.product} may not be used
         for marketing, and you may not add a client’s number on their behalf. We may suspend texting for an account
         that breaks this. Email is different and is covered by section 7.
       </p>
 
       <h2>7. Email to your clients</h2>
       <p>
-        A salon on {LEGAL.product} may email the clients it holds records for — an offer, a change of hours, news.
+        A business on {LEGAL.product} may email the clients it holds records for — an offer, a change of hours, news.
         Unlike text messages, this is email the client can stop at any time rather than something they had to ask for
         first.
       </p>
       <p>
-        <strong>Who may be emailed.</strong> Only clients of your own salon who gave an email address and have not
+        <strong>Who may be emailed.</strong> Only clients of your own business who gave an email address and have not
         unsubscribed. You may not import or buy a list, and you may not email someone who left.
       </p>
       <p>
         <strong>Unsubscribing.</strong> Every campaign carries an unsubscribe link and {LEGAL.legalName}’s postal
         address, added by us and not removable. We honour an unsubscribe immediately and centrally: once someone
-        unsubscribes from your salon, no campaign of yours can reach them again. It does not stop their booking
+        unsubscribes from your business, no campaign of yours can reach them again. It does not stop their booking
         confirmations or appointment reminders, which are not marketing.
       </p>
       <p>
-        <strong>If you run a salon:</strong> the content is yours and so is the responsibility for it — including
+        <strong>If you run a business:</strong> the content is yours and so is the responsibility for it — including
         having a lawful basis to contact your clients and honouring anything you promise them. There is a limit on how
-        many clients one salon may email in a day, because every salon shares the same sending reputation. We may
+        many clients one business may email in a day, because every business shares the same sending reputation. We may
         suspend email for an account that generates complaints, and we may refuse a campaign.
       </p>
 
@@ -191,8 +192,8 @@ export default function TermsPage() {
       */}
       <h2>15. Your content, and ours</h2>
       <p>
-        What you put into {LEGAL.product} stays yours: a salon’s name, services, descriptions and notes, the messages
-        you write, and the emails a salon sends its clients. You allow us to store, display and deliver it only so far
+        What you put into {LEGAL.product} stays yours: a business’s name, services, descriptions and notes, the messages
+        you write, and the emails a business sends its clients. You allow us to store, display and deliver it only so far
         as we need to run the service for you, and you confirm you have the right to use it.
       </p>
       <p>

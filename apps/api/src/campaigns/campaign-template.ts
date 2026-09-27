@@ -29,7 +29,7 @@ export function renderCampaign(mail: CampaignMail): RenderedEmail {
     ...paragraphs,
     '—',
     `Sent by ${mail.salonName} using ${LEGAL.product}.`,
-    `Unsubscribe from ${mail.salonName}, or from every salon on ${LEGAL.product}: ${mail.unsubscribeUrl}`,
+    `Unsubscribe from ${mail.salonName}, or from every business on ${LEGAL.product}: ${mail.unsubscribeUrl}`,
     `${LEGAL.legalName}, ${LEGAL.address}`,
   ].join('\n\n');
 
@@ -44,7 +44,7 @@ export function renderCampaign(mail: CampaignMail): RenderedEmail {
     <hr style="margin:28px 0 16px;border:0;border-top:1px solid #e9e3da">
     <p style="margin:0 0 6px;font:12px/1.5 -apple-system,Segoe UI,sans-serif;color:#7a7168">
       Sent by ${esc(mail.salonName)} using ${esc(LEGAL.product)}.
-      <a href="${esc(mail.unsubscribeUrl)}" style="color:#7a7168">Unsubscribe from ${esc(mail.salonName)}</a>, or from every salon on ${esc(LEGAL.product)}.
+      <a href="${esc(mail.unsubscribeUrl)}" style="color:#7a7168">Unsubscribe from ${esc(mail.salonName)}</a>, or from every business on ${esc(LEGAL.product)}.
     </p>
     <p style="margin:0;font:12px/1.5 -apple-system,Segoe UI,sans-serif;color:#7a7168">
       ${esc(LEGAL.legalName)}, ${esc(LEGAL.address)}

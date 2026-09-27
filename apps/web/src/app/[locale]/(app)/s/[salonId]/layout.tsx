@@ -10,7 +10,7 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { writeCurrentSalon } from "@/lib/current-salon";
 import { SalonContext, salonKeys } from "@/lib/salon-context";
-import { cn } from "cn";
+import { navGroup, navItem, pillSelectSm, textLink } from "@/lib/v3";
 
 /** Day-to-day work first; anything you set up once lives under Settings. */
 const TABS = [
@@ -20,7 +20,11 @@ const TABS = [
   { href: "/settings", label: "settings" },
 ] as const;
 
-export default function SalonLayout({ children }: { children: ReactNode }) {
+/**
+ * `modal` is the @modal slot: salon settings, opened from any salon page,
+ * render there as a dialog over the page instead of replacing it.
+ */
+export default function SalonLayout({ children, modal }: { children: ReactNode; modal: ReactNode }) {
   const { salonId } = useParams<{ salonId: string }>();
   const pathname = usePathname();
   const router = useRouter();
@@ -53,28 +57,28 @@ export default function SalonLayout({ children }: { children: ReactNode }) {
 
   return (
     <SalonContext.Provider value={{ salon: salon.data, members: members.data, me, isManager }}>
-      <div className="grid gap-6">
-        <div className="flex flex-wrap items-end justify-between gap-3">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
+        <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <h1 className="text-2xl">{salon.data.name}</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="text-[28px] leading-[1.3] md:text-4xl md:leading-[1.2]">{salon.data.name}</h1>
+            <p className="mt-1 text-sm text-body">
               {t.rich("bookingPage", {
                 slug: salon.data.slug,
                 timezone: salon.data.timezone,
                 link: (chunks) => (
-                  <Link href={`/${salon.data.slug}`} className="underline" target="_blank">
+                  <Link href={`/${salon.data.slug}`} className={textLink} target="_blank">
                     {chunks}
                   </Link>
                 ),
               })}
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex max-w-full min-w-0 flex-wrap items-center gap-2">
             {/* Only worth showing to someone who actually has somewhere to switch to. */}
             {others.length > 0 && (
               <select
                 aria-label={t("switch")}
-                className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
+                className={pillSelectSm}
                 value={salonId}
                 onChange={(e) => router.push(`/s/${e.target.value}/calendar`)}
               >
@@ -85,7 +89,7 @@ export default function SalonLayout({ children }: { children: ReactNode }) {
                 ))}
               </select>
             )}
-            <nav aria-label={t("tabsLabel")} className="flex gap-1 rounded-lg bg-muted p-1 text-sm">
+            <nav aria-label={t("tabsLabel")} className={navGroup}>
               {TABS.map((tab) => {
                 const href = base + tab.href;
                 const active = pathname.startsWith(href);
@@ -94,10 +98,7 @@ export default function SalonLayout({ children }: { children: ReactNode }) {
                     key={tab.href}
                     href={href}
                     aria-current={active ? "page" : undefined}
-                    className={cn(
-                      "rounded-md px-3 py-1.5 transition-colors",
-                      active ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground",
-                    )}
+                    className={navItem(active)}
                   >
                     {t(tab.label)}
                   </Link>
@@ -108,6 +109,7 @@ export default function SalonLayout({ children }: { children: ReactNode }) {
         </div>
         {children}
       </div>
+      {modal}
     </SalonContext.Provider>
   );
 }

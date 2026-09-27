@@ -9,50 +9,54 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Privacy Policy">
+    <LegalPage doc="privacy" title="Privacy Policy">
       <p>
-        {LEGAL.product} is an online booking service for hair and nail salons, operated by {LEGAL.legalName}. This
-        policy explains what personal information we handle, why, and what you can do about it.
+        {LEGAL.product} is an online booking service for small businesses that take appointments, operated by{" "}
+        {LEGAL.legalName}. This policy explains what personal information we handle, why, and what you can do about it.
       </p>
 
       <h2>Two kinds of people use {LEGAL.product}</h2>
       <p>
-        <strong>Salon staff</strong> hold an account with us — managers and designers who run a salon on the platform.
+        <strong>Business staff</strong> hold an account with us — managers and team members who run a business on the
+        platform.
       </p>
       <p>
-        <strong>Salon clients</strong> book appointments through a salon’s booking page. If you are a client, the salon
-        you booked with decides how your information is used; we hold and process it on their behalf and act on their
-        instructions.
+        <strong>Business clients</strong> book appointments through a business’s booking page. If you are a client, the
+        business you booked with decides how your information is used; we hold and process it on their behalf and act on
+        their instructions.
       </p>
 
       <h2>What we collect</h2>
-      <h3>From salon staff</h3>
+      <h3>From business staff</h3>
       <ul>
         <li>Name, email address and a password, which is stored only as a cryptographic hash — we never see it</li>
         <li>An optional phone number</li>
-        <li>Which salons you work in and your role in each</li>
+        <li>Which businesses you work in and your role in each</li>
         <li>IP address and browser details when you sign in or change something, kept as a security and audit record</li>
       </ul>
-      <h3>From salon clients</h3>
+      <h3>From business clients</h3>
       <ul>
         <li>Name, email address, and an optional mobile number, given when booking</li>
         <li>Your appointments — times, services and prices</li>
-        <li>Notes you add when booking, and notes the salon keeps about you</li>
-        <li>Messages exchanged with the salon through {LEGAL.product}</li>
-        <li>Star ratings you give a designer after a visit. They are only ever shown as an average, never with your name</li>
+        <li>Notes you add when booking, and notes the business keeps about you</li>
+        <li>Messages exchanged with the business through {LEGAL.product}</li>
+        <li>
+          Star ratings you give a team member after a visit. They are only ever shown as an average, never with your
+          name
+        </li>
         <li>Whether you agreed to text reminders, and when</li>
         <li>
-          Whether you unsubscribed from a salon’s emails, from every salon’s promotions, or from all our email, and
-          when
+          Whether you unsubscribed from a business’s emails, from every business’s promotions, or from all our email,
+          and when
         </li>
       </ul>
 
       <h2>Text messages</h2>
       <h3>How you opt in</h3>
       <p>
-        Text reminders are optional and off unless you ask for them. When you book on a salon’s booking page, the last
-        step asks for your name, email and — optionally — a mobile number. If you give a mobile number, you may tick a
-        box that is never pre-ticked, reading:
+        Text reminders are optional and off unless you ask for them. When you book on a business’s booking page, the
+        last step asks for your name, email and — optionally — a mobile number. If you give a mobile number, you may
+        tick a box that is never pre-ticked, reading:
       </p>
       <p>
         “Text me a reminder before my appointment. {LEGAL.product} appointment reminders only, never marketing. 1–2
@@ -61,20 +65,20 @@ export default function PrivacyPage() {
       </p>
       <p>
         You can finish booking without giving a number or ticking the box, and nothing about the appointment changes
-        either way. Consent is recorded against your record at that salon, with the date and time.
+        either way. Consent is recorded against your record at that business, with the date and time.
       </p>
 
       <h3>What we send</h3>
       <p>
         Appointment reminders only — typically one the day before and one a couple of hours ahead, depending on what
-        the salon has chosen. One to two messages per appointment. We never send marketing by text.
+        the business has chosen. One to two messages per appointment. We never send marketing by text.
       </p>
 
       <h3>How you stop them</h3>
       <p>
         Reply <strong>STOP</strong> to any message and they end immediately; reply <strong>HELP</strong> for help. You
-        can also untick the reminder box next time you book, or ask the salon. When you reply STOP we clear the consent
-        on your record as well, so nothing is queued against it.
+        can also untick the reminder box next time you book, or ask the business. When you reply STOP we clear the
+        consent on your record as well, so nothing is queued against it.
       </p>
 
       <h3>Who sees your number</h3>
@@ -84,23 +88,23 @@ export default function PrivacyPage() {
           for their own marketing.
         </strong>{" "}
         Your number is passed to our messaging provider for the sole purpose of delivering the reminders you asked
-        for. Within a salon, contact details are visible to its managers only.
+        for. Within a business, contact details are visible to its managers only.
       </p>
 
-      <h2>Email from the salon</h2>
+      <h2>Email from the business</h2>
       <p>
-        Separately from booking confirmations and reminders, the salon you booked with may email you about the salon —
-        an offer, a change of opening hours, news. Only salons you have a record with can do this; nobody buys or
-        rents a list, and {LEGAL.product} never emails you on its own behalf about anything other than your account.
+        Separately from booking confirmations and reminders, the business you booked with may email you about the
+        business — an offer, a change of opening hours, news. Only businesses you have a record with can do this;
+        nobody buys or rents a list, and {LEGAL.product} never emails you on its own behalf about anything other than your account.
       </p>
       <p>
         <strong>How you stop it.</strong> Every one of those emails carries an unsubscribe link at the bottom, along
-        with our postal address. One click stops that salon’s emails, immediately and for good, and you never need an
+        with our postal address. One click stops that business’s emails, immediately and for good, and you never need an
         account or a password to do it. The page the link opens lets you go further if you want to:
       </p>
       <ul>
         <li>
-          <strong>Promotions from every salon on {LEGAL.product}</strong>, including salons you book with later. We
+          <strong>Promotions from every business on {LEGAL.product}</strong>, including businesses you book with later. We
           keep that choice against your email address, so it applies wherever you book.
         </li>
         <li>
@@ -110,8 +114,8 @@ export default function PrivacyPage() {
         </li>
       </ul>
       <p>
-        Unsubscribing from one salon, or from every salon’s promotions, does <strong>not</strong> stop confirmations,
-        changes or reminders for appointments you book. Those are part of the booking, not marketing, and you would
+        Unsubscribing from one business, or from every business’s promotions, does <strong>not</strong> stop
+        confirmations, changes or reminders for appointments you book. Those are part of the booking, not marketing, and you would
         not want to lose them. Text reminders are separate: reply STOP to any of them.
       </p>
       <p>
@@ -133,8 +137,8 @@ export default function PrivacyPage() {
           <strong>Language cookie.</strong> Remembers the language you chose, so the next page is in it too.
         </li>
         <li>
-          <strong>Your last salon.</strong> For salon staff, your browser remembers which salon you last opened, so
-          signing in takes you back to its schedule. It stays on your device and is never sent to us.
+          <strong>Your last business.</strong> For business staff, your browser remembers which business you last
+          opened, so signing in takes you back to its schedule. It stays on your device and is never sent to us.
         </li>
       </ul>
       <p>
@@ -144,22 +148,22 @@ export default function PrivacyPage() {
 
       <h2>Why we use it</h2>
       <ul>
-        <li>To take and manage bookings, and to show salons their schedule</li>
+        <li>To take and manage bookings, and to show businesses their schedule</li>
         <li>To send booking confirmations, changes and reminders</li>
         <li>
-          To let the salon you booked with email you about the salon itself, until you unsubscribe — see “Email from
-          the salon” above
+          To let the business you booked with email you about the business itself, until you unsubscribe — see “Email
+          from the business” above
         </li>
-        <li>To let clients and salons message each other without exchanging personal contact details</li>
+        <li>To let clients and businesses message each other without exchanging personal contact details</li>
         <li>To keep accounts secure and investigate misuse</li>
         <li>To meet our legal and accounting obligations</li>
       </ul>
 
-      <h2>Contact details stay inside the salon</h2>
+      <h2>Contact details stay inside the business</h2>
       <p>
-        {LEGAL.product} is built so a client’s email address and phone number are visible only to that salon’s
-        managers. Designers see a client’s name and the salon’s own notes, and message clients through the platform
-        rather than directly. This is a deliberate design choice, not only a policy.
+        {LEGAL.product} is built so a client’s email address and phone number are visible only to that business’s
+        managers. Team members see a client’s name and the business’s own notes, and message clients through the
+        platform rather than directly. This is a deliberate design choice, not only a policy.
       </p>
 
       <h2>Who else sees it</h2>
@@ -180,7 +184,7 @@ export default function PrivacyPage() {
 
       <h2>How long we keep it</h2>
       <p>
-        Account and booking records are kept while the salon uses {LEGAL.product}, and afterwards only for as long as
+        Account and booking records are kept while the business uses {LEGAL.product}, and afterwards only for as long as
         we need them for legal, tax or accounting reasons. Security and audit records are kept so we can investigate
         problems after the fact.
       </p>
@@ -190,15 +194,15 @@ export default function PrivacyPage() {
         <li>Ask for a copy of the information we hold about you, or ask us to correct or delete it</li>
         <li>Withdraw consent to text reminders at any time</li>
         <li>
-          Unsubscribe from one salon’s emails, from every salon’s promotions, or from all our email, at any time, using
-          the link in any of them
+          Unsubscribe from one business’s emails, from every business’s promotions, or from all our email, at any time,
+          using the link in any of them
         </li>
         <li>
           Not be treated differently for using any of these rights
         </li>
         <li>
-          If you are a salon client, you can also ask the salon directly — it is their record, and we will help them
-          act on your request
+          If you are a client of a business, you can also ask the business directly — it is their record, and we will
+          help them act on your request
         </li>
       </ul>
       <p>
@@ -215,7 +219,7 @@ export default function PrivacyPage() {
       <h2>Security</h2>
       <p>
         Passwords are hashed with Argon2 and never stored in a readable form. Traffic is encrypted in transit. Access
-        to client contact details is limited to a salon’s managers, and changes are recorded in an audit log.
+        to client contact details is limited to a business’s managers, and changes are recorded in an audit log.
       </p>
 
       <h2>Children</h2>

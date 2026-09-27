@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, Geist, Geist_Mono, Noto_Sans_KR, Noto_Sans_SC } from "next/font/google";
+import { Fraunces, Geist, Geist_Mono, Newsreader, Noto_Sans_KR, Noto_Sans_SC } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -16,6 +16,9 @@ const fraunces = Fraunces({
   subsets: ["latin"],
   axes: ["opsz", "SOFT"],
 });
+// Morrri v3 headings (.theme-morrri in globals.css): a stand-in for PP Kyoto.
+// Only the redesigned pages use it, so it is not preloaded everywhere else.
+const newsreader = Newsreader({ variable: "--font-newsreader", subsets: ["latin"], axes: ["opsz"], preload: false });
 
 /**
  * Geist and Fraunces carry no Korean or Chinese glyphs, so without these the
@@ -59,7 +62,7 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} ${CJK_FONT[locale] ?? ""} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} ${newsreader.variable} ${CJK_FONT[locale] ?? ""} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
         {/* WCAG 2.4.1: the first Tab stop on every page jumps past the header.

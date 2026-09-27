@@ -44,7 +44,7 @@ export class SalonMembershipGuard implements CanActivate {
 
     if (membership) {
       if (required.length && !required.some((r) => membership.roles.includes(r))) {
-        throw new ForbiddenException('Your role in this salon does not allow that');
+        throw new ForbiddenException('Your role at this business does not allow that');
       }
       req.tenant = { salonId, membership };
       return true;
@@ -53,11 +53,11 @@ export class SalonMembershipGuard implements CanActivate {
     // Site admins may work in any salon; the audit log still records them as the actor.
     if (req.user.isSiteAdmin) {
       const exists = await this.prisma.salon.count({ where: { id: salonId } });
-      if (!exists) throw new ForbiddenException('Salon not found');
+      if (!exists) throw new ForbiddenException('Business not found');
       req.tenant = { salonId, membership: null };
       return true;
     }
 
-    throw new ForbiddenException('You are not a member of this salon');
+    throw new ForbiddenException('You are not a member of this business');
   }
 }

@@ -40,9 +40,9 @@ export default function MyAppointmentsPage() {
         {appts.isPending && <p className="text-muted-foreground">Loading…</p>}
         {appts.data && upcoming.length === 0 && (
           <p className="text-muted-foreground">
-            Nothing booked. Open a salon’s booking link to make an appointment, or{" "}
+            Nothing booked. Open a business’s booking link to make an appointment, or{" "}
             <Link href="/settings" className="underline">
-              set up your own salon
+              set up your own business
             </Link>
             .
           </p>
@@ -78,7 +78,7 @@ export default function MyAppointmentsPage() {
                     Cancel
                   </Button>
                 ) : (
-                  <span className="self-center text-xs text-muted-foreground">Contact the salon to change</span>
+                  <span className="self-center text-xs text-muted-foreground">Contact the business to change</span>
                 )}
               </div>
             </CardHeader>

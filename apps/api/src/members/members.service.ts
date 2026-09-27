@@ -49,7 +49,7 @@ export class MembersService {
       const will = (r: SalonRole) => input.roles!.includes(r);
 
       if (had('MANAGER') && !will('MANAGER') && (await this.activeManagerCount(tenant.salonId)) <= 1) {
-        throw new ConflictException('A salon needs at least one manager');
+        throw new ConflictException('A business needs at least one manager');
       }
       if (had('DESIGNER') && !will('DESIGNER')) {
         const upcoming = await this.upcomingAppointments(memberId);
@@ -76,7 +76,7 @@ export class MembersService {
   async remove(tenant: TenantContext, memberId: string): Promise<void> {
     const row = await this.findActive(tenant.salonId, memberId);
     if (row.roles.includes('MANAGER') && (await this.activeManagerCount(tenant.salonId)) <= 1) {
-      throw new ConflictException('A salon needs at least one manager');
+      throw new ConflictException('A business needs at least one manager');
     }
     const upcoming = await this.upcomingAppointments(memberId);
     if (upcoming > 0) {
