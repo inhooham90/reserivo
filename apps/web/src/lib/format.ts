@@ -113,9 +113,11 @@ export function formatLocalDateParts(ymd: string, locale: Locale): { weekday: st
   const weekday = parts.find((p) => p.type === "weekday")?.value ?? "";
   const rest = parts
     .filter((p) => p.type !== "weekday")
-    // Drop the separator left stranded where the weekday was removed.
+    // Drop the separator left stranded where the weekday was removed, and the
+    // brackets Korean puts round it ("9월 29일 (화)" would leave "9월 29일 ()").
     .map((p) => p.value)
     .join("")
+    .replace(/[(（]\s*[)）]/g, "")
     .replace(/^[\s,、·]+|[\s,、·]+$/g, "");
   return { weekday, rest };
 }

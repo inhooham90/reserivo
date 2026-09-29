@@ -138,6 +138,28 @@ export const bookAppointmentSchema = z.object({
 });
 export type BookAppointmentInput = z.infer<typeof bookAppointmentSchema>;
 
+/**
+ * "Anyone available". Every team member owns their own copy of a service, so
+ * the booking page sends the same service as each of them offers it, one id
+ * per person, and the server picks who is free. Twenty is more team members
+ * than any business on the page would list.
+ */
+export const MAX_ANYONE_SERVICES = 20;
+const anyServiceIdsSchema = z.array(z.uuid()).min(1).max(MAX_ANYONE_SERVICES);
+
+export const anyAvailabilityQuerySchema = availabilityQuerySchema
+  .omit({ designerId: true, serviceId: true, excludeAppointmentId: true })
+  .extend({
+    // A query string carries a list as "a,b,c".
+    serviceIds: z.preprocess((v) => (typeof v === 'string' ? v.split(',').filter(Boolean) : v), anyServiceIdsSchema),
+  });
+export type AnyAvailabilityQuery = z.infer<typeof anyAvailabilityQuerySchema>;
+
+export const bookAnyAppointmentSchema = bookAppointmentSchema
+  .omit({ designerId: true, serviceId: true })
+  .extend({ serviceIds: anyServiceIdsSchema });
+export type BookAnyAppointmentInput = z.infer<typeof bookAnyAppointmentSchema>;
+
 /** What a customer sees about their own booking. Designer is shown by display name only. */
 export const customerAppointmentSchema = z.object({
   id: z.string(),

@@ -6,8 +6,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
+  addDays,
   BLOCKING_STATUSES,
   localToUtc,
+  type AnyAvailabilityQuery,
+  type BookAnyAppointmentInput,
   completableFrom,
   noShowMarkableFrom,
   NO_SHOW_GRACE_MIN,
@@ -138,6 +141,96 @@ export class AppointmentsService {
 
     this.notify('appointment.booked', row);
     return this.toCustomerView(row);
+  }
+
+  /**
+   * "Anyone available": the union of what each team member would offer for
+   * their own copy of the service. Each person's slots come from the same
+   * engine as a named booking, so the union can offer nothing that booking
+   * one of them directly would refuse.
+   */
+  async publicAvailabilityAny(slug: string, query: AnyAvailabilityQuery): Promise<AvailabilityResponse> {
+    const salon = await this.salonBySlug(slug);
+    const services = await this.bookableServices(salon.id, query.serviceIds);
+    const each = await Promise.all(
+      services.map((service) =>
+        this.slots.compute({ salon, designerId: service.designerId, service, from: query.from, days: query.days, mode: 'public' }),
+      ),
+    );
+
+    const byDate = new Map<string, Map<string, AvailabilityResponse['days'][number]['slots'][number]>>();
+    for (const res of each) {
+      for (const day of res.days) {
+        const slots = byDate.get(day.date) ?? new Map();
+        for (const slot of day.slots) slots.set(slot.startAt, slot);
+        byDate.set(day.date, slots);
+      }
+    }
+    const days = [...byDate.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, slots]) => ({ date, slots: [...slots.values()].sort((a, b) => a.startAt.localeCompare(b.startAt)) }));
+    return { timezone: salon.timezone, durationMin: Math.min(...services.map((s) => s.durationMin)), days };
+  }
+
+  /**
+   * "Anyone available", booked. Of the team members free at that time, the
+   * one with the least already booked that day gets it, so walk-in style
+   * bookings spread across the team instead of piling on whoever is listed
+   * first; ties keep the page's order. If the chosen person is taken in the
+   * instant between the check and the insert, the next one is tried.
+   */
+  async bookPublicAny(slug: string, input: BookAnyAppointmentInput, user: AuthenticatedUser | null): Promise<CustomerAppointment> {
+    const salon = await this.salonBySlug(slug);
+    const services = await this.bookableServices(salon.id, input.serviceIds);
+    const startAt = new Date(input.startAt);
+    const iso = startAt.toISOString();
+    const local = utcToLocal(startAt, salon.timezone);
+
+    const offered = await Promise.all(
+      services.map((service) =>
+        this.slots.compute({ salon, designerId: service.designerId, service, from: local.date, days: 1, mode: 'public' }),
+      ),
+    );
+    const free = services.filter((_, i) => offered[i].days[0]?.slots.some((s) => s.startAt === iso));
+    if (free.length === 0) throw new ConflictException('That time is no longer available. Please pick another slot.');
+
+    const dayStart = localToUtc(local.date, 0, salon.timezone);
+    const dayEnd = localToUtc(addDays(local.date, 1), 0, salon.timezone);
+    const booked = await this.prisma.appointment.findMany({
+      where: {
+        designerId: { in: free.map((s) => s.designerId) },
+        status: { in: [...BLOCKING_STATUSES] },
+        startAt: { gte: dayStart, lt: dayEnd },
+      },
+      select: { designerId: true, startAt: true, endAt: true },
+    });
+    const load = new Map<string, number>();
+    for (const a of booked) load.set(a.designerId, (load.get(a.designerId) ?? 0) + (a.endAt.getTime() - a.startAt.getTime()));
+    const ranked = free
+      .map((service, order) => ({ service, order, load: load.get(service.designerId) ?? 0 }))
+      .sort((a, b) => a.load - b.load || a.order - b.order);
+
+    const customer = await this.customers.resolveForBooking(salon.id, user, input.customer);
+    for (const { service } of ranked) {
+      try {
+        const row = await this.insert({
+          salonId: salon.id,
+          designerId: service.designerId,
+          customerId: customer.id,
+          service,
+          startAt,
+          source: 'ONLINE',
+          notes: input.notes ?? null,
+          createdByUserId: user?.id ?? null,
+        });
+        this.notify('appointment.booked', row);
+        return this.toCustomerView(row);
+      } catch (err) {
+        // Taken a moment ago by someone else: try the next free person.
+        if (!(err instanceof ConflictException)) throw err;
+      }
+    }
+    throw new ConflictException('That time was just taken. Please pick another slot.');
   }
 
   // ---------- Customer (signed in) ----------
@@ -389,6 +482,23 @@ export class AppointmentsService {
     });
     if (!service) throw new NotFoundException('That service is not available for online booking');
     return service;
+  }
+
+  /**
+   * "Anyone available": every id must be a live service of a bookable member,
+   * in the order given (the page's order, which breaks ties). One service per
+   * person, since the point is to choose between people.
+   */
+  private async bookableServices(salonId: string, serviceIds: string[]) {
+    const ids = [...new Set(serviceIds)];
+    const rows = await this.prisma.service.findMany({
+      where: { id: { in: ids }, salonId, active: true, designer: { status: 'ACTIVE', roles: { has: 'DESIGNER' } } },
+    });
+    if (rows.length !== ids.length) throw new NotFoundException('That service is not available for online booking');
+    if (new Set(rows.map((r) => r.designerId)).size !== rows.length) {
+      throw new BadRequestException('Send one service per team member');
+    }
+    return ids.map((id) => rows.find((r) => r.id === id)!);
   }
 
   /** Staff path: any service of that designer in this salon, active or not. */

@@ -145,6 +145,15 @@
       "title": "选择团队成员",
       "services": "{count, plural, other {# 项服务}} · {price} 起"
     },
+    "anyone": {
+      "title": "任意空闲成员",
+      "short": "任意空闲成员",
+      "body": "选择服务和时间，即为你安排当时有空的团队成员。",
+      "menuHint": "团队提供的全部服务。预约确认后会显示为你服务的成员。",
+      "assigned": "预约确认后会显示为你服务的成员。",
+      "teamCount": "{count, plural, other {# 位团队成员}}",
+      "range": "{min}–{max}"
+    },
     "time": {
       "pickDay": "选择日期",
       "pickTime": "选择时间",

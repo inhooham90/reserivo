@@ -4,12 +4,13 @@ import {
   addDays,
   todayIn,
   type AvailabilityResponse,
+  type BookAnyAppointmentInput,
   type BookAppointmentInput,
   type CustomerAppointment,
   type PublicSalon,
 } from "@reserivo/shared";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Check, ChevronRight } from "lucide-react";
+import { ArrowLeft, Check, ChevronRight, UsersRound } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
@@ -29,10 +30,66 @@ import { cn } from "cn";
 
 type Designer = PublicSalon["designers"][number];
 type Service = Designer["services"][number];
+/** Who the booking is with: a named team member, or whoever is free. */
+type Who = Designer | "anyone";
+/**
+ * One thing on the menu. Every team member owns their own copy of a service,
+ * so "Anyone available" merges copies that share a name into one line, with
+ * one option per person; a named team member's service has one option.
+ */
+interface Offer {
+  key: string;
+  name: string;
+  category: string | null;
+  description: string | null;
+  options: { designer: Designer; service: Service }[];
+}
 type Step =
   | { kind: "member" }
-  | { kind: "pick"; d?: Designer }
-  | { kind: "time"; d: Designer; s: Service } | { kind: "details"; d: Designer; s: Service; startAt: string } | { kind: "done"; appt: CustomerAppointment };
+  | { kind: "pick"; who?: Who }
+  | { kind: "time"; who?: Who; offer: Offer }
+  | { kind: "details"; who?: Who; offer: Offer; startAt: string }
+  | { kind: "done"; appt: CustomerAppointment };
+
+const offerOf = (designer: Designer, service: Service): Offer => ({
+  key: service.id,
+  name: service.name,
+  category: service.category,
+  description: service.description,
+  options: [{ designer, service }],
+});
+
+/** Merged by name, ignoring case and spacing, in the order they first appear on the page. */
+function anyoneOffers(designers: Designer[]): Offer[] {
+  const byName = new Map<string, Offer>();
+  for (const designer of designers) {
+    for (const service of designer.services) {
+      const key = service.name.trim().toLocaleLowerCase().replace(/\s+/g, " ");
+      const offer = byName.get(key);
+      if (offer) offer.options.push({ designer, service });
+      else byName.set(key, { ...offerOf(designer, service), key });
+    }
+  }
+  return [...byName.values()];
+}
+
+const range = (values: number[]) => ({ min: Math.min(...values), max: Math.max(...values) });
+
+/** "$45.00", or "$45.00–$65.00" when the team members price it differently. The same for length. */
+function useOfferText() {
+  const f = useFormat();
+  const t = useTranslations("booking.anyone");
+  return {
+    price: (offer: Offer) => {
+      const { min, max } = range(offer.options.map((o) => o.service.priceCents));
+      return min === max ? f.cents(min) : t("range", { min: f.cents(min), max: f.cents(max) });
+    },
+    duration: (offer: Offer) => {
+      const { min, max } = range(offer.options.map((o) => o.service.durationMin));
+      return min === max ? f.duration(min) : t("range", { min: f.duration(min), max: f.duration(max) });
+    },
+  };
+}
 
 const DAYS_SHOWN = 14;
 
@@ -53,7 +110,9 @@ type StepKey = (typeof STEPS_WITH_MEMBER)[number];
  *
  * A business with more than one bookable team member gets a first step for
  * choosing one, and the menu then lists only that person's services. A solo
- * business goes straight to its menu.
+ * business goes straight to its menu. "Anyone available" heads that first
+ * step: the menu merges everyone's services, the times are everyone's free
+ * times, and the server picks who when the booking is made.
  */
 export function BookingFlow({ salon }: { salon: PublicSalon }) {
   const withServices = salon.designers.filter((d) => d.services.length > 0);
@@ -71,10 +130,10 @@ export function BookingFlow({ salon }: { salon: PublicSalon }) {
     body = (
       <Details
         salon={salon}
-        designer={step.d}
-        service={step.s}
+        who={step.who}
+        offer={step.offer}
         startAt={step.startAt}
-        onBack={() => setStep({ kind: "time", d: step.d, s: step.s })}
+        onBack={() => setStep({ kind: "time", who: step.who, offer: step.offer })}
         onDone={(appt) => setStep({ kind: "done", appt })}
       />
     );
@@ -82,20 +141,21 @@ export function BookingFlow({ salon }: { salon: PublicSalon }) {
     body = (
       <TimePicker
         salon={salon}
-        designer={step.d}
-        service={step.s}
-        onBack={() => setStep({ kind: "pick", d: pickMember ? step.d : undefined })}
-        onPick={(startAt) => setStep({ kind: "details", d: step.d, s: step.s, startAt })}
+        who={step.who}
+        offer={step.offer}
+        onBack={() => setStep({ kind: "pick", who: step.who })}
+        onPick={(startAt) => setStep({ kind: "details", who: step.who, offer: step.offer, startAt })}
       />
     );
   } else if (step.kind === "member") {
-    body = <MemberPicker designers={withServices} onPick={(d) => setStep({ kind: "pick", d })} />;
+    body = <MemberPicker designers={withServices} onPick={(who) => setStep({ kind: "pick", who })} />;
   } else {
     body = (
       <Menu
-        designers={step.d ? [step.d] : withServices}
+        who={step.who}
+        designers={step.who && step.who !== "anyone" ? [step.who] : withServices}
         onBack={pickMember ? () => setStep({ kind: "member" }) : undefined}
-        onPick={(d, s) => setStep({ kind: "time", d, s })}
+        onPick={(offer) => setStep({ kind: "time", who: step.who, offer })}
       />
     );
   }
@@ -110,8 +170,8 @@ export function BookingFlow({ salon }: { salon: PublicSalon }) {
         <div className="sticky top-8">
           <BookingSummary
             salon={salon}
-            designer={chosen?.d}
-            service={chosen && "s" in chosen ? chosen.s : undefined}
+            who={chosen?.who}
+            offer={chosen && "offer" in chosen ? chosen.offer : undefined}
             startAt={chosen && "startAt" in chosen ? chosen.startAt : undefined}
           />
         </div>
@@ -172,20 +232,53 @@ function Avatar({ designer }: { designer: Designer }) {
   );
 }
 
-/** The first step at a business with several team members: one card each, their menu behind it. */
-function MemberPicker({ designers, onPick }: { designers: Designer[]; onPick: (d: Designer) => void }) {
+const memberCard =
+  "group flex items-start gap-4 rounded-lg p-5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
+
+/**
+ * The first step at a business with several team members: one card each,
+ * their menu behind it, and "Anyone available" first for the client who just
+ * wants a time. It spans the row and sits on lavender so it reads as the
+ * other kind of answer, not as one more person.
+ */
+function MemberPicker({ designers, onPick }: { designers: Designer[]; onPick: (who: Who) => void }) {
   const f = useFormat();
   const t = useTranslations("booking.member");
+  const anyone = useTranslations("booking.anyone");
+  const offers = anyoneOffers(designers);
   return (
     <div className="grid gap-5 animate-in fade-in duration-300">
       <h2 className="text-2xl md:text-3xl">{t("title")}</h2>
       <ul className="grid gap-3 sm:grid-cols-2">
+        <li className="grid sm:col-span-2">
+          <button type="button" onClick={() => onPick("anyone")} className={cn(memberCard, "bg-lavender hover:bg-lavender/70")}>
+            <span aria-hidden className="grid size-14 shrink-0 place-items-center rounded-full bg-card text-foreground">
+              <UsersRound className="size-6" />
+            </span>
+            <span className="grid min-w-0 flex-1 gap-1 pt-1">
+              <span className="text-lg font-medium">{anyone("title")}</span>
+              <span className="text-sm text-body">{anyone("body")}</span>
+              <span className="text-sm text-body tabular-nums">
+                {t("services", {
+                  count: offers.length,
+                  price: f.cents(Math.min(...designers.flatMap((d) => d.services.map((s) => s.priceCents)))),
+                })}
+              </span>
+            </span>
+            <span
+              aria-hidden
+              className="grid size-8 shrink-0 place-items-center self-center rounded-full bg-card transition-transform group-hover:translate-x-0.5"
+            >
+              <ChevronRight className="size-4" />
+            </span>
+          </button>
+        </li>
         {designers.map((d) => (
           <li key={d.id} className="grid">
             <button
               type="button"
               onClick={() => onPick(d)}
-              className="group flex items-start gap-4 rounded-lg bg-muted p-5 text-left transition-colors hover:bg-surface-muted focus-visible:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+              className={cn(memberCard, "bg-muted hover:bg-surface-muted focus-visible:bg-surface-muted")}
             >
               <Avatar designer={d} />
               <span className="grid min-w-0 flex-1 gap-1 pt-1">
@@ -214,16 +307,57 @@ function MemberPicker({ designers, onPick }: { designers: Designer[]; onPick: (d
 }
 
 function Menu({
+  who,
   designers: withServices,
   onBack,
   onPick,
 }: {
+  who?: Who;
   designers: Designer[];
   onBack?: () => void;
-  onPick: (d: Designer, s: Service) => void;
+  onPick: (offer: Offer) => void;
 }) {
   const f = useFormat();
   const t = useTranslations("booking");
+  const text = useOfferText();
+
+  if (who === "anyone") {
+    return (
+      <div className="grid gap-8">
+        {onBack && <BackButton onClick={onBack}>{t("back.allMembers")}</BackButton>}
+        <section className="grid gap-5 animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <div className="flex items-start gap-4">
+            <span aria-hidden className="grid size-14 shrink-0 place-items-center rounded-full bg-lavender text-foreground">
+              <UsersRound className="size-6" />
+            </span>
+            <div className="grid gap-1 pt-1">
+              <h2 className="text-2xl md:text-3xl">{t("anyone.title")}</h2>
+              <p className="max-w-prose text-muted-foreground">{t("anyone.menuHint")}</p>
+            </div>
+          </div>
+          <ul className="divide-y divide-border overflow-hidden rounded-lg bg-muted">
+            {anyoneOffers(withServices).map((offer) => (
+              <li key={offer.key}>
+                <MenuItem
+                  name={offer.name}
+                  price={text.price(offer)}
+                  meta={[
+                    text.duration(offer),
+                    offer.category,
+                    t("anyone.teamCount", { count: offer.options.length }),
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                  description={offer.description}
+                  onClick={() => onPick(offer)}
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+    );
+  }
 
   if (withServices.length === 0) {
     return (
@@ -253,29 +387,13 @@ function Menu({
             <ul className="divide-y divide-border overflow-hidden rounded-lg bg-muted">
               {d.services.map((s) => (
                 <li key={s.id}>
-                  <button
-                    type="button"
-                    onClick={() => onPick(d, s)}
-                    className="group grid w-full grid-cols-[1fr_auto] items-baseline gap-x-6 gap-y-1 px-6 py-5 text-left transition-colors hover:bg-surface-muted focus-visible:bg-surface-muted focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
-                  >
-                    <span className="text-lg font-medium">{s.name}</span>
-                    <span className="flex items-center gap-3 text-lg tabular-nums">
-                      {f.cents(s.priceCents)}
-                      <span
-                        aria-hidden
-                        className="grid size-8 place-items-center self-center rounded-full bg-card transition-transform group-hover:translate-x-0.5"
-                      >
-                        <ChevronRight className="size-4" />
-                      </span>
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      {f.duration(s.durationMin)}
-                      {s.category ? ` · ${s.category}` : ""}
-                    </span>
-                    {s.description && (
-                      <span className="col-span-2 max-w-prose text-sm text-muted-foreground">{s.description}</span>
-                    )}
-                  </button>
+                  <MenuItem
+                    name={s.name}
+                    price={f.cents(s.priceCents)}
+                    meta={`${f.duration(s.durationMin)}${s.category ? ` · ${s.category}` : ""}`}
+                    description={s.description}
+                    onClick={() => onPick(offerOf(d, s))}
+                  />
                 </li>
               ))}
             </ul>
@@ -286,31 +404,76 @@ function Menu({
   );
 }
 
+function MenuItem({
+  name,
+  price,
+  meta,
+  description,
+  onClick,
+}: {
+  name: string;
+  price: string;
+  meta: string;
+  description: string | null;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group grid w-full grid-cols-[1fr_auto] items-baseline gap-x-6 gap-y-1 px-6 py-5 text-left transition-colors hover:bg-surface-muted focus-visible:bg-surface-muted focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
+    >
+      <span className="text-lg font-medium">{name}</span>
+      <span className="flex items-center gap-3 text-lg tabular-nums">
+        {price}
+        <span
+          aria-hidden
+          className="grid size-8 place-items-center self-center rounded-full bg-card transition-transform group-hover:translate-x-0.5"
+        >
+          <ChevronRight className="size-4" />
+        </span>
+      </span>
+      <span className="text-sm text-muted-foreground">{meta}</span>
+      {description && <span className="col-span-2 max-w-prose text-sm text-muted-foreground">{description}</span>}
+    </button>
+  );
+}
+
 /** The sticky panel beside the flow on wide screens. */
+/** The team member named on a choice: the one picked, or the only one offering it. Null for "anyone". */
+function namedDesigner(who: Who | undefined, offer: Offer | undefined): Designer | null {
+  if (who && who !== "anyone") return who;
+  if (!who && offer?.options.length === 1) return offer.options[0].designer;
+  return null;
+}
+
 function BookingSummary({
   salon,
-  designer,
-  service,
+  who,
+  offer,
   startAt,
 }: {
   salon: PublicSalon;
-  designer?: Designer;
-  service?: Service;
+  who?: Who;
+  offer?: Offer;
   startAt?: string;
 }) {
   const f = useFormat();
   const t = useTranslations("booking.summary");
+  const anyone = useTranslations("booking.anyone");
+  const text = useOfferText();
+  const designer = namedDesigner(who, offer);
   return (
     <div className="grid gap-5 rounded-lg bg-butter p-8">
       <p className="font-display text-[28px] leading-[1.3] font-medium tracking-[-0.01em]">{t("title")}</p>
-      {designer ? (
+      {who || offer ? (
         <dl className="grid gap-4">
           <div className="grid gap-0.5">
             <dt className="text-sm text-muted-foreground">{t("service")}</dt>
-            {service ? (
+            {offer ? (
               <>
-                <dd className="font-medium">{service.name}</dd>
-                <dd className="text-sm text-muted-foreground">{f.duration(service.durationMin)}</dd>
+                <dd className="font-medium">{offer.name}</dd>
+                <dd className="text-sm text-muted-foreground">{text.duration(offer)}</dd>
               </>
             ) : (
               <dd className="text-muted-foreground">{t("chooseService")}</dd>
@@ -318,9 +481,10 @@ function BookingSummary({
           </div>
           <div className="grid gap-0.5">
             <dt className="text-sm text-muted-foreground">{t("with")}</dt>
-            <dd className="font-medium">{designer.displayName}</dd>
+            <dd className="font-medium">{designer ? designer.displayName : anyone("title")}</dd>
+            {!designer && <dd className="text-sm text-muted-foreground">{anyone("assigned")}</dd>}
           </div>
-          {service && (
+          {offer && (
             <>
               <div className="grid gap-0.5">
                 <dt className="text-sm text-muted-foreground">{t("when")}</dt>
@@ -330,7 +494,7 @@ function BookingSummary({
               </div>
               <div className="flex items-baseline justify-between border-t pt-4">
                 <dt className="text-sm text-muted-foreground">{t("price")}</dt>
-                <dd className="text-lg tabular-nums">{f.cents(service.priceCents)}</dd>
+                <dd className="text-lg tabular-nums">{text.price(offer)}</dd>
               </div>
             </>
           )}
@@ -350,25 +514,27 @@ function BookingSummary({
 }
 
 /** The inline summary on phones, where there is no room for the side panel. */
-function Summary({ designer, service, startAt, timezone }: { designer: Designer; service: Service; startAt?: string; timezone: string }) {
+function Summary({ who, offer, startAt, timezone }: { who?: Who; offer: Offer; startAt?: string; timezone: string }) {
   const f = useFormat();
   const t = useTranslations("booking");
+  const text = useOfferText();
+  const designer = namedDesigner(who, offer);
   return (
     <div className="flex flex-wrap items-baseline justify-between gap-2 rounded-lg bg-butter px-5 py-4 lg:hidden">
       <div className="grid gap-0.5">
         <span className="font-medium">
           {t.rich("serviceWith", {
-            service: service.name,
-            designer: designer.displayName,
+            service: offer.name,
+            designer: designer ? designer.displayName : t("anyone.short"),
             muted: (chunks) => <span className="text-muted-foreground">{chunks}</span>,
           })}
         </span>
         <span className="text-sm text-muted-foreground">
-          {f.duration(service.durationMin)}
+          {text.duration(offer)}
           {startAt ? ` · ${f.inTz(startAt, timezone)}` : ""}
         </span>
       </div>
-      <span className="tabular-nums">{f.cents(service.priceCents)}</span>
+      <span className="tabular-nums">{text.price(offer)}</span>
     </div>
   );
 }
@@ -386,16 +552,19 @@ function BackButton({ onClick, children }: { onClick: () => void; children: Reac
   );
 }
 
+/** The options a choice can be booked through: one named person, or everyone in the merged line. */
+const serviceIdsOf = (offer: Offer) => offer.options.map((o) => o.service.id);
+
 function TimePicker({
   salon,
-  designer,
-  service,
+  who,
+  offer,
   onBack,
   onPick,
 }: {
   salon: PublicSalon;
-  designer: Designer;
-  service: Service;
+  who?: Who;
+  offer: Offer;
   onBack: () => void;
   onPick: (startAt: string) => void;
 }) {
@@ -403,12 +572,15 @@ function TimePicker({
   const t = useTranslations("booking");
   const from = useMemo(() => todayIn(salon.timezone), [salon.timezone]);
   const [date, setDate] = useState(from);
+  const [only] = offer.options;
 
   const availability = useQuery({
-    queryKey: ["public-availability", salon.slug, designer.id, service.id, from],
+    queryKey: ["public-availability", salon.slug, ...serviceIdsOf(offer), from],
     queryFn: () =>
       api<AvailabilityResponse>(
-        `/public/salons/${salon.slug}/availability?designerId=${designer.id}&serviceId=${service.id}&from=${from}&days=${DAYS_SHOWN}`,
+        offer.options.length === 1
+          ? `/public/salons/${salon.slug}/availability?designerId=${only.designer.id}&serviceId=${only.service.id}&from=${from}&days=${DAYS_SHOWN}`
+          : `/public/salons/${salon.slug}/availability/any?serviceIds=${serviceIdsOf(offer).join(",")}&from=${from}&days=${DAYS_SHOWN}`,
       ),
     staleTime: 15_000,
   });
@@ -420,7 +592,7 @@ function TimePicker({
   return (
     <div className="grid gap-8 animate-in fade-in duration-300">
       <BackButton onClick={onBack}>{t("back.allServices")}</BackButton>
-      <Summary designer={designer} service={service} timezone={salon.timezone} />
+      <Summary who={who} offer={offer} timezone={salon.timezone} />
 
       <div className="grid gap-4">
         <h2 className="text-2xl">{t("time.pickDay")}</h2>
@@ -500,15 +672,15 @@ function TimePicker({
 
 function Details({
   salon,
-  designer,
-  service,
+  who,
+  offer,
   startAt,
   onBack,
   onDone,
 }: {
   salon: PublicSalon;
-  designer: Designer;
-  service: Service;
+  who?: Who;
+  offer: Offer;
   startAt: string;
   onBack: () => void;
   onDone: (appt: CustomerAppointment) => void;
@@ -521,9 +693,20 @@ function Details({
   const [smsConsent, setSmsConsent] = useState(false);
   const [notes, setNotes] = useState("");
 
+  // One option books that person; several ask the server to pick whoever is free.
   const book = useMutation({
-    mutationFn: (input: BookAppointmentInput) =>
-      api<CustomerAppointment>(`/public/salons/${salon.slug}/appointments`, { method: "POST", json: input }),
+    mutationFn: (input: Omit<BookAppointmentInput, "designerId" | "serviceId">) => {
+      const [only] = offer.options;
+      return offer.options.length === 1
+        ? api<CustomerAppointment>(`/public/salons/${salon.slug}/appointments`, {
+            method: "POST",
+            json: { ...input, designerId: only.designer.id, serviceId: only.service.id } satisfies BookAppointmentInput,
+          })
+        : api<CustomerAppointment>(`/public/salons/${salon.slug}/appointments/any`, {
+            method: "POST",
+            json: { ...input, serviceIds: serviceIdsOf(offer) } satisfies BookAnyAppointmentInput,
+          });
+    },
     onSuccess: onDone,
   });
 
@@ -533,7 +716,7 @@ function Details({
   return (
     <div className="grid gap-8 animate-in fade-in duration-300">
       <BackButton onClick={onBack}>{t("back.changeTime")}</BackButton>
-      <Summary designer={designer} service={service} startAt={startAt} timezone={salon.timezone} />
+      <Summary who={who} offer={offer} startAt={startAt} timezone={salon.timezone} />
       <section aria-labelledby="bk-title" className="grid gap-6 rounded-lg bg-muted px-6 py-8 md:p-10">
         <div className="grid gap-1.5">
           <h2 id="bk-title" className="text-[28px] leading-[1.3]">
@@ -546,8 +729,6 @@ function Details({
           onSubmit={(e) => {
             e.preventDefault();
             book.mutate({
-              designerId: designer.id,
-              serviceId: service.id,
               startAt,
               customer: {
                 name: name.trim(),

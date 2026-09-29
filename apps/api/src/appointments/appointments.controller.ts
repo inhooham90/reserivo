@@ -1,7 +1,11 @@
 import { Body, Controller, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
 import {
+  anyAvailabilityQuerySchema,
   availabilityQuerySchema,
+  bookAnyAppointmentSchema,
   bookAppointmentSchema,
+  type AnyAvailabilityQuery,
+  type BookAnyAppointmentInput,
   staffAppointmentsQuerySchema,
   staffBookAppointmentSchema,
   updateAppointmentSchema,
@@ -35,6 +39,27 @@ export class PublicBookingController {
     @Query(new ZodValidationPipe(availabilityQuerySchema)) query: AvailabilityQuery,
   ): Promise<AvailabilityResponse> {
     return this.appointments.publicAvailability(slug, query);
+  }
+
+  /** "Anyone available": every slot at which at least one of these team members is free. */
+  @Public()
+  @Get('availability/any')
+  availabilityAny(
+    @Param('slug') slug: string,
+    @Query(new ZodValidationPipe(anyAvailabilityQuerySchema)) query: AnyAvailabilityQuery,
+  ): Promise<AvailabilityResponse> {
+    return this.appointments.publicAvailabilityAny(slug, query);
+  }
+
+  /** "Anyone available": the business's side picks who; the response says who it was. */
+  @OptionalAuth()
+  @Post('appointments/any')
+  bookAny(
+    @Param('slug') slug: string,
+    @Body(new ZodValidationPipe(bookAnyAppointmentSchema)) body: BookAnyAppointmentInput,
+    @CurrentUser() user: AuthenticatedUser | null,
+  ): Promise<CustomerAppointment> {
+    return this.appointments.bookPublicAny(slug, body, user);
   }
 
   /** Guests may book; a signed-in customer's booking is linked to their account. */

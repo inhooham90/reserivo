@@ -145,6 +145,15 @@
       "title": "Choose a team member",
       "services": "{count, plural, one {# service} other {# services}} · from {price}"
     },
+    "anyone": {
+      "title": "Anyone available",
+      "short": "anyone available",
+      "body": "Choose a service and a time, and you’re booked with whoever is free.",
+      "menuHint": "Everything the team offers. You’ll see who you’re booked with once it’s confirmed.",
+      "assigned": "You’ll see who when your booking is confirmed.",
+      "teamCount": "{count, plural, one {# team member} other {# team members}}",
+      "range": "{min}–{max}"
+    },
     "time": {
       "pickDay": "Pick a day",
       "pickTime": "Pick a time",
