@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { GuideBanner, SetupReopen } from "@/components/setup/guide-banner";
 import { useSalon } from "@/lib/salon-context";
 import { pillInputSm } from "@/lib/v3";
 import { cn } from "cn";
@@ -128,6 +129,8 @@ export function SettingsDialog({ intercepted = false, children }: { intercepted?
                     </Link>
                   </div>
                 )}
+                <SetupReopen className={railItem} />
+
                 {visible.length === 0 && !showSalons && (
                   <p className="px-3 text-sm text-muted-foreground">{t("dialog.noMatch")}</p>
                 )}
@@ -147,7 +150,10 @@ export function SettingsDialog({ intercepted = false, children }: { intercepted?
                   <X aria-hidden className="size-5" />
                 </Dialog.Close>
               </div>
-              <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-2 pb-8 md:px-8">{children}</div>
+              <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-2 pb-8 md:px-8">
+                <GuideBanner />
+                {children}
+              </div>
               <div ref={setFooter} className="empty:hidden" />
             </div>
           </SettingsDialogContext.Provider>

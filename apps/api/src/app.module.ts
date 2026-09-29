@@ -11,6 +11,7 @@ import { AdminModule } from './admin/admin.module.js';
 import { AppointmentsModule } from './appointments/appointments.module.js';
 import { AvailabilityModule } from './availability/availability.module.js';
 import { CampaignsModule } from './campaigns/campaigns.module.js';
+import { SetupModule } from './setup/setup.module.js';
 import { validateEnv } from './config/env.js';
 import { CustomersModule } from './customers/customers.module.js';
 import { InvitationsModule } from './invitations/invitations.module.js';
@@ -52,6 +53,7 @@ import { ServicesModule } from './services/services.module.js';
     AdminModule,
     RemindersModule,
     CampaignsModule,
+    SetupModule,
   ],
   controllers: [AppController],
   providers: [

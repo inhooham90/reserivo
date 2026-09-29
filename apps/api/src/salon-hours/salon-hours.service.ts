@@ -8,6 +8,7 @@ import type {
 } from '@reserivo/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { Prisma } from '../generated/prisma/client.js';
+import { markSetupStep } from '../setup/mark-setup-step.js';
 
 /** Mon–Sat 9:00–18:00. Applied to new salons so the booking page is never silently empty. */
 export const DEFAULT_SALON_HOURS = [1, 2, 3, 4, 5, 6].map((weekday) => ({ weekday, startMinutes: 540, endMinutes: 1080 }));
@@ -51,11 +52,13 @@ export class SalonHoursService {
     };
   }
 
-  async replaceRules(salonId: string, input: ReplaceAvailabilityRulesInput): Promise<AvailabilityRule[]> {
+  /** Saving counts as the setup guide's "opening hours" step for whoever saved. */
+  async replaceRules(salonId: string, input: ReplaceAvailabilityRulesInput, membershipId?: string): Promise<AvailabilityRule[]> {
     await this.prisma.$transaction([
       this.prisma.salonHours.deleteMany({ where: { salonId } }),
       this.prisma.salonHours.createMany({ data: input.rules.map((r) => ({ ...r, salonId })) }),
     ]);
+    await markSetupStep(this.prisma, membershipId, 'businessHours');
     return (await this.rules(salonId)).map(toRule);
   }
 

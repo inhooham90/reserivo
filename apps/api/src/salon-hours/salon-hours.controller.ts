@@ -30,7 +30,7 @@ export class SalonHoursController {
     @Tenant() tenant: TenantContext,
     @Body(new ZodValidationPipe(replaceAvailabilityRulesSchema)) body: ReplaceAvailabilityRulesInput,
   ): Promise<AvailabilityRule[]> {
-    return this.hours.replaceRules(tenant.salonId, body);
+    return this.hours.replaceRules(tenant.salonId, body, tenant.membership?.id);
   }
 
   @SalonRoles('MANAGER')

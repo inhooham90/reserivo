@@ -27,4 +27,8 @@ export const salonKeys = {
   services: (id: string) => ["salons", id, "services"] as const,
   availability: (id: string, memberId: string) => ["salons", id, "availability", memberId] as const,
   hours: (id: string) => ["salons", id, "hours"] as const,
+  setup: (id: string) => ["salons", id, "setup"] as const,
 };
+
+/** Any salon's setup-guide query; see the MutationCache in `Providers`. */
+export const isSetupKey = (key: readonly unknown[]) => key[0] === "salons" && key[2] === "setup";

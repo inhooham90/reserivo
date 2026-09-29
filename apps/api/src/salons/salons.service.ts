@@ -3,6 +3,7 @@ import type { CreateSalonInput, MySalon, PublicSalon, Salon, SalonRole, UpdateSa
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RatingsService } from '../ratings/ratings.service.js';
 import { SalonHoursService } from '../salon-hours/salon-hours.service.js';
+import { markSetupStep } from '../setup/mark-setup-step.js';
 
 @Injectable()
 export class SalonsService {
@@ -92,9 +93,10 @@ export class SalonsService {
     return { ...this.toSalon(salon), hours: salon.hours, designers };
   }
 
-  /** Managers edit identity and booking policies. */
-  async update(salonId: string, input: UpdateSalonInput): Promise<Salon> {
+  /** Managers edit identity and booking policies. Saving counts as the setup guide's "business details" step. */
+  async update(salonId: string, input: UpdateSalonInput, membershipId?: string): Promise<Salon> {
     const salon = await this.prisma.salon.update({ where: { id: salonId }, data: input });
+    await markSetupStep(this.prisma, membershipId, 'business');
     return this.toSalon(salon);
   }
 

@@ -29,12 +29,18 @@ import { cn } from "cn";
 
 type Designer = PublicSalon["designers"][number];
 type Service = Designer["services"][number];
-type Step = { kind: "pick" } | { kind: "time"; d: Designer; s: Service } | { kind: "details"; d: Designer; s: Service; startAt: string } | { kind: "done"; appt: CustomerAppointment };
+type Step =
+  | { kind: "member" }
+  | { kind: "pick"; d?: Designer }
+  | { kind: "time"; d: Designer; s: Service } | { kind: "details"; d: Designer; s: Service; startAt: string } | { kind: "done"; appt: CustomerAppointment };
 
 const DAYS_SHOWN = 14;
 
 /** Keys under booking.steps. The English "Your details" is quoted on /sms, so keep that wording. */
 const STEPS = ["service", "time", "details"] as const;
+/** With more than one bookable team member the flow opens on choosing one, so nobody scrolls past everyone else's menu. */
+const STEPS_WITH_MEMBER = ["member", ...STEPS] as const;
+type StepKey = (typeof STEPS_WITH_MEMBER)[number];
 
 /**
  * The customer's path from menu to confirmed booking, on the Morrri v3 design
@@ -44,14 +50,21 @@ const STEPS = ["service", "time", "details"] as const;
  *
  * On wide screens the flow sits beside a sticky summary of what has been chosen
  * so far; on phones the same summary is shown inline above each step instead.
+ *
+ * A business with more than one bookable team member gets a first step for
+ * choosing one, and the menu then lists only that person's services. A solo
+ * business goes straight to its menu.
  */
 export function BookingFlow({ salon }: { salon: PublicSalon }) {
-  const [step, setStep] = useState<Step>({ kind: "pick" });
+  const withServices = salon.designers.filter((d) => d.services.length > 0);
+  const pickMember = withServices.length > 1;
+  const steps: readonly StepKey[] = pickMember ? STEPS_WITH_MEMBER : STEPS;
+  const [step, setStep] = useState<Step>(pickMember ? { kind: "member" } : { kind: "pick" });
 
   if (step.kind === "done") return <Confirmation appt={step.appt} />;
 
-  const current = step.kind === "pick" ? 0 : step.kind === "time" ? 1 : 2;
-  const chosen = step.kind === "pick" ? null : step;
+  const current = steps.indexOf(step.kind === "member" ? "member" : step.kind === "pick" ? "service" : step.kind);
+  const chosen = step.kind === "member" ? null : step;
 
   let body: React.ReactNode;
   if (step.kind === "details") {
@@ -71,18 +84,26 @@ export function BookingFlow({ salon }: { salon: PublicSalon }) {
         salon={salon}
         designer={step.d}
         service={step.s}
-        onBack={() => setStep({ kind: "pick" })}
+        onBack={() => setStep({ kind: "pick", d: pickMember ? step.d : undefined })}
         onPick={(startAt) => setStep({ kind: "details", d: step.d, s: step.s, startAt })}
       />
     );
+  } else if (step.kind === "member") {
+    body = <MemberPicker designers={withServices} onPick={(d) => setStep({ kind: "pick", d })} />;
   } else {
-    body = <Menu salon={salon} onPick={(d, s) => setStep({ kind: "time", d, s })} />;
+    body = (
+      <Menu
+        designers={step.d ? [step.d] : withServices}
+        onBack={pickMember ? () => setStep({ kind: "member" }) : undefined}
+        onPick={(d, s) => setStep({ kind: "time", d, s })}
+      />
+    );
   }
 
   return (
     <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
       <div className="grid content-start gap-8 lg:col-span-8">
-        <Steps current={current} />
+        <Steps steps={steps} current={current} />
         {body}
       </div>
       <aside className="hidden lg:col-span-4 lg:block">
@@ -90,7 +111,7 @@ export function BookingFlow({ salon }: { salon: PublicSalon }) {
           <BookingSummary
             salon={salon}
             designer={chosen?.d}
-            service={chosen?.s}
+            service={chosen && "s" in chosen ? chosen.s : undefined}
             startAt={chosen && "startAt" in chosen ? chosen.startAt : undefined}
           />
         </div>
@@ -99,11 +120,11 @@ export function BookingFlow({ salon }: { salon: PublicSalon }) {
   );
 }
 
-function Steps({ current }: { current: number }) {
+function Steps({ steps, current }: { steps: readonly StepKey[]; current: number }) {
   const t = useTranslations("booking.steps");
   return (
     <ol aria-label={t("label")} className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-      {STEPS.map((step, i) => (
+      {steps.map((step, i) => (
         <li
           key={step}
           aria-current={i === current ? "step" : undefined}
@@ -151,10 +172,58 @@ function Avatar({ designer }: { designer: Designer }) {
   );
 }
 
-function Menu({ salon, onPick }: { salon: PublicSalon; onPick: (d: Designer, s: Service) => void }) {
+/** The first step at a business with several team members: one card each, their menu behind it. */
+function MemberPicker({ designers, onPick }: { designers: Designer[]; onPick: (d: Designer) => void }) {
+  const f = useFormat();
+  const t = useTranslations("booking.member");
+  return (
+    <div className="grid gap-5 animate-in fade-in duration-300">
+      <h2 className="text-2xl md:text-3xl">{t("title")}</h2>
+      <ul className="grid gap-3 sm:grid-cols-2">
+        {designers.map((d) => (
+          <li key={d.id} className="grid">
+            <button
+              type="button"
+              onClick={() => onPick(d)}
+              className="group flex items-start gap-4 rounded-lg bg-muted p-5 text-left transition-colors hover:bg-surface-muted focus-visible:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            >
+              <Avatar designer={d} />
+              <span className="grid min-w-0 flex-1 gap-1 pt-1">
+                <span className="text-lg font-medium">{d.displayName}</span>
+                <RatingSummary rating={d.rating} />
+                {d.bio && <span className="line-clamp-2 text-sm text-muted-foreground">{d.bio}</span>}
+                <span className="text-sm text-muted-foreground tabular-nums">
+                  {t("services", {
+                    count: d.services.length,
+                    price: f.cents(Math.min(...d.services.map((s) => s.priceCents))),
+                  })}
+                </span>
+              </span>
+              <span
+                aria-hidden
+                className="grid size-8 shrink-0 place-items-center self-center rounded-full bg-card transition-transform group-hover:translate-x-0.5"
+              >
+                <ChevronRight className="size-4" />
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function Menu({
+  designers: withServices,
+  onBack,
+  onPick,
+}: {
+  designers: Designer[];
+  onBack?: () => void;
+  onPick: (d: Designer, s: Service) => void;
+}) {
   const f = useFormat();
   const t = useTranslations("booking");
-  const withServices = salon.designers.filter((d) => d.services.length > 0);
 
   if (withServices.length === 0) {
     return (
@@ -166,50 +235,53 @@ function Menu({ salon, onPick }: { salon: PublicSalon; onPick: (d: Designer, s: 
   }
 
   return (
-    <div className="grid gap-14">
-      {withServices.map((d) => (
-        <section key={d.id} className="grid gap-5 animate-in fade-in slide-in-from-bottom-2 duration-500">
-          <div className="flex items-start gap-4">
-            <Avatar designer={d} />
-            <div className="grid gap-1 pt-1">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <h2 className="text-2xl md:text-3xl">{d.displayName}</h2>
-                <RatingSummary rating={d.rating} />
+    <div className="grid gap-8">
+      {onBack && <BackButton onClick={onBack}>{t("back.allMembers")}</BackButton>}
+      <div className="grid gap-14">
+        {withServices.map((d) => (
+          <section key={d.id} className="grid gap-5 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <div className="flex items-start gap-4">
+              <Avatar designer={d} />
+              <div className="grid gap-1 pt-1">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <h2 className="text-2xl md:text-3xl">{d.displayName}</h2>
+                  <RatingSummary rating={d.rating} />
+                </div>
+                {d.bio && <p className="max-w-prose text-muted-foreground">{d.bio}</p>}
               </div>
-              {d.bio && <p className="max-w-prose text-muted-foreground">{d.bio}</p>}
             </div>
-          </div>
-          <ul className="divide-y divide-border overflow-hidden rounded-lg bg-muted">
-            {d.services.map((s) => (
-              <li key={s.id}>
-                <button
-                  type="button"
-                  onClick={() => onPick(d, s)}
-                  className="group grid w-full grid-cols-[1fr_auto] items-baseline gap-x-6 gap-y-1 px-6 py-5 text-left transition-colors hover:bg-surface-muted focus-visible:bg-surface-muted focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
-                >
-                  <span className="text-lg font-medium">{s.name}</span>
-                  <span className="flex items-center gap-3 text-lg tabular-nums">
-                    {f.cents(s.priceCents)}
-                    <span
-                      aria-hidden
-                      className="grid size-8 place-items-center self-center rounded-full bg-card transition-transform group-hover:translate-x-0.5"
-                    >
-                      <ChevronRight className="size-4" />
+            <ul className="divide-y divide-border overflow-hidden rounded-lg bg-muted">
+              {d.services.map((s) => (
+                <li key={s.id}>
+                  <button
+                    type="button"
+                    onClick={() => onPick(d, s)}
+                    className="group grid w-full grid-cols-[1fr_auto] items-baseline gap-x-6 gap-y-1 px-6 py-5 text-left transition-colors hover:bg-surface-muted focus-visible:bg-surface-muted focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
+                  >
+                    <span className="text-lg font-medium">{s.name}</span>
+                    <span className="flex items-center gap-3 text-lg tabular-nums">
+                      {f.cents(s.priceCents)}
+                      <span
+                        aria-hidden
+                        className="grid size-8 place-items-center self-center rounded-full bg-card transition-transform group-hover:translate-x-0.5"
+                      >
+                        <ChevronRight className="size-4" />
+                      </span>
                     </span>
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {f.duration(s.durationMin)}
-                    {s.category ? ` · ${s.category}` : ""}
-                  </span>
-                  {s.description && (
-                    <span className="col-span-2 max-w-prose text-sm text-muted-foreground">{s.description}</span>
-                  )}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
+                    <span className="text-sm text-muted-foreground">
+                      {f.duration(s.durationMin)}
+                      {s.category ? ` · ${s.category}` : ""}
+                    </span>
+                    {s.description && (
+                      <span className="col-span-2 max-w-prose text-sm text-muted-foreground">{s.description}</span>
+                    )}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
     </div>
   );
 }
@@ -231,27 +303,37 @@ function BookingSummary({
   return (
     <div className="grid gap-5 rounded-lg bg-butter p-8">
       <p className="font-display text-[28px] leading-[1.3] font-medium tracking-[-0.01em]">{t("title")}</p>
-      {service && designer ? (
+      {designer ? (
         <dl className="grid gap-4">
           <div className="grid gap-0.5">
             <dt className="text-sm text-muted-foreground">{t("service")}</dt>
-            <dd className="font-medium">{service.name}</dd>
-            <dd className="text-sm text-muted-foreground">{f.duration(service.durationMin)}</dd>
+            {service ? (
+              <>
+                <dd className="font-medium">{service.name}</dd>
+                <dd className="text-sm text-muted-foreground">{f.duration(service.durationMin)}</dd>
+              </>
+            ) : (
+              <dd className="text-muted-foreground">{t("chooseService")}</dd>
+            )}
           </div>
           <div className="grid gap-0.5">
             <dt className="text-sm text-muted-foreground">{t("with")}</dt>
             <dd className="font-medium">{designer.displayName}</dd>
           </div>
-          <div className="grid gap-0.5">
-            <dt className="text-sm text-muted-foreground">{t("when")}</dt>
-            <dd className={cn(startAt ? "font-medium" : "text-muted-foreground")}>
-              {startAt ? f.inTz(startAt, salon.timezone, "dateTimeLong") : t("chooseTime")}
-            </dd>
-          </div>
-          <div className="flex items-baseline justify-between border-t pt-4">
-            <dt className="text-sm text-muted-foreground">{t("price")}</dt>
-            <dd className="text-lg tabular-nums">{f.cents(service.priceCents)}</dd>
-          </div>
+          {service && (
+            <>
+              <div className="grid gap-0.5">
+                <dt className="text-sm text-muted-foreground">{t("when")}</dt>
+                <dd className={cn(startAt ? "font-medium" : "text-muted-foreground")}>
+                  {startAt ? f.inTz(startAt, salon.timezone, "dateTimeLong") : t("chooseTime")}
+                </dd>
+              </div>
+              <div className="flex items-baseline justify-between border-t pt-4">
+                <dt className="text-sm text-muted-foreground">{t("price")}</dt>
+                <dd className="text-lg tabular-nums">{f.cents(service.priceCents)}</dd>
+              </div>
+            </>
+          )}
         </dl>
       ) : (
         <p className="text-muted-foreground">{t("nothing")}</p>

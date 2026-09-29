@@ -23,7 +23,7 @@ export function SettingsSection({
   className?: string;
 }) {
   return (
-    <section className={cn("grid gap-3", className)}>
+    <section className={cn("grid grid-cols-[minmax(0,1fr)] gap-3", className)}>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
           {/* h3 inside the pane's h2; Geist, not the display serif, as in the design. */}

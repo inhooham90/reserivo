@@ -1,8 +1,10 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
 import {
   createServiceInputSchema,
+  createServicesInputSchema,
   updateServiceSchema,
   type CreateServiceInput,
+  type CreateServicesInput,
   type Service,
   type UpdateServiceInput,
 } from '@reserivo/shared';
@@ -27,6 +29,15 @@ export class ServicesController {
     @Body(new ZodValidationPipe(createServiceInputSchema)) body: CreateServiceInput,
   ): Promise<Service> {
     return this.services.create(tenant, body);
+  }
+
+  /** The guided setup saves a whole menu in one request: all of it or none of it. */
+  @Post('bulk')
+  createMany(
+    @Tenant() tenant: TenantContext,
+    @Body(new ZodValidationPipe(createServicesInputSchema)) body: CreateServicesInput,
+  ): Promise<Service[]> {
+    return this.services.createMany(tenant, body);
   }
 
   @Patch(':id')

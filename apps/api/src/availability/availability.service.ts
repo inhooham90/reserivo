@@ -15,6 +15,7 @@ import { SalonHoursService } from '../salon-hours/salon-hours.service.js';
 import { assertCanManageMember } from '../tenancy/access.js';
 import type { TenantContext } from '../tenancy/tenant.types.js';
 import { windowsForDate } from './slot-engine.js';
+import { markSetupStep } from '../setup/mark-setup-step.js';
 
 const WEEKDAY = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -69,6 +70,9 @@ export class AvailabilityService {
         data: input.rules.map((r) => ({ ...r, salonId: tenant.salonId, designerId })),
       }),
     ]);
+
+    // The member's hours are set, whether they saved them or a manager did for them.
+    await markSetupStep(this.prisma, designerId, 'myHours');
 
     const rows = await this.prisma.availabilityRule.findMany({
       where: { designerId },

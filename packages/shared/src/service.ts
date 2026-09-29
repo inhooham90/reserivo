@@ -55,7 +55,24 @@ export const createServiceInputSchema = createServiceSchema.superRefine((v, ctx)
   if (problem) ctx.addIssue({ code: 'custom', message: problem, path: ['allowsDoubleBooking'] });
 });
 
-export const updateServiceSchema = createServiceSchema.omit({ designerId: true }).partial().extend({
+/** A whole menu at once, from the guided setup. Enough for any real menu, small enough to review on one screen. */
+export const MAX_SERVICES_PER_BATCH = 50;
+
+export const createServicesInputSchema = z.object({
+  designerId: z.string().optional(),
+  services: z
+    .array(
+      createServiceSchema.omit({ designerId: true }).superRefine((v, ctx) => {
+        const problem = assertDoubleBookingAllowed(v.durationMin, v.allowsDoubleBooking);
+        if (problem) ctx.addIssue({ code: 'custom', message: problem, path: ['allowsDoubleBooking'] });
+      }),
+    )
+    .min(1)
+    .max(MAX_SERVICES_PER_BATCH),
+});
+export type CreateServicesInput = z.infer<typeof createServicesInputSchema>;
+
+export const updateServiceSchema =createServiceSchema.omit({ designerId: true }).partial().extend({
   sortOrder: z.number().int().min(0).optional(),
 });
 export type UpdateServiceInput = z.infer<typeof updateServiceSchema>;

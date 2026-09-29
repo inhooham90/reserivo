@@ -4,6 +4,7 @@ import {
   BLOCKING_STATUSES,
   canAllowDoubleBooking,
   type CreateServiceInput,
+  type CreateServicesInput,
   type Service,
   type UpdateServiceInput,
 } from '@reserivo/shared';
@@ -40,6 +41,25 @@ export class ServicesService {
     const { designerId: _ignored, ...data } = input;
     const row = await this.prisma.service.create({ data: { ...data, salonId: tenant.salonId, designerId } });
     return this.toService(row);
+  }
+
+  /**
+   * Same ownership rules as `create`, for a whole menu. The rows go in after
+   * the member's existing services, in the order they were given, and in one
+   * statement, so a failure leaves nothing half-added.
+   */
+  async createMany(tenant: TenantContext, input: CreateServicesInput): Promise<Service[]> {
+    const designerId = input.designerId ?? tenant.membership?.id;
+    if (!designerId) throw new BadRequestException('designerId is required');
+    assertCanManageMember(tenant, designerId);
+    await this.members.findDesigner(tenant.salonId, designerId);
+
+    const last = await this.prisma.service.aggregate({ where: { designerId }, _max: { sortOrder: true } });
+    const start = (last._max.sortOrder ?? -1) + 1;
+    const rows = await this.prisma.service.createManyAndReturn({
+      data: input.services.map((s, i) => ({ ...s, salonId: tenant.salonId, designerId, sortOrder: start + i })),
+    });
+    return rows.sort((a, b) => a.sortOrder - b.sortOrder).map(this.toService);
   }
 
   async update(tenant: TenantContext, id: string, input: UpdateServiceInput): Promise<Service> {

@@ -110,11 +110,13 @@
   },
   "storefront": {
     "metaTitle": "Book at {name} · {product}",
-    "chooseService": "Choose a service to see available times."
+    "chooseService": "Choose a service to see available times.",
+    "chooseMember": "Choose a team member to see their services and available times."
   },
   "booking": {
     "steps": {
       "label": "Booking progress",
+      "member": "Team member",
       "service": "Service",
       "time": "Time",
       "details": "Your details"
@@ -125,6 +127,7 @@
       "service": "Service",
       "with": "With",
       "when": "When",
+      "chooseService": "Choose a service",
       "chooseTime": "Choose a time",
       "price": "Price",
       "nothing": "Nothing chosen yet.",
@@ -134,8 +137,13 @@
     },
     "serviceWith": "{service} <muted>with {designer}</muted>",
     "back": {
+      "allMembers": "All team members",
       "allServices": "All services",
       "changeTime": "Change time"
+    },
+    "member": {
+      "title": "Choose a team member",
+      "services": "{count, plural, one {# service} other {# services}} · from {price}"
     },
     "time": {
       "pickDay": "Pick a day",
@@ -405,6 +413,87 @@
       "book": "Book"
     }
   },
+  "setup": {
+    "titleManager": "Let’s get {business} ready for bookings",
+    "titleMember": "Get ready to take bookings at {business}",
+    "hide": "Hide guide",
+    "progressLabel": "Setup progress",
+    "progress": "{done} of {total} done",
+    "progressShort": "{done}/{total}",
+    "allSteps": "All steps ({count})",
+    "allStepsLabel": "Setup steps",
+    "nextUp": "Next up · step {n} of {total}",
+    "doneLabel": "(done)",
+    "currentLabel": "(next)",
+    "doneTitle": "You’re ready for bookings",
+    "doneBody": "{business} is set up. Anything here can be changed later under Settings.",
+    "close": "Close guide",
+    "reopen": "Setup guide",
+    "reopenGroup": "Getting started",
+    "banner": {
+      "label": "Setup guide",
+      "step": "Setup guide · step {n} of {total}",
+      "backToSchedule": "Back to schedule",
+      "next": "Next: {title}",
+      "finish": "Done"
+    },
+    "steps": {
+      "business": {
+        "title": "Check your business details",
+        "short": "Business details",
+        "body": "Your name, time zone and booking rules: how far ahead clients can book, and until when they can cancel.",
+        "hint": "Look over each setting and save if you change anything.",
+        "action": "Review details",
+        "confirm": "Looks right"
+      },
+      "businessHours": {
+        "title": "Set your opening hours",
+        "short": "Opening hours",
+        "body": "When the business is open. Everyone’s working hours have to fit inside these.",
+        "hint": "Change any day under Opening hours and save the week. Holidays go under Closures & special days.",
+        "action": "Set opening hours",
+        "confirm": "These hours are right"
+      },
+      "myHours": {
+        "title": "Set your working hours",
+        "short": "Your hours",
+        "body": "The times clients can book you. They start out the same as the opening hours.",
+        "hint": "Change any day under your hours and save. Add days off below.",
+        "action": "Set your hours",
+        "confirm": "These hours are right"
+      },
+      "services": {
+        "title": "Add your services",
+        "short": "Your services",
+        "body": "What you offer, how long it takes and what it costs. Pick from a list and it takes about two minutes.",
+        "hint": "Tap Set up your services, pick what you offer, then set a price and time for each.",
+        "action": "Add services"
+      },
+      "profile": {
+        "title": "Introduce yourself",
+        "short": "Your profile",
+        "body": "A line or two about you. Clients read it when choosing who to book.",
+        "hint": "Write a short bio and save.",
+        "action": "Write your bio"
+      },
+      "team": {
+        "title": "Invite your team",
+        "short": "Your team",
+        "body": "Send each team member an invitation, and they set up their own hours and services.",
+        "hint": "Enter their email, choose what they do, and send the invitation.",
+        "action": "Invite your team",
+        "skip": "It’s just me"
+      },
+      "share": {
+        "title": "Share your booking page",
+        "short": "Your booking page",
+        "body": "Put this link on your Instagram, your Google listing and your cards. Clients book without making an account.",
+        "copy": "Copy link",
+        "copied": "Copied",
+        "open": "Open page"
+      }
+    }
+  },
   "settings": {
     "navLabel": "Settings sections",
     "dialog": {
@@ -508,9 +597,8 @@
       "edit": "Edit",
       "delete": "Delete",
       "confirmDelete": "Delete “{name}”?",
-      "add": "Add a service",
+      "add": "Add services",
       "editTitle": "Edit service",
-      "newTitle": "New service",
       "formHint": "Durations in 5-minute steps. Buffer is cleanup time after. Over {min} minutes you can allow double booking.",
       "name": "Name",
       "category": "Category",
@@ -523,8 +611,128 @@
       "allowDouble": "Allow double booking?",
       "allowDoubleHint": "For services with waiting time in them, like colour or a perm. Someone else can be booked over this one, up to two clients at a time.",
       "saveChanges": "Save changes",
-      "addService": "Add service",
-      "saving": "Saving…"
+      "saving": "Saving…",
+      "setUp": "Set up your services",
+      "added": "{count, plural, one {Added # service.} other {Added # services.}} Use Edit to add a description or buffer time."
+    },
+    "serviceSetup": {
+      "step": "Step {n} of {total}",
+      "pickTitle": "What do you offer?",
+      "pickHint": "Tap everything that applies. You’ll set prices and times on the next step.",
+      "ownLabel": "Add your own",
+      "ownPlaceholder": "Type a service name",
+      "ownAdd": "Add",
+      "alreadyHave": "Already on your menu",
+      "copyFrom": "Copy from {name}",
+      "copyHint": "Prices and times come along too.",
+      "selectAll": "Select all",
+      "clearAll": "Clear all",
+      "starterLabel": "Common services",
+      "remove": "Remove {name}",
+      "selected": "{count, plural, =0 {Nothing selected yet} one {# selected} other {# selected}}",
+      "cancel": "Cancel",
+      "next": "Next",
+      "back": "Back",
+      "detailsTitle": "Set prices and times",
+      "detailsHint": "Clients see these on your booking page. You can add a description, buffer time or double booking afterwards with Edit.",
+      "name": "Service name",
+      "price": "Price",
+      "duration": "Duration",
+      "otherDuration": "Other…",
+      "save": "{count, plural, one {Add # service} other {Add # services}}",
+      "saving": "Adding…",
+      "nameRequired": "Enter a name",
+      "priceRequired": "Enter a price, or 0 if it’s free",
+      "priceInvalid": "Enter a price from 0 to 10,000, like 45 or 45.50",
+      "fixErrors": "Check the highlighted fields",
+      "tooMany": "Up to {max} at a time. Remove a few and add them next.",
+      "saveFailed": "Couldn’t save. Try again.",
+      "catalog": {
+        "hair": {
+          "label": "Hair",
+          "items": {
+            "womensCut": "Women’s cut",
+            "mensCut": "Men’s cut",
+            "kidsCut": "Kids’ cut",
+            "blowout": "Blowout",
+            "rootTouchUp": "Root touch-up",
+            "allOverColor": "All-over color",
+            "partialHighlights": "Partial highlights",
+            "fullHighlights": "Full highlights",
+            "balayage": "Balayage",
+            "toner": "Toner",
+            "keratin": "Keratin treatment",
+            "updo": "Updo"
+          }
+        },
+        "barber": {
+          "label": "Barber",
+          "items": {
+            "haircut": "Haircut",
+            "skinFade": "Skin fade",
+            "beardTrim": "Beard trim",
+            "cutAndBeard": "Haircut & beard",
+            "hotTowelShave": "Hot towel shave",
+            "lineUp": "Line-up"
+          }
+        },
+        "nails": {
+          "label": "Nails",
+          "items": {
+            "manicure": "Manicure",
+            "gelManicure": "Gel manicure",
+            "pedicure": "Pedicure",
+            "gelPedicure": "Gel pedicure",
+            "acrylicFullSet": "Acrylic full set",
+            "acrylicFill": "Acrylic fill",
+            "dipPowder": "Dip powder",
+            "nailArt": "Nail art",
+            "gelRemoval": "Gel removal"
+          }
+        },
+        "lashesBrows": {
+          "label": "Lashes & brows",
+          "items": {
+            "classicLashes": "Classic lash extensions",
+            "volumeLashes": "Volume lash extensions",
+            "lashFill": "Lash fill",
+            "lashLift": "Lash lift & tint",
+            "browShaping": "Brow shaping",
+            "browTint": "Brow tint",
+            "browLamination": "Brow lamination"
+          }
+        },
+        "skin": {
+          "label": "Skin & waxing",
+          "items": {
+            "facial": "Signature facial",
+            "expressFacial": "Express facial",
+            "chemicalPeel": "Chemical peel",
+            "browWax": "Brow wax",
+            "lipWax": "Lip wax",
+            "legWax": "Full leg wax",
+            "bikiniWax": "Bikini wax"
+          }
+        },
+        "massage": {
+          "label": "Massage",
+          "items": {
+            "swedish60": "Swedish massage (60 min)",
+            "swedish90": "Swedish massage (90 min)",
+            "deepTissue": "Deep tissue massage",
+            "prenatal": "Prenatal massage",
+            "hotStone": "Hot stone massage"
+          }
+        },
+        "general": {
+          "label": "General",
+          "items": {
+            "consultation": "Consultation",
+            "session30": "30-minute session",
+            "session60": "1-hour session"
+          }
+        }
+      }
     },
     "hours": {
       "salonTitle": "Business hours",

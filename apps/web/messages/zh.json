@@ -110,11 +110,13 @@
   },
   "storefront": {
     "metaTitle": "预约 {name} · {product}",
-    "chooseService": "选择服务项目即可查看可预约时间。"
+    "chooseService": "选择服务项目即可查看可预约时间。",
+    "chooseMember": "选择团队成员即可查看其服务和可预约时间。"
   },
   "booking": {
     "steps": {
       "label": "预约进度",
+      "member": "团队成员",
       "service": "服务",
       "time": "时间",
       "details": "你的信息"
@@ -125,6 +127,7 @@
       "service": "服务",
       "with": "团队成员",
       "when": "时间",
+      "chooseService": "请选择服务",
       "chooseTime": "请选择时间",
       "price": "价格",
       "nothing": "尚未选择。",
@@ -134,8 +137,13 @@
     },
     "serviceWith": "{service} <muted>· {designer}</muted>",
     "back": {
+      "allMembers": "全部团队成员",
       "allServices": "全部服务",
       "changeTime": "更改时间"
+    },
+    "member": {
+      "title": "选择团队成员",
+      "services": "{count, plural, other {# 项服务}} · {price} 起"
     },
     "time": {
       "pickDay": "选择日期",
@@ -405,6 +413,87 @@
       "book": "预约"
     }
   },
+  "setup": {
+    "titleManager": "让 {business} 准备好接受预约",
+    "titleMember": "准备好在 {business} 接受预约",
+    "hide": "隐藏指南",
+    "progressLabel": "设置进度",
+    "progress": "已完成 {done}/{total}",
+    "progressShort": "{done}/{total}",
+    "allSteps": "全部步骤（{count}）",
+    "allStepsLabel": "设置步骤",
+    "nextUp": "下一步 · 第 {n} 步，共 {total} 步",
+    "doneLabel": "（已完成）",
+    "currentLabel": "（下一步）",
+    "doneTitle": "你已准备好接受预约",
+    "doneBody": "{business} 已设置完成。这里的所有内容之后都可以在“设置”中修改。",
+    "close": "关闭指南",
+    "reopen": "设置指南",
+    "reopenGroup": "入门",
+    "banner": {
+      "label": "设置指南",
+      "step": "设置指南 · 第 {n} 步，共 {total} 步",
+      "backToSchedule": "返回日程",
+      "next": "下一步：{title}",
+      "finish": "完成"
+    },
+    "steps": {
+      "business": {
+        "title": "核对商家信息",
+        "short": "商家信息",
+        "body": "名称、时区和预约规则：客户最多可以提前多久预约，以及最晚什么时候可以取消。",
+        "hint": "逐项查看设置，如有修改请保存。",
+        "action": "查看信息",
+        "confirm": "没问题"
+      },
+      "businessHours": {
+        "title": "设置营业时间",
+        "short": "营业时间",
+        "body": "商家的营业时间。每位成员的工作时间都必须在此范围内。",
+        "hint": "在“营业时间”中修改各天并保存整周。节假日请添加到“休息日和特殊日期”。",
+        "action": "设置营业时间",
+        "confirm": "时间没问题"
+      },
+      "myHours": {
+        "title": "设置你的工作时间",
+        "short": "你的工作时间",
+        "body": "客户可以预约你的时间。初始与营业时间相同。",
+        "hint": "在你的工作时间中修改各天并保存。休息日请在下方添加。",
+        "action": "设置工作时间",
+        "confirm": "时间没问题"
+      },
+      "services": {
+        "title": "添加你的服务",
+        "short": "你的服务",
+        "body": "你提供的服务、所需时长和价格。从列表中选择，大约两分钟即可完成。",
+        "hint": "点击“设置你的服务”，选好你提供的服务，再为每项设置价格和时长。",
+        "action": "添加服务"
+      },
+      "profile": {
+        "title": "介绍一下自己",
+        "short": "你的简介",
+        "body": "关于你的一两句话。客户在选择预约对象时会看到。",
+        "hint": "写一段简短的简介并保存。",
+        "action": "撰写简介"
+      },
+      "team": {
+        "title": "邀请你的团队",
+        "short": "你的团队",
+        "body": "给每位团队成员发送邀请，他们会自行设置工作时间和服务。",
+        "hint": "输入对方的邮箱，选择其职责，然后发送邀请。",
+        "action": "邀请团队成员",
+        "skip": "只有我一个人"
+      },
+      "share": {
+        "title": "分享你的预约页面",
+        "short": "预约页面",
+        "body": "把这个链接放到你的 Instagram、Google 商家资料和名片上。客户无需注册账户即可预约。",
+        "copy": "复制链接",
+        "copied": "已复制",
+        "open": "打开页面"
+      }
+    }
+  },
   "settings": {
     "navLabel": "设置分区",
     "dialog": {
@@ -510,7 +599,6 @@
       "confirmDelete": "要删除“{name}”吗？",
       "add": "添加服务",
       "editTitle": "编辑服务",
-      "newTitle": "新服务",
       "formHint": "时长以 5 分钟为单位。整理时间是服务结束后的清理时间。超过 {min} 分钟的服务可以允许重叠预约。",
       "name": "名称",
       "category": "类别",
@@ -523,8 +611,128 @@
       "allowDouble": "允许重叠预约？",
       "allowDoubleHint": "适用于中间有等待时间的服务，例如染发或烫发。可以在此服务时段内再预约其他客人，同一时间最多两位。",
       "saveChanges": "保存更改",
-      "addService": "添加服务",
-      "saving": "正在保存…"
+      "saving": "正在保存…",
+      "setUp": "设置你的服务",
+      "added": "{count, plural, other {已添加 # 项服务。}}可通过“编辑”添加说明或整理时间。"
+    },
+    "serviceSetup": {
+      "step": "第 {n} 步，共 {total} 步",
+      "pickTitle": "你提供哪些服务？",
+      "pickHint": "点选所有适用的项目。下一步再设置价格和时长。",
+      "ownLabel": "自行添加",
+      "ownPlaceholder": "输入服务名称",
+      "ownAdd": "添加",
+      "alreadyHave": "已在你的服务列表中",
+      "copyFrom": "复制 {name} 的服务",
+      "copyHint": "价格和时长会一并复制。",
+      "selectAll": "全选",
+      "clearAll": "全部取消",
+      "starterLabel": "常见服务",
+      "remove": "移除 {name}",
+      "selected": "{count, plural, =0 {尚未选择} other {已选 # 项}}",
+      "cancel": "取消",
+      "next": "下一步",
+      "back": "上一步",
+      "detailsTitle": "设置价格和时长",
+      "detailsHint": "客户会在你的预约页面上看到这些信息。说明、整理时间和可重叠预约可以之后通过“编辑”添加。",
+      "name": "服务名称",
+      "price": "价格",
+      "duration": "时长",
+      "otherDuration": "其他…",
+      "save": "{count, plural, other {添加 # 项服务}}",
+      "saving": "正在添加…",
+      "nameRequired": "请输入名称",
+      "priceRequired": "请输入价格，免费请填 0",
+      "priceInvalid": "请输入 0 到 10,000 之间的价格，例如 45 或 45.50",
+      "fixErrors": "请检查标出的字段",
+      "tooMany": "每次最多添加 {max} 项。请先移除几项，稍后再添加。",
+      "saveFailed": "保存失败，请重试。",
+      "catalog": {
+        "hair": {
+          "label": "美发",
+          "items": {
+            "womensCut": "女士剪发",
+            "mensCut": "男士剪发",
+            "kidsCut": "儿童剪发",
+            "blowout": "吹发造型",
+            "rootTouchUp": "补染发根",
+            "allOverColor": "全头染发",
+            "partialHighlights": "局部挑染",
+            "fullHighlights": "全头挑染",
+            "balayage": "巴黎画染",
+            "toner": "调色",
+            "keratin": "角蛋白护理",
+            "updo": "盘发"
+          }
+        },
+        "barber": {
+          "label": "理发",
+          "items": {
+            "haircut": "理发",
+            "skinFade": "渐变推剪",
+            "beardTrim": "修胡须",
+            "cutAndBeard": "理发 + 修胡须",
+            "hotTowelShave": "热毛巾剃须",
+            "lineUp": "修边"
+          }
+        },
+        "nails": {
+          "label": "美甲",
+          "items": {
+            "manicure": "手部护理",
+            "gelManicure": "凝胶美甲",
+            "pedicure": "足部护理",
+            "gelPedicure": "凝胶美足",
+            "acrylicFullSet": "水晶甲全套",
+            "acrylicFill": "水晶甲补甲",
+            "dipPowder": "浸粉甲",
+            "nailArt": "美甲彩绘",
+            "gelRemoval": "卸甲"
+          }
+        },
+        "lashesBrows": {
+          "label": "睫毛与眉毛",
+          "items": {
+            "classicLashes": "经典嫁接睫毛",
+            "volumeLashes": "浓密嫁接睫毛",
+            "lashFill": "睫毛补接",
+            "lashLift": "睫毛烫染",
+            "browShaping": "修眉",
+            "browTint": "染眉",
+            "browLamination": "眉毛定型"
+          }
+        },
+        "skin": {
+          "label": "护肤与脱毛",
+          "items": {
+            "facial": "招牌面部护理",
+            "expressFacial": "快速面部护理",
+            "chemicalPeel": "化学焕肤",
+            "browWax": "眉部蜜蜡脱毛",
+            "lipWax": "唇部蜜蜡脱毛",
+            "legWax": "全腿蜜蜡脱毛",
+            "bikiniWax": "比基尼蜜蜡脱毛"
+          }
+        },
+        "massage": {
+          "label": "按摩",
+          "items": {
+            "swedish60": "瑞典式按摩（60 分钟）",
+            "swedish90": "瑞典式按摩（90 分钟）",
+            "deepTissue": "深层组织按摩",
+            "prenatal": "孕妇按摩",
+            "hotStone": "热石按摩"
+          }
+        },
+        "general": {
+          "label": "通用",
+          "items": {
+            "consultation": "咨询",
+            "session30": "30 分钟服务",
+            "session60": "1 小时服务"
+          }
+        }
+      }
     },
     "hours": {
       "salonTitle": "商家营业时间",

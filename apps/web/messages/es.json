@@ -110,11 +110,13 @@
   },
   "storefront": {
     "metaTitle": "Reserva en {name} · {product}",
-    "chooseService": "Elige un servicio para ver los horarios disponibles."
+    "chooseService": "Elige un servicio para ver los horarios disponibles.",
+    "chooseMember": "Elige a un miembro del equipo para ver sus servicios y horarios disponibles."
   },
   "booking": {
     "steps": {
       "label": "Progreso de la reserva",
+      "member": "Miembro del equipo",
       "service": "Servicio",
       "time": "Hora",
       "details": "Tus datos"
@@ -125,6 +127,7 @@
       "service": "Servicio",
       "with": "Con",
       "when": "Cuándo",
+      "chooseService": "Elige un servicio",
       "chooseTime": "Elige una hora",
       "price": "Precio",
       "nothing": "Todavía no has elegido nada.",
@@ -134,8 +137,13 @@
     },
     "serviceWith": "{service} <muted>con {designer}</muted>",
     "back": {
+      "allMembers": "Todo el equipo",
       "allServices": "Todos los servicios",
       "changeTime": "Cambiar hora"
+    },
+    "member": {
+      "title": "Elige a un miembro del equipo",
+      "services": "{count, plural, one {# servicio} other {# servicios}} · desde {price}"
     },
     "time": {
       "pickDay": "Elige un día",
@@ -405,6 +413,87 @@
       "book": "Reservar"
     }
   },
+  "setup": {
+    "titleManager": "Preparemos {business} para recibir reservas",
+    "titleMember": "Prepárate para recibir reservas en {business}",
+    "hide": "Ocultar guía",
+    "progressLabel": "Progreso de la configuración",
+    "progress": "{done} de {total} listos",
+    "progressShort": "{done}/{total}",
+    "allSteps": "Todos los pasos ({count})",
+    "allStepsLabel": "Pasos de la configuración",
+    "nextUp": "Siguiente · paso {n} de {total}",
+    "doneLabel": "(listo)",
+    "currentLabel": "(siguiente)",
+    "doneTitle": "Ya puedes recibir reservas",
+    "doneBody": "{business} está configurado. Todo lo de aquí se puede cambiar después en Configuración.",
+    "close": "Cerrar guía",
+    "reopen": "Guía de configuración",
+    "reopenGroup": "Primeros pasos",
+    "banner": {
+      "label": "Guía de configuración",
+      "step": "Guía de configuración · paso {n} de {total}",
+      "backToSchedule": "Volver a la agenda",
+      "next": "Siguiente: {title}",
+      "finish": "Listo"
+    },
+    "steps": {
+      "business": {
+        "title": "Revisa los datos de tu negocio",
+        "short": "Datos del negocio",
+        "body": "El nombre, la zona horaria y las reglas de reserva: con cuánta antelación pueden reservar tus clientes y hasta cuándo pueden cancelar.",
+        "hint": "Revisa cada ajuste y guarda si cambias algo.",
+        "action": "Revisar datos",
+        "confirm": "Está bien así"
+      },
+      "businessHours": {
+        "title": "Define tu horario de apertura",
+        "short": "Horario de apertura",
+        "body": "Cuándo abre el negocio. El horario de cada miembro del equipo tiene que caber dentro de este.",
+        "hint": "Cambia los días en Horario de apertura y guarda la semana. Los festivos van en Cierres y días especiales.",
+        "action": "Definir horario",
+        "confirm": "El horario está bien"
+      },
+      "myHours": {
+        "title": "Define tu horario de trabajo",
+        "short": "Tu horario",
+        "body": "Las horas en que los clientes pueden reservar contigo. Empiezan iguales al horario de apertura.",
+        "hint": "Cambia los días en tu horario y guarda. Añade tus días libres más abajo.",
+        "action": "Definir tu horario",
+        "confirm": "El horario está bien"
+      },
+      "services": {
+        "title": "Añade tus servicios",
+        "short": "Tus servicios",
+        "body": "Lo que ofreces, cuánto dura y cuánto cuesta. Si eliges de una lista, tardas unos dos minutos.",
+        "hint": "Toca Configura tus servicios, elige lo que ofreces y pon un precio y una duración a cada uno.",
+        "action": "Añadir servicios"
+      },
+      "profile": {
+        "title": "Preséntate",
+        "short": "Tu perfil",
+        "body": "Una o dos líneas sobre ti. Tus clientes las leen al elegir con quién reservar.",
+        "hint": "Escribe una biografía corta y guarda.",
+        "action": "Escribir biografía"
+      },
+      "team": {
+        "title": "Invita a tu equipo",
+        "short": "Tu equipo",
+        "body": "Envía una invitación a cada miembro del equipo y cada uno configura su horario y sus servicios.",
+        "hint": "Escribe su correo, elige lo que hace y envía la invitación.",
+        "action": "Invitar al equipo",
+        "skip": "Solo estoy yo"
+      },
+      "share": {
+        "title": "Comparte tu página de reservas",
+        "short": "Tu página de reservas",
+        "body": "Pon este enlace en tu Instagram, tu ficha de Google y tus tarjetas. Tus clientes reservan sin crear una cuenta.",
+        "copy": "Copiar enlace",
+        "copied": "Copiado",
+        "open": "Abrir página"
+      }
+    }
+  },
   "settings": {
     "navLabel": "Secciones de ajustes",
     "dialog": {
@@ -508,9 +597,8 @@
       "edit": "Editar",
       "delete": "Eliminar",
       "confirmDelete": "¿Eliminar “{name}”?",
-      "add": "Añadir un servicio",
+      "add": "Añadir servicios",
       "editTitle": "Editar servicio",
-      "newTitle": "Nuevo servicio",
       "formHint": "Duración en pasos de 5 minutos. El margen es el tiempo de limpieza posterior. A partir de {min} minutos puedes permitir reservas dobles.",
       "name": "Nombre",
       "category": "Categoría",
@@ -523,8 +611,128 @@
       "allowDouble": "¿Permitir reserva doble?",
       "allowDoubleHint": "Para servicios con tiempo de espera, como un color o una permanente. Se puede reservar a otra persona encima de este, hasta dos clientes a la vez.",
       "saveChanges": "Guardar cambios",
-      "addService": "Añadir servicio",
-      "saving": "Guardando…"
+      "saving": "Guardando…",
+      "setUp": "Configura tus servicios",
+      "added": "{count, plural, one {Se añadió # servicio.} other {Se añadieron # servicios.}} Usa Editar para añadir una descripción o margen."
+    },
+    "serviceSetup": {
+      "step": "Paso {n} de {total}",
+      "pickTitle": "¿Qué ofreces?",
+      "pickHint": "Toca todo lo que corresponda. En el siguiente paso pondrás precios y duraciones.",
+      "ownLabel": "Añade los tuyos",
+      "ownPlaceholder": "Escribe el nombre de un servicio",
+      "ownAdd": "Añadir",
+      "alreadyHave": "Ya está en tu menú",
+      "copyFrom": "Copiar de {name}",
+      "copyHint": "También se copian los precios y las duraciones.",
+      "selectAll": "Seleccionar todo",
+      "clearAll": "Quitar todo",
+      "starterLabel": "Servicios habituales",
+      "remove": "Quitar {name}",
+      "selected": "{count, plural, =0 {Aún no has elegido nada} one {# seleccionado} other {# seleccionados}}",
+      "cancel": "Cancelar",
+      "next": "Siguiente",
+      "back": "Atrás",
+      "detailsTitle": "Pon precios y duraciones",
+      "detailsHint": "Tus clientes los verán en tu página de reservas. Puedes añadir una descripción, margen o reserva doble después con Editar.",
+      "name": "Nombre del servicio",
+      "price": "Precio",
+      "duration": "Duración",
+      "otherDuration": "Otra…",
+      "save": "{count, plural, one {Añadir # servicio} other {Añadir # servicios}}",
+      "saving": "Añadiendo…",
+      "nameRequired": "Escribe un nombre",
+      "priceRequired": "Escribe un precio, o 0 si es gratis",
+      "priceInvalid": "Escribe un precio de 0 a 10.000, como 45 o 45,50",
+      "fixErrors": "Revisa los campos marcados",
+      "tooMany": "Hasta {max} a la vez. Quita algunos y añádelos después.",
+      "saveFailed": "No se pudo guardar. Inténtalo de nuevo.",
+      "catalog": {
+        "hair": {
+          "label": "Cabello",
+          "items": {
+            "womensCut": "Corte de mujer",
+            "mensCut": "Corte de hombre",
+            "kidsCut": "Corte infantil",
+            "blowout": "Brushing",
+            "rootTouchUp": "Retoque de raíz",
+            "allOverColor": "Color completo",
+            "partialHighlights": "Mechas parciales",
+            "fullHighlights": "Mechas completas",
+            "balayage": "Balayage",
+            "toner": "Matizador",
+            "keratin": "Tratamiento de keratina",
+            "updo": "Recogido"
+          }
+        },
+        "barber": {
+          "label": "Barbería",
+          "items": {
+            "haircut": "Corte de cabello",
+            "skinFade": "Degradado",
+            "beardTrim": "Arreglo de barba",
+            "cutAndBeard": "Corte y barba",
+            "hotTowelShave": "Afeitado con toalla caliente",
+            "lineUp": "Perfilado"
+          }
+        },
+        "nails": {
+          "label": "Uñas",
+          "items": {
+            "manicure": "Manicura",
+            "gelManicure": "Manicura en gel",
+            "pedicure": "Pedicura",
+            "gelPedicure": "Pedicura en gel",
+            "acrylicFullSet": "Uñas acrílicas (set completo)",
+            "acrylicFill": "Relleno de acrílico",
+            "dipPowder": "Uñas de inmersión",
+            "nailArt": "Decoración de uñas",
+            "gelRemoval": "Retiro de gel"
+          }
+        },
+        "lashesBrows": {
+          "label": "Pestañas y cejas",
+          "items": {
+            "classicLashes": "Extensiones de pestañas clásicas",
+            "volumeLashes": "Extensiones de pestañas de volumen",
+            "lashFill": "Relleno de pestañas",
+            "lashLift": "Lifting y tinte de pestañas",
+            "browShaping": "Diseño de cejas",
+            "browTint": "Tinte de cejas",
+            "browLamination": "Laminado de cejas"
+          }
+        },
+        "skin": {
+          "label": "Piel y depilación",
+          "items": {
+            "facial": "Facial de la casa",
+            "expressFacial": "Facial exprés",
+            "chemicalPeel": "Peeling químico",
+            "browWax": "Depilación de cejas",
+            "lipWax": "Depilación de labio",
+            "legWax": "Depilación de piernas completas",
+            "bikiniWax": "Depilación de bikini"
+          }
+        },
+        "massage": {
+          "label": "Masajes",
+          "items": {
+            "swedish60": "Masaje sueco (60 min)",
+            "swedish90": "Masaje sueco (90 min)",
+            "deepTissue": "Masaje de tejido profundo",
+            "prenatal": "Masaje prenatal",
+            "hotStone": "Masaje con piedras calientes"
+          }
+        },
+        "general": {
+          "label": "General",
+          "items": {
+            "consultation": "Consulta",
+            "session30": "Sesión de 30 minutos",
+            "session60": "Sesión de 1 hora"
+          }
+        }
+      }
     },
     "hours": {
       "salonTitle": "Horario del negocio",

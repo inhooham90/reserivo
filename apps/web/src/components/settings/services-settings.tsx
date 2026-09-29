@@ -3,13 +3,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { canAllowDoubleBooking, createServiceSchema, DOUBLE_BOOKING_MIN_DURATION_MIN, type Service } from "@reserivo/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { CircleCheck, Plus } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { FieldError } from "@/components/field-error";
+import { ServiceSetup } from "@/components/settings/service-setup";
 import { SettingsRow, SettingsRows, SettingsSection, Switch } from "@/components/settings/settings-ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,7 +41,9 @@ export default function ServicesSettings() {
   const [designerId, setDesignerId] = useState<string>(
     me && me.roles.includes("DESIGNER") ? me.id : (designers[0]?.id ?? ""),
   );
-  const [editing, setEditing] = useState<Service | "new" | null>(null);
+  const [editing, setEditing] = useState<Service | null>(null);
+  const [setup, setSetup] = useState(false);
+  const [added, setAdded] = useState<number | null>(null);
   const queryClient = useQueryClient();
 
   const services = useQuery({
@@ -60,12 +63,37 @@ export default function ServicesSettings() {
 
   if (designers.length === 0) return <p className="text-sm text-muted-foreground">{settings("noDesigners")}</p>;
 
-  const addButton = canEdit && !editing && (
-    <Button className={pillButtonSm} onClick={() => setEditing("new")}>
+  const startSetup = () => {
+    setEditing(null);
+    setAdded(null);
+    setSetup(true);
+  };
+
+  const addButton = canEdit && !editing && !setup && (
+    <Button className={pillButtonSm} onClick={startSetup}>
       <Plus aria-hidden />
       {t("add")}
     </Button>
   );
+
+  if (setup && services.data) {
+    return (
+      <ServiceSetup
+        key={designerId}
+        salonId={salon.id}
+        designerId={designerId}
+        existing={mine}
+        allServices={services.data}
+        members={members}
+        onCancel={() => setSetup(false)}
+        onDone={(n) => {
+          setSetup(false);
+          setAdded(n);
+          void invalidate();
+        }}
+      />
+    );
+  }
 
   return (
     <div className="grid gap-8">
@@ -81,6 +109,7 @@ export default function ServicesSettings() {
                 onChange={(e) => {
                   setDesignerId(e.target.value);
                   setEditing(null);
+                  setAdded(null);
                 }}
               >
                 {designers.map((m) => (
@@ -94,12 +123,18 @@ export default function ServicesSettings() {
           </div>
         }
       >
+        {added !== null && (
+          <p role="status" className="flex items-center gap-2 rounded-lg bg-lavender px-4 py-3 text-sm font-medium">
+            <CircleCheck aria-hidden className="size-[18px] shrink-0" />
+            {t("added", { count: added })}
+          </p>
+        )}
+
         {editing && (
           <ServiceForm
-            key={editing === "new" ? "new" : editing.id}
+            key={editing.id}
             salonId={salon.id}
-            designerId={designerId}
-            service={editing === "new" ? null : editing}
+            service={editing}
             onDone={() => {
               setEditing(null);
               void invalidate();
@@ -117,9 +152,9 @@ export default function ServicesSettings() {
             <h4 className="text-base font-semibold">{t("emptyTitle")}</h4>
             <p className="max-w-[46ch] text-sm text-body">{t("emptyBody")}</p>
             {canEdit && (
-              <Button variant="outline" className={cn(outlinePillSm, "justify-self-start")} onClick={() => setEditing("new")}>
+              <Button className={cn(pillButtonSm, "justify-self-start")} onClick={startSetup}>
                 <Plus aria-hidden />
-                {t("add")}
+                {t("setUp")}
               </Button>
             )}
           </div>
@@ -143,7 +178,14 @@ export default function ServicesSettings() {
                 </div>
                 {canEdit && (
                   <div className="flex shrink-0 gap-2">
-                    <Button variant="outline" className={outlinePillSm} onClick={() => setEditing(s)}>
+                    <Button
+                      variant="outline"
+                      className={outlinePillSm}
+                      onClick={() => {
+                        setAdded(null);
+                        setEditing(s);
+                      }}
+                    >
                       {t("edit")}
                     </Button>
                     <Button
@@ -167,16 +209,15 @@ export default function ServicesSettings() {
   );
 }
 
+/** Every field of one service. Adding goes through `ServiceSetup`; this is where the rest gets fine-tuned. */
 function ServiceForm({
   salonId,
-  designerId,
   service,
   onDone,
   onCancel,
 }: {
   salonId: string;
-  designerId: string;
-  service: Service | null;
+  service: Service;
   onDone: () => void;
   onCancel: () => void;
 }) {
@@ -184,27 +225,16 @@ function ServiceForm({
   const common = useTranslations("common");
   const form = useForm<FormInput, unknown, FormOutput>({
     resolver: zodResolver(formSchema),
-    defaultValues: service
-      ? {
-          name: service.name,
-          category: service.category ?? "",
-          description: service.description ?? "",
-          priceDollars: service.priceCents / 100,
-          durationMin: service.durationMin,
-          bufferMin: service.bufferMin,
-          active: service.active,
-          allowsDoubleBooking: service.allowsDoubleBooking,
-        }
-      : {
-          name: "",
-          category: "",
-          description: "",
-          priceDollars: 0,
-          durationMin: 60,
-          bufferMin: 0,
-          active: true,
-          allowsDoubleBooking: false,
-        },
+    defaultValues: {
+      name: service.name,
+      category: service.category ?? "",
+      description: service.description ?? "",
+      priceDollars: service.priceCents / 100,
+      durationMin: service.durationMin,
+      bufferMin: service.bufferMin,
+      active: service.active,
+      allowsDoubleBooking: service.allowsDoubleBooking,
+    },
   });
 
   const save = useMutation({
@@ -216,9 +246,7 @@ function ServiceForm({
         description: rest.description || null,
         priceCents: Math.round(priceDollars * 100),
       };
-      return service
-        ? api<Service>(`/salons/${salonId}/services/${service.id}`, { method: "PATCH", json })
-        : api<Service>(`/salons/${salonId}/services`, { method: "POST", json: { ...json, designerId } });
+      return api<Service>(`/salons/${salonId}/services/${service.id}`, { method: "PATCH", json });
     },
     onSuccess: onDone,
   });
@@ -240,7 +268,7 @@ function ServiceForm({
       noValidate
     >
       <div>
-        <h4 className="text-base font-semibold">{service ? t("editTitle") : t("newTitle")}</h4>
+        <h4 className="text-base font-semibold">{t("editTitle")}</h4>
         <p className="mt-0.5 text-sm text-body">{t("formHint", { min: DOUBLE_BOOKING_MIN_DURATION_MIN })}</p>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
@@ -288,7 +316,7 @@ function ServiceForm({
       <FieldError message={save.error instanceof ApiError ? save.error.message : undefined} />
       <div className="flex gap-2">
         <Button type="submit" className={pillButtonSm} disabled={save.isPending}>
-          {save.isPending ? t("saving") : service ? t("saveChanges") : t("addService")}
+          {save.isPending ? t("saving") : t("saveChanges")}
         </Button>
         <Button type="button" variant="ghost" className={ghostPillSm} onClick={onCancel}>
           {common("cancel")}

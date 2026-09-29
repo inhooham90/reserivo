@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { FieldError } from "@/components/field-error";
 import { RolePicker } from "@/components/role-picker";
 import { SettingsRows, SettingsSection } from "@/components/settings/settings-ui";
@@ -21,9 +22,12 @@ import { cn } from "cn";
 export default function TeamSettings() {
   const { salon, members, me, isManager } = useSalon();
   const t = useTranslations("settings.team");
+  // Opened from the setup guide's profile step: the person's own row starts open.
+  const guide = useSearchParams().get("guide");
 
   return (
-    <div className="grid gap-8">
+    // minmax(0, 1fr): a long email in a row is truncated, not allowed to widen the pane.
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-8">
       <SettingsSection title={t("members")}>
         <SettingsRows>
           {members.map((m) => (
@@ -34,13 +38,16 @@ export default function TeamSettings() {
               canEdit={isManager || me?.id === m.id}
               isManager={isManager}
               salonId={salon.id}
+              startEditing={guide === "profile" && me?.id === m.id}
             />
           ))}
         </SettingsRows>
       </SettingsSection>
       {isManager && (
         <>
-          <InviteSection salonId={salon.id} />
+          <div id="guide-invite" className="scroll-mt-48 md:scroll-mt-36">
+            <InviteSection salonId={salon.id} />
+          </div>
           <PendingInvitations salonId={salon.id} />
         </>
       )}
@@ -61,16 +68,18 @@ function MemberRow({
   canEdit,
   isManager,
   salonId,
+  startEditing = false,
 }: {
   member: Member;
   isMe: boolean;
   canEdit: boolean;
   isManager: boolean;
   salonId: string;
+  startEditing?: boolean;
 }) {
   const f = useFormat();
   const t = useTranslations("settings.team");
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState(startEditing);
   const queryClient = useQueryClient();
   const invalidate = () => queryClient.invalidateQueries({ queryKey: salonKeys.members(salonId) });
 
@@ -83,7 +92,7 @@ function MemberRow({
   const detail = [f.roles(member.roles), member.email, member.bio].filter(Boolean).join(" · ");
 
   return (
-    <div className="grid gap-4 px-4 py-4 md:px-6">
+    <div id={startEditing ? "guide-profile" : undefined} className="grid scroll-mt-48 grid-cols-[minmax(0,1fr)] gap-4 px-4 py-4 md:scroll-mt-36 md:px-6">
       <div className="flex flex-wrap items-center gap-4">
         <span
           aria-hidden

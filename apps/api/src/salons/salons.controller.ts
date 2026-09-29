@@ -53,6 +53,6 @@ export class SalonsController {
     @Tenant() tenant: TenantContext,
     @Body(new ZodValidationPipe(updateSalonSchema)) body: UpdateSalonInput,
   ): Promise<Salon> {
-    return this.salons.update(tenant.salonId, body);
+    return this.salons.update(tenant.salonId, body, tenant.membership?.id);
   }
 }

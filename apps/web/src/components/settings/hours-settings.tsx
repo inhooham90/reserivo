@@ -87,7 +87,7 @@ export default function HoursSettings() {
         </>
       )}
 
-      <div className="grid gap-8 border-t border-border pt-8">
+      <div id="guide-my-hours" className="grid scroll-mt-48 md:scroll-mt-36 gap-8 border-t border-border pt-8">
         <SettingsSection
           title={t("designerTitle")}
           hint={isManager ? (meDesigner ? t("managerDesigner") : t("managerOnly")) : t("designerOnly")}

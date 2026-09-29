@@ -6,6 +6,7 @@ export * from './salon';
 export * from './member';
 export * from './invitation';
 export * from './service';
+export * from './setup';
 export * from './availability';
 export * from './time';
 export * from './appointment';

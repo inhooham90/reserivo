@@ -179,6 +179,10 @@ model SalonMembership {
   displayName String
   bio         String?
   photoUrl    String?
+  /// Setup-guide steps confirmed by hand or by saving (`STORED_SETUP_STEPS`). The rest are derived from data.
+  setupSteps    String[]  @default([])
+  /// The member put the setup guide away. Memberships older than the guide start hidden.
+  setupHiddenAt DateTime? @db.Timestamptz(6)
   createdAt   DateTime         @default(now()) @db.Timestamptz(6)
   updatedAt   DateTime         @updatedAt @db.Timestamptz(6)
 

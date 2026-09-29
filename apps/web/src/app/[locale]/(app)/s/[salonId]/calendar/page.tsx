@@ -31,6 +31,7 @@ import { Label } from "@/components/ui/label";
 import { Link } from "@/i18n/navigation";
 import { api, ApiError } from "@/lib/api";
 import { salonKeys, useSalon } from "@/lib/salon-context";
+import { SetupGuide } from "@/components/setup/setup-guide";
 import { useFormat } from "@/lib/use-format";
 import { ghostPillSm, pillButtonSm, pillSelectSm, textLink } from "@/lib/v3";
 import { cn } from "cn";
@@ -357,6 +358,7 @@ export default function CalendarPage() {
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
+      <SetupGuide />
       <div role="toolbar" aria-label={t("toolbar.label")} className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-1 rounded-full bg-muted p-1 shadow-[inset_0_0_0_1px_var(--border)]">
           <Button variant="ghost" size="icon" className="size-10 hover:bg-surface-muted" aria-label={t("toolbar.prevDay")} onClick={() => setDate((d) => addDays(d, -1))}>

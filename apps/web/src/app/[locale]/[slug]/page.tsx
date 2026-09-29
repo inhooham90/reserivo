@@ -49,7 +49,10 @@ export default async function SalonPublicPage({ params }: Props) {
           <h1 className="max-w-[20ch] text-[44px] leading-[1.05] text-balance animate-in fade-in slide-in-from-bottom-2 duration-700 md:text-[56px] xl:text-[64px]">
             {salon.name}
           </h1>
-          <p className="max-w-[42ch] text-lg text-body">{t("chooseService")}</p>
+          <p className="max-w-[42ch] text-lg text-body">
+            {/* Same test as BookingFlow's: with more than one team member the flow opens on choosing one. */}
+            {t(salon.designers.filter((d) => d.services.length > 0).length > 1 ? "chooseMember" : "chooseService")}
+          </p>
         </section>
         <div className="pt-10 md:pt-14">
           <BookingFlow salon={salon} />
