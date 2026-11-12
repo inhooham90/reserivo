@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Wordmark } from "@/components/brand/wordmark";
 import { Children, cloneElement, isValidElement, type ReactElement, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
@@ -55,7 +56,7 @@ export function LegalPage({ doc, title, children }: { doc: LegalDoc; title: stri
     <div className="theme-morrri flex flex-1 flex-col">
       <header className={cn(container, "flex items-center justify-between gap-4 pt-8 pb-6")}>
         <Link href="/" className="shrink-0 rounded-sm leading-none outline-none focus-visible:ring-3 focus-visible:ring-ring">
-          <Image src="/images/morrri-wordmark.png" alt={LEGAL.product} width={74} height={18} priority />
+          <Wordmark className="w-[74px]" />
         </Link>
         <AuthNav className="bg-muted shadow-[inset_0_0_0_1px_var(--border)]" />
       </header>

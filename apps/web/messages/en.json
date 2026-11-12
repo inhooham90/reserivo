@@ -43,8 +43,8 @@
       "secondaryCta": "See how it works"
     },
     "about": {
-      "title": "What {product} is",
-      "body": "{product} is booking software for appointment-based businesses in the United States, from barbers and nail studios to spas, tutors and clinics. A business signs up, adds its team, services and opening hours, and gets a booking page of its own at <url>morrri.com/your-business</url> to share with clients. Clients book on that page (no account needed) and the business manages the day from one calendar.",
+      "title": "{product} is appointment booking software for small businesses in the United States.",
+      "body": "A business signs up, adds its team, services and opening hours, and gets a booking page of its own at <url>morrri.com/your-business</url> to share with clients. Clients book on that page (no account needed) and the business manages the day from one calendar.",
       "notASalon": "We sell software to businesses. We are not the business you book with, and we do not take a cut of a booking."
     },
     "features": {
@@ -74,7 +74,7 @@
         "acrylicFill": "Acrylic fill",
         "cutAndStyle": "Women's cut & style",
         "pickTime": "Pick a time",
-        "visits": "{count, plural, one {# visit} other {# visits}}",
+        "lastVisit": "Last visit {date}",
         "prefers": "Prefers {name}",
         "colorClient": "Color client",
         "numberHidden": "Number hidden, messages go through {product}"
@@ -99,7 +99,39 @@
     },
     "navLabel": "Main",
     "howItWorks": "How it works",
-    "remindersNav": "Reminders"
+    "remindersNav": "Reminders",
+    "banners": {
+      "link": {
+        "title": "<l>One link.</l> <l>Every booking.</l> <l>Your clients stay yours.</l>",
+        "nearby": "Near the Chelsea",
+        "category": "Hair Salon"
+      },
+      "setup": {
+        "title": "Set up your booking page",
+        "body": "Add your team, services and hours, then share your link.",
+        "service": "Vegan Cake"
+      }
+    },
+    "compare": {
+      "eyebrow": "Compare",
+      "title": "Booking by text, or booking with {product}",
+      "before": {
+        "title": "By text and phone",
+        "a": "Back-and-forth texts",
+        "b": "Missed calls mid-appointment",
+        "c": "Double bookings found too late",
+        "d": "Swapping phone numbers",
+        "e": "A cut of every booking"
+      },
+      "after": {
+        "title": "With {product}",
+        "a": "Clients book themselves",
+        "b": "Clients book any time, on your page",
+        "c": "Double bookings caught before they happen",
+        "d": "Messages go through {product}",
+        "e": "No cut of your bookings"
+      }
+    }
   },
   "footer": {
     "terms": "Terms",

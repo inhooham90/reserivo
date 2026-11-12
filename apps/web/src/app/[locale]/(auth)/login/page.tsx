@@ -42,7 +42,7 @@ function LoginForm() {
 
   return (
     <AuthCard title={t("login.title")} description={t("login.description", { product: LEGAL.product })}>
-      <form onSubmit={onSubmit} className="grid gap-6" noValidate>
+      <form method="post" onSubmit={onSubmit} className="grid gap-6" noValidate>
         <div className="grid gap-2">
           <Label htmlFor="email">{t("email")}</Label>
           <Input id="email" type="email" autoComplete="email" className={pillInput} {...form.register("email")} />

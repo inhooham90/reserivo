@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import Image from "next/image";
+import { Wordmark } from "@/components/brand/wordmark";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -12,7 +12,6 @@ import { SettingsMenu } from "@/components/layout/settings-menu";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import { LEGAL } from "@/lib/legal";
 import { ghostPillSm, navGroup, navItem, outlinePillSm, textLink } from "@/lib/v3";
 import { cn } from "cn";
 
@@ -90,7 +89,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               href="/dashboard"
               className="shrink-0 rounded-sm leading-none outline-none focus-visible:ring-3 focus-visible:ring-ring"
             >
-              <Image src="/images/morrri-wordmark.png" alt={LEGAL.product} width={74} height={18} priority />
+              <Wordmark className="w-[74px]" />
             </Link>
             {/* Drops to its own row on a phone rather than crowding the account cluster. */}
             <nav aria-label={t("primaryLabel")} className={cn(navGroup, "order-last w-full md:order-none md:w-auto")}>

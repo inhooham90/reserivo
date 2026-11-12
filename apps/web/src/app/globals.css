@@ -82,6 +82,16 @@
   /* Morrri v3 surfaces (DESIGN.md). Defined only inside .theme-morrri for now. */
   --color-lavender: var(--lavender);
   --color-butter: var(--butter);
+  --color-lisa: var(--lisa);
+  --color-lisa-soft: var(--lisa-soft);
+  --color-mona-ink: var(--mona-ink);
+  --color-canvas: var(--canvas);
+  --color-olive: var(--olive);
+  --color-mona-butter: var(--mona-butter);
+  --color-sfumato: var(--sfumato);
+  --color-rule: var(--rule);
+  /* The brand display face: Fredoka, rounded to match the wordmark. */
+  --font-brand: var(--font-fredoka), var(--font-cjk, sans-serif), ui-sans-serif, sans-serif;
   --color-body: var(--body);
   --color-surface-muted: var(--surface-muted);
   --color-scrim: var(--scrim);
@@ -223,6 +233,24 @@
   --butter: #fdfee9;
   --body: #45445a;
   --surface-muted: #f0f0f6;
+  /* Brand palette board (Morrri portfolio, "14 Brand Color Palette"): Lisa
+     Lavender and Mona Ink. Lisa soft is the button tint sampled from the
+     website board. Ink on lisa-soft 11.59:1, ink on Lisa 7.77:1; white on
+     Lisa is 1.96:1, so white on it is only for decoration like the chips'
+     check marks. */
+  --lisa: #ec9df7;
+  --lisa-soft: #f5d8f4;
+  --mona-ink: #26252b;
+  --canvas: #faf8f2;
+  /* Sampled from the website board. Olive is its body text: 6.00:1 on white,
+     5.65:1 on canvas, 5.20:1 on Mona Butter. Ink on Sfumato (the client tags)
+     6.73:1. Rule is the hairline on cards and dividers, decoration only. */
+  --olive: #66644f;
+  --mona-butter: #f3efdc;
+  --sfumato: #afae93;
+  --rule: #e5e3de;
+  /* Only the hero glow uses it: the warm blur top right of the website board. */
+  --peach: #f6c4a6;
   /* DESIGN.md "Line tints": hour rules, the closed-hours hatch and the
      cancelled outline in the calendar grid. */
   --hour-rule: rgb(18 18 42 / 0.06);

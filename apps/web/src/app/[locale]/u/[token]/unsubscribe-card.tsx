@@ -73,7 +73,7 @@ export function UnsubscribeCard({ token }: { token: string }) {
         <CardDescription>{t(`summary.${state.scope}`, vars)}</CardDescription>
       </CardHeader>
       <CardContent>
-        <form
+        <form method="post"
           className="grid gap-5"
           onSubmit={(e) => {
             e.preventDefault();

@@ -292,7 +292,7 @@ function Pick({
         <label htmlFor={ownId} className="text-sm font-medium">
           {t("ownLabel")}
         </label>
-        <form
+        <form method="post"
           className="flex gap-2"
           onSubmit={(e) => {
             e.preventDefault();

@@ -1,6 +1,7 @@
 "use client";
 
 import { Menu } from "@base-ui/react/menu";
+import { Globe } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,8 @@ const ITEM_CLASS =
  * Each language is written in itself and never translated: someone who cannot
  * read the current language still has to find their own in the list.
  */
-export function LocaleSwitcher({ className }: { className?: string }) {
+/** `globe` puts a globe before the language name, as the home footer does. */
+export function LocaleSwitcher({ className, globe = false }: { className?: string; globe?: boolean }) {
   const locale = useLocale() as Locale;
   const pathname = usePathname();
   const router = useRouter();
@@ -35,6 +37,7 @@ export function LocaleSwitcher({ className }: { className?: string }) {
       <Menu.Trigger
         render={<Button variant="ghost" size="sm" className={className} disabled={pending} aria-label={t("language")} />}
       >
+        {globe ? <Globe aria-hidden className="size-4" /> : null}
         {LOCALE_NAMES[locale]}
       </Menu.Trigger>
       <Menu.Portal>

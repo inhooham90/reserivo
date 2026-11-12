@@ -154,7 +154,7 @@ function MemberForm({ member, isManager, salonId, onSaved }: { member: Member; i
   const rolesChanged = roles.length !== member.roles.length || roles.some((r) => !member.roles.includes(r));
 
   return (
-    <form
+    <form method="post"
       className="grid gap-4 rounded-lg bg-muted p-4 md:ml-14"
       onSubmit={(e) => {
         e.preventDefault();
@@ -213,7 +213,7 @@ function InviteSection({ salonId }: { salonId: string }) {
   return (
     <SettingsSection title={t("inviteTitle")} hint={t("inviteHint")}>
       <SettingsRows className="p-4 md:p-6">
-        <form
+        <form method="post"
           onSubmit={(e) => {
             e.preventDefault();
             setError(null);

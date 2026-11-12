@@ -1,6 +1,6 @@
 import type { PublicSalon } from "@reserivo/shared";
+import { Wordmark } from "@/components/brand/wordmark";
 import type { Metadata } from "next";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { BookingFlow } from "@/components/booking/booking-flow";
@@ -36,7 +36,7 @@ export default async function SalonPublicPage({ params }: Props) {
       <header className={cn(container, "flex items-center pt-8 pb-6")}>
         {/* The wordmark is artwork, never set in type. The salon is the headline; this is only the byline. */}
         <Link href="/" className="shrink-0 rounded-sm leading-none outline-none focus-visible:ring-3 focus-visible:ring-ring">
-          <Image src="/images/morrri-wordmark.png" alt={LEGAL.product} width={74} height={18} priority />
+          <Wordmark className="w-[74px]" />
         </Link>
       </header>
       <main id="main" tabIndex={-1} className={cn(container, "flex flex-1 flex-col pb-20 outline-none")}>

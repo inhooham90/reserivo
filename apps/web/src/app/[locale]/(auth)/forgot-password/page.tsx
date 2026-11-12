@@ -43,7 +43,7 @@ export default function ForgotPasswordPage() {
           </p>
         </div>
       ) : (
-        <form onSubmit={onSubmit} className="grid gap-6" noValidate>
+        <form method="post" onSubmit={onSubmit} className="grid gap-6" noValidate>
           <div className="grid gap-2">
             <Label htmlFor="fp-email">{t("email")}</Label>
             <Input id="fp-email" type="email" autoComplete="email" className={pillInput} {...form.register("email")} />

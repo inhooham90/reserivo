@@ -20,7 +20,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarDays, ChevronLeft, ChevronRight, Info, MousePointerClick, Plus, TriangleAlert } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import { FieldError } from "@/components/field-error";
 import { NewAppointmentForm, resolveServiceId, type AppointmentDraft } from "@/components/staff/new-appointment-form";
 import { Badge } from "@/components/ui/badge";
@@ -359,71 +359,75 @@ export default function CalendarPage() {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
       <SetupGuide />
-      <div role="toolbar" aria-label={t("toolbar.label")} className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-1 rounded-full bg-muted p-1 shadow-[inset_0_0_0_1px_var(--border)]">
-          <Button variant="ghost" size="icon" className="size-10 hover:bg-surface-muted" aria-label={t("toolbar.prevDay")} onClick={() => setDate((d) => addDays(d, -1))}>
-            <ChevronLeft aria-hidden />
+      {/* Two fixed rows. The date's length varies by day and language, so the
+          date navigation and New appointment share a row that never wraps from
+          md up, and the filters always sit on the second. On a phone each
+          control takes its own line rather than wrapping wherever the date ends. */}
+      <div data-component="ScheduleToolbar" role="toolbar" aria-label={t("toolbar.label")} className="grid gap-3">
+        <div className="flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
+          <div data-component="DatePill" className="flex shrink-0 items-center gap-1 rounded-full bg-muted p-1 shadow-[inset_0_0_0_1px_var(--border)]">
+            <Button variant="ghost" size="icon" className="size-10 hover:bg-surface-muted" aria-label={t("toolbar.prevDay")} onClick={() => setDate((d) => addDays(d, -1))}>
+              <ChevronLeft aria-hidden />
+            </Button>
+            <Button variant="ghost" size="sm" className={ghostPillSm} disabled={date === today} onClick={() => setDate(today)}>
+              {t("toolbar.today")}
+            </Button>
+            <Button variant="ghost" size="icon" className="size-10 hover:bg-surface-muted" aria-label={t("toolbar.nextDay")} onClick={() => setDate((d) => addDays(d, 1))}>
+              <ChevronRight aria-hidden />
+            </Button>
+            <DateLabel date={date} />
+            {/* Jump to any date. The native picker does the work; the input stays in the tab order. */}
+            <label className="relative mr-1 grid size-10 cursor-pointer place-items-center rounded-full hover:bg-surface-muted focus-within:ring-3 focus-within:ring-ring">
+              <CalendarDays aria-hidden className="size-4" />
+              <input
+                ref={dateInput}
+                type="date"
+                aria-label={t("toolbar.goToDate")}
+                className="absolute inset-0 cursor-pointer opacity-0"
+                value={date}
+                onClick={() => dateInput.current?.showPicker?.()}
+                onChange={(e) => e.target.value && setDate(e.target.value)}
+              />
+            </label>
+          </div>
+          <Button className={cn(pillButtonSm, "shrink-0")} onClick={() => openDraft(columns[0]?.id ?? "", null)} disabled={columns.length === 0}>
+            <Plus aria-hidden />
+            {t("toolbar.newAppointment")}
           </Button>
-          <Button variant="ghost" size="sm" className={ghostPillSm} disabled={date === today} onClick={() => setDate(today)}>
-            {t("toolbar.today")}
-          </Button>
-          <Button variant="ghost" size="icon" className="size-10 hover:bg-surface-muted" aria-label={t("toolbar.nextDay")} onClick={() => setDate((d) => addDays(d, 1))}>
-            <ChevronRight aria-hidden />
-          </Button>
-          <span className="mx-2 text-base font-semibold whitespace-nowrap" aria-live="polite">
-            {f.localDate(date, "dayLong")}
-          </span>
-          {/* Jump to any date. The native picker does the work; the input stays in the tab order. */}
-          <label className="relative mr-1 grid size-10 cursor-pointer place-items-center rounded-full hover:bg-surface-muted focus-within:ring-3 focus-within:ring-ring">
-            <CalendarDays aria-hidden className="size-4" />
-            <input
-              ref={dateInput}
-              type="date"
-              aria-label={t("toolbar.goToDate")}
-              className="absolute inset-0 cursor-pointer opacity-0"
-              value={date}
-              onClick={() => dateInput.current?.showPicker?.()}
-              onChange={(e) => e.target.value && setDate(e.target.value)}
-            />
-          </label>
         </div>
 
-        {allowed.length > 1 && (
-          <div role="group" aria-label={t("toolbar.showDesigner")} className="inline-flex max-w-full gap-1 overflow-x-auto rounded-full bg-muted p-1 shadow-[inset_0_0_0_1px_var(--border)]">
-            {[{ id: null, displayName: t("toolbar.everyone") }, ...allowed].map((m) => {
-              const pressed = (only === null && m.id === null) || (m.id !== null && columns.length === 1 && columns[0].id === m.id);
-              return (
-                <button
-                  key={m.id ?? "all"}
-                  type="button"
-                  aria-pressed={pressed}
-                  onClick={() => setOnly(m.id)}
-                  className={cn(
-                    "h-10 shrink-0 rounded-full px-4 text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring",
-                    pressed ? "bg-primary text-primary-foreground" : "hover:bg-surface-muted",
-                  )}
-                >
-                  {m.displayName}
-                </button>
-              );
-            })}
-          </div>
-        )}
-
-        <span className="hidden flex-1 md:block" />
-        <label className="flex items-center gap-3 text-sm text-body">
-          <input
-            type="checkbox"
-            className="size-5 accent-foreground"
-            checked={showCancelled}
-            onChange={(e) => setShowCancelled(e.target.checked)}
-          />
-          {t("toolbar.showCancelled")}
-        </label>
-        <Button className={pillButtonSm} onClick={() => openDraft(columns[0]?.id ?? "", null)} disabled={columns.length === 0}>
-          <Plus aria-hidden />
-          {t("toolbar.newAppointment")}
-        </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          {allowed.length > 1 && (
+            <div data-component="TeamFilter" role="group" aria-label={t("toolbar.showDesigner")} className="inline-flex max-w-full gap-1 overflow-x-auto rounded-full bg-muted p-1 shadow-[inset_0_0_0_1px_var(--border)]">
+              {[{ id: null, displayName: t("toolbar.everyone") }, ...allowed].map((m) => {
+                const pressed = (only === null && m.id === null) || (m.id !== null && columns.length === 1 && columns[0].id === m.id);
+                return (
+                  <button
+                    key={m.id ?? "all"}
+                    type="button"
+                    aria-pressed={pressed}
+                    onClick={() => setOnly(m.id)}
+                    className={cn(
+                      "h-10 shrink-0 rounded-full px-4 text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring",
+                      pressed ? "bg-primary text-primary-foreground" : "hover:bg-surface-muted",
+                    )}
+                  >
+                    {m.displayName}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          <label className="ml-auto flex items-center gap-3 text-sm text-body">
+            <input
+              type="checkbox"
+              className="size-5 accent-foreground"
+              checked={showCancelled}
+              onChange={(e) => setShowCancelled(e.target.checked)}
+            />
+            {t("toolbar.showCancelled")}
+          </label>
+        </div>
       </div>
 
       {columns.length === 0 ? (
@@ -1232,5 +1236,37 @@ function AppointmentPanel({
         )}
       </CardContent>
     </Card>
+  );
+}
+
+/**
+ * The toolbar's date, in a box as wide as the widest date this language can
+ * produce, so the DatePill around it keeps one size as the days go by and the
+ * date picker beside it never moves. The candidates are stacked invisibly in
+ * the same grid cell: for each month, the longest of days 22-28 (every
+ * weekday, always two digits). Only the visible one is announced.
+ */
+function DateLabel({ date }: { date: string }) {
+  const f = useFormat();
+  const widest = useMemo(
+    () =>
+      Array.from({ length: 12 }, (_, m) =>
+        Array.from({ length: 7 }, (_, i) => f.localDate(`2026-${String(m + 1).padStart(2, "0")}-${22 + i}`, "dayLong")).reduce((a, b) =>
+          b.length > a.length ? b : a,
+        ),
+      ),
+    [f],
+  );
+  return (
+    <span data-component="DateLabel" className="mx-2 grid text-base font-semibold whitespace-nowrap">
+      <span aria-live="polite" className="text-center [grid-area:1/1]">
+        {f.localDate(date, "dayLong")}
+      </span>
+      {widest.map((text) => (
+        <span key={text} aria-hidden className="invisible [grid-area:1/1]">
+          {text}
+        </span>
+      ))}
+    </span>
   );
 }

@@ -62,7 +62,7 @@ function ResetPassword() {
           </p>
         </div>
       ) : (
-        <form
+        <form method="post"
           className="grid gap-6"
           onSubmit={(e) => {
             e.preventDefault();

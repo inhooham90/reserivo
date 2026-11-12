@@ -43,8 +43,8 @@
       "secondaryCta": "Ver cómo funciona"
     },
     "about": {
-      "title": "Qué es {product}",
-      "body": "{product} es un software de reservas para negocios que trabajan con cita en Estados Unidos, desde barberías y estudios de uñas hasta spas, tutores y clínicas. El negocio se registra, añade a su equipo, sus servicios y su horario, y obtiene su propia página de reservas en <url>morrri.com/your-business</url> para compartir con sus clientes. Los clientes reservan en esa página (sin necesidad de cuenta) y el negocio organiza el día desde un solo calendario.",
+      "title": "{product} es un software de reservas para pequeños negocios en Estados Unidos.",
+      "body": "El negocio se registra, añade a su equipo, sus servicios y su horario, y obtiene su propia página de reservas en <url>morrri.com/your-business</url> para compartir con sus clientes. Los clientes reservan en esa página (sin necesidad de cuenta) y el negocio organiza el día desde un solo calendario.",
       "notASalon": "Vendemos software a negocios. No somos el negocio donde reservas y no nos quedamos con ninguna parte de una reserva."
     },
     "features": {
@@ -74,7 +74,7 @@
         "acrylicFill": "Relleno acrílico",
         "cutAndStyle": "Corte y peinado de mujer",
         "pickTime": "Elegir hora",
-        "visits": "{count, plural, one {# visita} other {# visitas}}",
+        "lastVisit": "Última visita: {date}",
         "prefers": "Prefiere a {name}",
         "colorClient": "Clienta de color",
         "numberHidden": "Número oculto, los mensajes pasan por {product}"
@@ -99,7 +99,39 @@
     },
     "navLabel": "Principal",
     "howItWorks": "Cómo funciona",
-    "remindersNav": "Recordatorios"
+    "remindersNav": "Recordatorios",
+    "banners": {
+      "link": {
+        "title": "<l>Un enlace.</l> <l>Todas las reservas.</l> <l>Tus clientes siguen siendo tuyos.</l>",
+        "nearby": "Cerca del Chelsea",
+        "category": "Peluquería"
+      },
+      "setup": {
+        "title": "Crea tu página de reservas",
+        "body": "Añade tu equipo, tus servicios y tu horario, y comparte tu enlace.",
+        "service": "Pastel vegano"
+      }
+    },
+    "compare": {
+      "eyebrow": "Comparar",
+      "title": "Reservar por mensaje o reservar con {product}",
+      "before": {
+        "title": "Por mensaje y teléfono",
+        "a": "Mensajes de ida y vuelta",
+        "b": "Llamadas perdidas en plena cita",
+        "c": "Reservas duplicadas descubiertas tarde",
+        "d": "Intercambiar números de teléfono",
+        "e": "Una comisión por cada reserva"
+      },
+      "after": {
+        "title": "Con {product}",
+        "a": "Los clientes reservan solos",
+        "b": "Reservan a cualquier hora, en tu página",
+        "c": "Reservas duplicadas detectadas antes de que ocurran",
+        "d": "Los mensajes pasan por {product}",
+        "e": "Sin comisión por tus reservas"
+      }
+    }
   },
   "footer": {
     "terms": "Términos",

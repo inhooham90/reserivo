@@ -724,7 +724,7 @@ function Details({
           </h2>
           <p className="text-muted-foreground">{user ? t("details.bookingAs", { email: user.email }) : t("details.noAccount")}</p>
         </div>
-        <form
+        <form method="post"
           className="grid gap-5"
           onSubmit={(e) => {
             e.preventDefault();

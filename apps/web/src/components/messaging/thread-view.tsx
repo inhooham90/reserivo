@@ -102,7 +102,7 @@ export function ThreadView({
         ))}
       </ol>
 
-      <form
+      <form method="post"
         className="grid shrink-0 gap-2"
         onSubmit={(e) => {
           e.preventDefault();

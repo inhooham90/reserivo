@@ -98,7 +98,7 @@ function Composer() {
         <CardDescription>Plain text. Keep it short — people read these on a phone.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form
+        <form method="post"
           className="grid gap-5"
           onSubmit={(e) => {
             e.preventDefault();

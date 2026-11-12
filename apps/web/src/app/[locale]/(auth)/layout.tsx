@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Wordmark } from "@/components/brand/wordmark";
 import { CircleCheck } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { AuthNav } from "@/components/auth/auth-nav";
@@ -19,7 +20,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
       <header className="mx-auto flex w-full max-w-[calc(1200px+5rem)] px-6 items-center justify-between gap-4 pt-8 pb-6 md:px-10">
         {/* The wordmark is artwork, never set in type. */}
         <Link href="/" className="shrink-0 rounded-sm leading-none outline-none focus-visible:ring-3 focus-visible:ring-ring">
-          <Image src="/images/morrri-wordmark.png" alt={LEGAL.product} width={74} height={18} priority />
+          <Wordmark className="w-[74px]" />
         </Link>
         <AuthNav />
       </header>

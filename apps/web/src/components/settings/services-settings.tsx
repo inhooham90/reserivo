@@ -259,7 +259,7 @@ function ServiceForm({
   const field = "grid gap-2";
 
   return (
-    <form
+    <form method="post"
       onSubmit={form.handleSubmit((v) =>
         // The switch is hidden below the threshold, so never send a stale tick.
         save.mutate({ ...v, allowsDoubleBooking: canShare && v.allowsDoubleBooking }),

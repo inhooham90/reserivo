@@ -38,3 +38,11 @@ export const navItem = (active: boolean) =>
     "inline-flex shrink-0 items-center gap-1.5 rounded-full px-5 text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring",
     active ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-surface-muted",
   );
+
+/*
+ * Website-board pills (the brand refresh, home page first): 48px, semibold,
+ * Mona Ink or the soft Lisa Lavender tint. `focus-visible:ring-white` on the
+ * soft one is for when it sits on a photo; on canvas the ink ring still shows.
+ */
+export const inkPill = cn("h-12 rounded-full bg-mona-ink px-6 text-base font-semibold text-white hover:bg-mona-ink", press);
+export const softPill = cn("h-12 rounded-full bg-lisa-soft px-6 text-base font-semibold text-mona-ink hover:bg-lisa-soft", press);

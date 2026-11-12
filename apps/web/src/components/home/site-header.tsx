@@ -1,12 +1,12 @@
 "use client";
 
-import Image from "next/image";
+import { Wordmark } from "@/components/brand/wordmark";
+import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "cn";
 import { Link } from "@/i18n/navigation";
 import { useAuth } from "@/lib/auth";
-import { LEGAL } from "@/lib/legal";
 
 const SECTIONS = [
   { id: "how", key: "howItWorks" },
@@ -14,12 +14,14 @@ const SECTIONS = [
 ] as const;
 
 const ITEM =
-  "inline-flex items-center rounded-full px-5 text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring";
+  "inline-flex h-full items-center rounded-full px-5 text-sm font-semibold whitespace-nowrap transition-[background-color,color,transform] outline-none focus-visible:ring-3 focus-visible:ring-ring";
+const PRESS = "hover:scale-[1.04] active:scale-[0.98] motion-reduce:hover:scale-100 motion-reduce:active:scale-100";
 
 /**
- * Sticky landing header. The nav pill follows the section in view
- * (DESIGN.md "User journey"): its item turns navy, the selected-pill pair.
- * On a phone only "Sign in" stays, so the pill never wraps.
+ * Sticky landing header (website board): section links in a white capsule,
+ * then "Sign in" and "Get started" pills. The capsule follows the section in
+ * view, its item turning ink. On a phone the capsule goes and "Get started"
+ * goes under `sm`, so the row never wraps; the hero repeats both links.
  */
 export function SiteHeader() {
   const t = useTranslations("home");
@@ -55,35 +57,50 @@ export function SiteHeader() {
   }, []);
 
   return (
-    <header className={cn("sticky top-0 z-20 bg-background py-6 transition-shadow", scrolled && "shadow-[0_1px_0_var(--border)]")}>
+    // Transparent over the hero's gradient until the page moves, then a frosted canvas bar.
+    <header
+      className={cn(
+        "sticky top-0 z-20 py-4 transition-[background-color,box-shadow] md:py-6",
+        scrolled ? "bg-canvas/85 shadow-[0_1px_0_var(--border)] backdrop-blur-md" : "bg-transparent",
+      )}
+    >
       <div className="mx-auto flex w-full max-w-[calc(1200px+5rem)] items-center justify-between gap-4 px-6 md:px-10">
-        <Link href="/" className="shrink-0 rounded-sm leading-none outline-none focus-visible:ring-3 focus-visible:ring-ring">
-          <Image src="/images/morrri-wordmark.png" alt={LEGAL.product} width={74} height={18} priority />
+        <Link href="/" className="shrink-0 rounded-sm leading-none text-mona-ink outline-none focus-visible:ring-3 focus-visible:ring-ring">
+          <Wordmark className="w-[88px] md:w-[112px]" />
         </Link>
-        <nav
-          aria-label={t("navLabel")}
-          className="inline-flex h-12 gap-1 rounded-full bg-muted p-1 shadow-[inset_0_0_0_1px_var(--border)]"
-        >
-          {SECTIONS.map(({ id, key }) => (
-            <a
-              key={id}
-              href={`#${id}`}
-              onClick={() => setActive(id)}
-              aria-current={active === id ? "true" : undefined}
-              className={cn(
-                ITEM,
-                "hidden md:inline-flex",
-                active === id ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-surface-muted",
-              )}
-            >
-              {t(key)}
-            </a>
-          ))}
+        <div className="flex h-12 items-center gap-2 md:h-14 md:gap-3">
+          <nav
+            aria-label={t("navLabel")}
+            className="hidden h-full gap-1 rounded-full bg-white p-1 shadow-[0_1px_3px_rgb(0_0_0/0.06)] md:inline-flex"
+          >
+            {SECTIONS.map(({ id, key }) => (
+              <a
+                key={id}
+                href={`#${id}`}
+                onClick={() => setActive(id)}
+                aria-current={active === id ? "true" : undefined}
+                className={cn(
+                  ITEM,
+                  active === id
+                    ? "bg-mona-ink text-white"
+                    : "text-mona-ink shadow-[inset_0_0_0_1px_var(--border)] hover:bg-surface-muted",
+                )}
+              >
+                {t(key)}
+              </a>
+            ))}
+          </nav>
           {/* Either way it ends on the dashboard: /login forwards anyone already signed in. */}
-          <Link href={signedIn ? "/dashboard" : "/login"} className={cn(ITEM, "text-foreground hover:bg-surface-muted")}>
+          <Link href={signedIn ? "/dashboard" : "/login"} className={cn(ITEM, PRESS, "bg-lisa-soft text-mona-ink")}>
             {signedIn ? t("dashboard") : t("signIn")}
           </Link>
-        </nav>
+          {signedIn ? null : (
+            <Link href="/register" className={cn(ITEM, PRESS, "hidden gap-2 bg-mona-ink pr-4 text-white sm:inline-flex")}>
+              {t("hero.cta")}
+              <ArrowRight aria-hidden className="size-4" />
+            </Link>
+          )}
+        </div>
       </div>
     </header>
   );

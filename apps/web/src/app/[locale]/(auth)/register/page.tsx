@@ -44,7 +44,7 @@ function RegisterForm() {
 
   return (
     <AuthCard title={t("register.title")} description={t("register.description")}>
-      <form onSubmit={onSubmit} className="grid gap-6" noValidate>
+      <form method="post" onSubmit={onSubmit} className="grid gap-6" noValidate>
         <div className="grid gap-2">
           <Label htmlFor="name">{t("register.name")}</Label>
           <Input id="name" autoComplete="name" className={pillInput} {...form.register("name")} />

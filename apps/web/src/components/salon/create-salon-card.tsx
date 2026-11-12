@@ -53,7 +53,7 @@ export function CreateSalonCard({ title, description, onCancel }: { title?: stri
         <CardDescription>{description ?? t("description")}</CardDescription>
       </CardHeader>
       <CardContent>
-        <form
+        <form method="post"
           onSubmit={form.handleSubmit((v) => {
             setServerError(null);
             create.mutate(v);

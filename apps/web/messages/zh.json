@@ -43,8 +43,8 @@
       "secondaryCta": "了解使用方式"
     },
     "about": {
-      "title": "{product} 是什么",
-      "body": "{product} 是为美国预约制商家打造的预约软件，从理发店、美甲工作室到水疗馆、家教和诊所都适用。商家注册后添加团队成员、服务项目和营业时间，即可获得一个专属预约页面 <url>morrri.com/your-business</url>，分享给客户。客户无需注册账号即可在该页面预约，商家则在同一个日历中安排每一天。",
+      "title": "{product} 是面向美国小型商家的预约软件。",
+      "body": "商家注册后添加团队成员、服务项目和营业时间，即可获得一个专属预约页面 <url>morrri.com/your-business</url>，分享给客户。客户无需注册账号即可在该页面预约，商家则在同一个日历中安排每一天。",
       "notASalon": "我们向商家出售软件。我们不是你预约的那家店，也不从任何一笔预约中抽成。"
     },
     "features": {
@@ -74,7 +74,7 @@
         "acrylicFill": "水晶甲补填",
         "cutAndStyle": "女士剪发和造型",
         "pickTime": "选择时间",
-        "visits": "{count, plural, other {到店 # 次}}",
+        "lastVisit": "上次到访：{date}",
         "prefers": "偏好 {name}",
         "colorClient": "染发客户",
         "numberHidden": "号码已隐藏，消息通过 {product} 传递"
@@ -99,7 +99,39 @@
     },
     "navLabel": "主导航",
     "howItWorks": "使用方式",
-    "remindersNav": "提醒"
+    "remindersNav": "提醒",
+    "banners": {
+      "link": {
+        "title": "<l>一个链接。</l><l>所有预约。</l><l>客户始终是你的。</l>",
+        "nearby": "切尔西附近",
+        "category": "美发沙龙"
+      },
+      "setup": {
+        "title": "设置你的预约页面",
+        "body": "添加团队成员、服务和营业时间，然后分享你的链接。",
+        "service": "纯素蛋糕"
+      }
+    },
+    "compare": {
+      "eyebrow": "对比",
+      "title": "用短信预约，还是用 {product} 预约",
+      "before": {
+        "title": "靠短信和电话",
+        "a": "来回发短信",
+        "b": "服务途中漏接电话",
+        "c": "重复预约发现得太晚",
+        "d": "互换电话号码",
+        "e": "每笔预约都被抽成"
+      },
+      "after": {
+        "title": "使用 {product}",
+        "a": "客户自助预约",
+        "b": "客户随时在你的页面上预约",
+        "c": "重复预约在发生前就被发现",
+        "d": "消息通过 {product} 传递",
+        "e": "预约不抽成"
+      }
+    }
   },
   "footer": {
     "terms": "服务条款",

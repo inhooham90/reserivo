@@ -73,6 +73,8 @@ const DATE_STYLES = {
   dateWithYear: { year: "numeric", month: "short", day: "numeric" },
   /** "Jan 2026" */
   monthYear: { year: "numeric", month: "short" },
+  /** "Jan 5": a date in passing, like a last visit. */
+  monthDay: { month: "short", day: "numeric" },
   /** "Mon, Jan 5" */
   dayMonth: { weekday: "short", month: "short", day: "numeric" },
   /** "Monday, Jan 5": the schedule toolbar, where the weekday is the point. */
