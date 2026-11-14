@@ -1,3 +1,4 @@
+import { SMS_PROGRAM_ENABLED } from "@reserivo/shared";
 import Image from "next/image";
 import { Wordmark } from "@/components/brand/wordmark";
 import { CircleCheck } from "lucide-react";
@@ -48,7 +49,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
             className="m-auto h-auto w-[182px] md:w-[252px]"
           />
           <ul className="grid gap-3">
-            {[t("point1"), t("point2")].map((point) => (
+            {[t("point1"), t(SMS_PROGRAM_ENABLED ? "point2" : "point2EmailOnly")].map((point) => (
               <li key={point} className="flex items-center gap-3 text-base">
                 <CircleCheck aria-hidden className="size-[22px] shrink-0 fill-foreground text-butter" />
                 {point}

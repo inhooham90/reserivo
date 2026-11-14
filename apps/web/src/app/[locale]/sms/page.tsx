@@ -1,3 +1,4 @@
+import { SMS_PROGRAM_ENABLED } from "@reserivo/shared";
 import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 import { SmsConsent } from "@/components/booking/sms-consent";
@@ -27,8 +28,26 @@ export const metadata: Metadata = {
  * cannot find it, which is exactly how the first campaign was rejected. This
  * page is public, needs no account, and shows the same checkbox component the
  * booking form renders, so what a reviewer reads is what a client sees.
+ *
+ * While SMS_PROGRAM_ENABLED is off it says so instead of describing a program
+ * nobody can join. It still answers rather than 404ing, because Terms section 6
+ * links here.
  */
 export default function SmsPage() {
+  if (!SMS_PROGRAM_ENABLED) {
+    return (
+      <LegalPage doc="sms" title="Text message program">
+        <p>
+          {LEGAL.product} does not send text messages yet. Appointment confirmations and reminders are sent by email
+          only, and no one is asked to opt in to texts.
+        </p>
+        <p>
+          When text reminders become available, this page will describe how they work, and clients will be able to opt
+          in when they book. Questions: <a href={`mailto:${LEGAL.supportEmail}`}>{LEGAL.supportEmail}</a>.
+        </p>
+      </LegalPage>
+    );
+  }
   return (
     <LegalPage doc="sms" title="Text message program">
       <p>

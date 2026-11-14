@@ -103,6 +103,24 @@ model Salon {
   cancelWindowHours Int      @default(24)
   /// Hours before the start to send a reminder. Empty turns reminders off.
   reminderHoursBefore Int[]  @default([24])
+
+  /// Billing: one Stripe subscription per business, mirrored here by the
+  /// webhook. Stripe is the source of truth; these columns are a cache that
+  /// lets the booking page decide without calling Stripe. See billing.service.ts.
+  stripeCustomerId              String?   @unique
+  stripeSubscriptionId          String?   @unique
+  /// Stripe's own status string (active, past_due, canceled, …).
+  subscriptionStatus            String?
+  subscriptionPeriodEnd         DateTime? @db.Timestamptz(6)
+  subscriptionCancelAtPeriodEnd Boolean   @default(false)
+  /// Set the first time a subscription syncs. The intro discount and promo
+  /// codes apply only while it is null, so cancelling and re-subscribing does
+  /// not restart the $1 months.
+  introOfferUsedAt              DateTime? @db.Timestamptz(6)
+  /// Bookable without a subscription until then. Businesses that existed
+  /// before billing got 30 days; new ones get none.
+  billingGraceUntil             DateTime? @db.Timestamptz(6)
+
   createdAt         DateTime @default(now()) @db.Timestamptz(6)
   updatedAt         DateTime @updatedAt @db.Timestamptz(6)
 

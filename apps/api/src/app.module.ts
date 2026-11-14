@@ -6,6 +6,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller.js';
 import { AuditModule } from './audit/audit.module.js';
 import { AuthModule } from './auth/auth.module.js';
+import { BillingModule } from './billing/billing.module.js';
 import { JwtAuthGuard } from './auth/jwt-auth.guard.js';
 import { AdminModule } from './admin/admin.module.js';
 import { AppointmentsModule } from './appointments/appointments.module.js';
@@ -54,6 +55,7 @@ import { ServicesModule } from './services/services.module.js';
     RemindersModule,
     CampaignsModule,
     SetupModule,
+    BillingModule,
   ],
   controllers: [AppController],
   providers: [

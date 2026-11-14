@@ -1,5 +1,6 @@
 import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import type { CreateSalonInput, MySalon, PublicSalon, Salon, SalonRole, UpdateSalonInput } from '@reserivo/shared';
+import { BillingService } from '../billing/billing.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RatingsService } from '../ratings/ratings.service.js';
 import { SalonHoursService } from '../salon-hours/salon-hours.service.js';
@@ -11,6 +12,7 @@ export class SalonsService {
     private readonly prisma: PrismaService,
     private readonly salonHours: SalonHoursService,
     private readonly ratings: RatingsService,
+    private readonly billing: BillingService,
   ) {}
 
   /**
@@ -90,7 +92,7 @@ export class SalonsService {
     const scores = await this.ratings.forDesigners(salon.memberships.map((m) => m.id));
     const designers = salon.memberships.map((m) => ({ ...m, rating: scores.get(m.id)! }));
 
-    return { ...this.toSalon(salon), hours: salon.hours, designers };
+    return { ...this.toSalon(salon), acceptingBookings: this.billing.acceptsBookings(salon), hours: salon.hours, designers };
   }
 
   /** Managers edit identity and booking policies. Saving counts as the setup guide's "business details" step. */

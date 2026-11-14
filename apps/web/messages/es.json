@@ -83,6 +83,7 @@
     "reminders": {
       "title": "Recordatorios de citas",
       "body": "Cada reserva recibe al instante una confirmación por correo electrónico y un recordatorio antes de la cita. Quien deja un número de móvil al reservar también puede marcar una casilla para recibir ese recordatorio por mensaje de texto: solo recordatorios de citas, nunca publicidad y nunca sin pedir permiso. Todo el programa, incluido el texto exacto del consentimiento, se explica en <link>morrri.com/sms</link>.",
+      "bodyEmailOnly": "Cada reserva recibe al instante una confirmación por correo electrónico y un recordatorio por correo antes de la cita.",
       "steps": {
         "listLabel": "Lo que recibe un cliente",
         "confirmTitle": "Confirmación por correo",
@@ -131,19 +132,23 @@
         "d": "Los mensajes pasan por {product}",
         "e": "Sin comisión por tus reservas"
       }
-    }
+    },
+    "pricingNav": "Precios"
   },
   "footer": {
     "terms": "Términos",
     "privacy": "Privacidad",
     "accessibility": "Accesibilidad",
     "sms": "Recordatorios por SMS",
-    "contact": "Contacto"
+    "contact": "Contacto",
+    "pricing": "Precios"
   },
   "storefront": {
     "metaTitle": "Reserva en {name} · {product}",
     "chooseService": "Elige un servicio para ver los horarios disponibles.",
-    "chooseMember": "Elige a un miembro del equipo para ver sus servicios y horarios disponibles."
+    "chooseMember": "Elige a un miembro del equipo para ver sus servicios y horarios disponibles.",
+    "pausedLead": "Las reservas en línea están en pausa por ahora.",
+    "pausedBody": "{name} no acepta reservas en línea en este momento. Comunícate directamente para reservar."
   },
   "booking": {
     "steps": {
@@ -277,7 +282,8 @@
       "body": "Dale a cada persona su propia agenda y servicios, mantén privados los datos de contacto de tus clientes y gestiónalo todo desde un solo lugar.",
       "point1": "Los clientes reservan sin crear una cuenta",
       "point2": "Recordatorios por correo, y por SMS si lo aceptan",
-      "monaAlt": "La gata Mona revisando los papeles de un negocio con una lupa"
+      "monaAlt": "La gata Mona revisando los papeles de un negocio con una lupa",
+      "point2EmailOnly": "Recordatorios por correo antes de cada cita"
     },
     "show": "Mostrar",
     "hide": "Ocultar",
@@ -565,6 +571,10 @@
       "yourSalons": {
         "label": "Tus negocios",
         "hint": "Cambia entre ellos o crea otro"
+      },
+      "billing": {
+        "label": "Facturación",
+        "hint": "Tu suscripción, tarjeta y facturas"
       }
     },
     "salon": {
@@ -844,6 +854,76 @@
       "takesHint": "Para quienes trabajan solos o son propietarios y atienden citas. Puedes cambiarlo más adelante en Ajustes → Equipo.",
       "create": "Crear negocio",
       "creating": "Creando…"
+    },
+    "billing": {
+      "managersOnly": "Solo los administradores pueden ver y cambiar la facturación.",
+      "notConfigured": "La facturación no está configurada en este servidor, así que no se cobra nada y las reservas en línea nunca se pausan.",
+      "processing": "¡Gracias! Stripe está confirmando tu suscripción. Suele tardar unos segundos; recarga si esto no se actualiza.",
+      "statusTitle": "Suscripción",
+      "state": {
+        "active": {
+          "label": "Activa",
+          "body": "{price} al mes. Próximo cobro el {date}."
+        },
+        "pastDue": {
+          "label": "Pago fallido",
+          "body": "Tu último pago no se procesó. Stripe lo volverá a intentar; actualiza tu tarjeta para mantener las reservas en línea."
+        },
+        "grace": {
+          "label": "Aún sin suscripción",
+          "body": "Las reservas en línea siguen activas hasta el {date}. Suscríbete antes para mantenerlas."
+        },
+        "inactive": {
+          "label": "Finalizada",
+          "body": "Tu suscripción terminó. Suscríbete de nuevo para reactivar las reservas en línea."
+        },
+        "none": {
+          "label": "Sin suscripción",
+          "body": "Suscríbete para activar las reservas en línea."
+        }
+      },
+      "cancelling": "Cancelación programada",
+      "cancellingBody": "Tu suscripción termina el {date}. Después, las reservas en línea se pausan.",
+      "onlineBooking": "Reservas en línea",
+      "bookingOn": "Activas: los clientes pueden reservar desde tu página.",
+      "bookingPaused": "En pausa: tu página sigue publicada pero no acepta reservas. Tu equipo aún puede agregar citas.",
+      "manageTitle": "Tarjeta, facturas y cancelación",
+      "manageHint": "Abre la página de facturación segura de Stripe.",
+      "manage": "Administrar facturación",
+      "subscribeTitle": "Suscribirse",
+      "plan": "{price} al mes.",
+      "promoLabel": "Código promocional (opcional)",
+      "promoHint": "¿Tienes un código? Reemplaza el precio de introducción.",
+      "subscribe": "Continuar al pago",
+      "invoices": "Facturas anteriores",
+      "renewal": "Se renueva cada mes a {price} después de cualquier periodo de introducción, hasta que canceles. Cancela cuando quieras desde Administrar facturación.",
+      "notice": {
+        "paused": {
+          "title": "Las reservas en línea están en pausa",
+          "body": "Este negocio no tiene una suscripción activa, así que los clientes no pueden reservar en línea. Tu equipo aún puede agregar citas.",
+          "action": "Suscribirse"
+        },
+        "pastDue": {
+          "title": "Tu pago no se procesó",
+          "body": "Actualiza tu tarjeta para mantener las reservas en línea.",
+          "action": "Actualizar tarjeta"
+        },
+        "grace": {
+          "title": "Suscríbete para mantener las reservas en línea",
+          "body": "Las reservas en línea siguen activas hasta el {date}.",
+          "action": "Ver planes"
+        }
+      },
+      "loading": "Cargando facturación…",
+      "loadFailed": "No se pudo cargar la facturación.",
+      "retry": "Reintentar",
+      "unavailable": "Los pagos no están disponibles en este momento, así que no puedes suscribirte ni cambiar la facturación ahora. Mientras tanto, las reservas en línea siguen activas. Inténtalo más tarde.",
+      "processingSlow": "Aún no tenemos respuesta de Stripe. Si completaste el pago, recarga esta página en un minuto; no se te cobrará dos veces.",
+      "offerBadge": "Oferta de lanzamiento",
+      "offerPrice": "{intro}/mes durante {months} meses",
+      "offerThen": "Luego {price}/mes.",
+      "included": "Un solo precio para todo el negocio: todos los miembros del equipo, reservas ilimitadas.",
+      "redirecting": "Abriendo Stripe…"
     }
   },
   "admin": {
@@ -982,5 +1062,62 @@
     "saving": "Guardando…",
     "undo": "Deshacer: seguir recibiendo correos",
     "saveFailed": "No se pudo guardar. Inténtalo de nuevo."
+  },
+  "promo": {
+    "label": "Oferta de lanzamiento",
+    "badge": "Oferta de lanzamiento:",
+    "text": "{intro}/mes durante tus primeros {months} meses, luego {price}/mes.",
+    "link": "Ver precios"
+  },
+  "pricing": {
+    "metaTitle": "Precios · {product}",
+    "metaOffer": "Un plan por negocio: {intro}/mes durante los primeros {months} meses, luego {price}/mes. Todo incluido, cancela cuando quieras.",
+    "metaPlan": "Un plan por negocio: {price}/mes. Todo incluido, cancela cuando quieras.",
+    "title": "Un plan sencillo para todo tu negocio",
+    "subtitle": "Todo incluido, para cada miembro del equipo. Sin cuota de alta, sin comisión por reserva, cancela cuando quieras.",
+    "planName": "{product}",
+    "offerBadge": "Oferta de lanzamiento",
+    "perMonthFor": "/mes durante tus primeros {months} meses",
+    "then": "Luego {price}/mes.",
+    "perMonth": "/mes",
+    "perBusiness": "Un solo precio por negocio, tengas los miembros de equipo que tengas.",
+    "cta": "Empezar",
+    "ctaNote": "Crea tu cuenta y luego escribe a {email}; la aprobaremos para tu negocio.",
+    "includedTitle": "Todo incluido",
+    "features": {
+      "page": "Tu propia página de reservas en morrri.com/tu-negocio",
+      "team": "Cada miembro del equipo con su propia agenda, horario y servicios",
+      "unlimited": "Reservas y clientes ilimitados",
+      "reminders": "Correos de confirmación y recordatorio para cada reserva",
+      "clients": "Fichas de clientes con notas e historial de visitas; los datos de contacto solo los ven los administradores",
+      "messages": "Escribe a tus clientes sin compartir el número de nadie"
+    },
+    "faqTitle": "Preguntas",
+    "faq": {
+      "offer": {
+        "q": "¿Cómo funciona la oferta de lanzamiento?",
+        "a": "Tu negocio paga {intro} al mes durante sus primeros {months} meses y luego {price} al mes. Se aplica automáticamente al suscribirte; no hay que introducir ningún código."
+      },
+      "perPerson": {
+        "q": "¿Pago por cada miembro del equipo?",
+        "a": "No. Es un solo precio por negocio, añadas los miembros que añadas."
+      },
+      "cancel": {
+        "q": "¿Puedo cancelar cuando quiera?",
+        "a": "Sí, desde Facturación en tu configuración. Tu suscripción sigue hasta el final del mes que ya pagaste y después no se renueva."
+      },
+      "ends": {
+        "q": "¿Qué pasa si termina mi suscripción?",
+        "a": "Tu página de reservas sigue publicada pero deja de aceptar reservas en línea. Tu agenda, clientes e historial se conservan, y tu equipo puede seguir agregando citas. Suscríbete de nuevo para reactivar las reservas en línea."
+      },
+      "clientsPay": {
+        "q": "¿Mis clientes pagan algo?",
+        "a": "No. Los clientes reservan gratis y no necesitan una cuenta."
+      },
+      "promo": {
+        "q": "Tengo un código promocional. ¿Dónde lo introduzco?",
+        "a": "En la página de Facturación de tu configuración, antes de continuar al pago. Un código promocional reemplaza la oferta de lanzamiento."
+      }
+    }
   }
 }

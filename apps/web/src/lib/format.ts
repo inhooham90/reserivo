@@ -22,6 +22,12 @@ export function formatCents(cents: number, locale: Locale): string {
   return new Intl.NumberFormat(locale, { style: "currency", currency: CURRENCY }).format(cents / 100);
 }
 
+/** "$29" and "$1", but "$4.50": whole amounts drop the cents, for prices quoted in copy rather than on a receipt. */
+export function formatPrice(cents: number, locale: Locale): string {
+  const fraction = cents % 100 === 0 ? 0 : 2;
+  return new Intl.NumberFormat(locale, { style: "currency", currency: CURRENCY, minimumFractionDigits: fraction, maximumFractionDigits: fraction }).format(cents / 100);
+}
+
 /**
  * 90 → "1 hr 30 min" / "1시간 30분" / "1小时30分钟" / "1 h 30 min".
  *

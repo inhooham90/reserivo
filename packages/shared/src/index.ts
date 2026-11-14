@@ -15,3 +15,4 @@ export * from './campaign';
 export * from './message';
 export * from './rating';
 export * from './admin';
+export * from './billing';

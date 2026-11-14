@@ -145,6 +145,30 @@ happy that way:
 heroku config:set -a reserivo-api TWILIO_ACCOUNT_SID=... TWILIO_AUTH_TOKEN=... TWILIO_FROM_NUMBER=+1...
 ```
 
+### Billing (Stripe)
+
+Billing is off until `STRIPE_SECRET_KEY` is set: nothing is charged and no
+business is paused. **The moment it is set, every business without a live
+subscription or grace period stops taking online bookings**, so create the
+Stripe objects first. Do it in test mode (`sk_test_…`) once end to end
+before the live keys.
+
+In the Stripe dashboard:
+
+1. **Product** "Morrri" with a recurring **Price** of $29.00 / month → `STRIPE_PRICE_ID` (`price_…`). Give the product the **tax code** `txcd_10103001` (Software as a service, business use). New accounts have *Managed Payments* on by default, and without a tax code every checkout is refused with "the product tax code is missing"; the app surfaces that as a 502 "Checkout could not be started".
+2. **Coupon** for the intro offer: amount off $28.00 USD, duration *Repeating*, 6 months → `STRIPE_INTRO_COUPON_ID`. It makes the first six invoices $1. Leave the variable unset to drop the offer; the billing page stops mentioning it.
+3. **Coupon** for the free six months: 100% off, *Repeating*, 6 months. Give it a **Promotion code** customers type (e.g. `FREE6`), with *first-time order only* and an expiry or redemption limit as you like. No config var: the API looks codes up by name.
+4. **Customer portal** (Settings → Billing → Customer portal): save it once, allowing card updates, invoice history and cancellation at period end. Until it is saved the Manage billing button fails.
+5. **Webhook** endpoint `https://api.morrri.com/billing/webhook` (or the current API host) with the events
+   `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`,
+   `customer.subscription.deleted`, `customer.subscription.paused`, `customer.subscription.resumed`
+   → its signing secret is `STRIPE_WEBHOOK_SECRET` (`whsec_…`).
+6. **Smart retries / dunning** (Settings → Billing → Subscriptions): pick what happens when retries run out. *Cancel* or *mark unpaid* both pause online booking; until then a `past_due` business keeps taking bookings.
+
+```powershell
+heroku config:set -a reserivo-api STRIPE_SECRET_KEY=sk_live_... STRIPE_PRICE_ID=price_... STRIPE_INTRO_COUPON_ID=... STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
 ## 3. Configure the web app
 
 ```powershell

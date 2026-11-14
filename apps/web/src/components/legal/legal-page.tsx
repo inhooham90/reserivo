@@ -1,3 +1,4 @@
+import { SMS_PROGRAM_ENABLED } from "@reserivo/shared";
 import Image from "next/image";
 import { Wordmark } from "@/components/brand/wordmark";
 import { Children, cloneElement, isValidElement, type ReactElement, type ReactNode } from "react";
@@ -16,7 +17,7 @@ const DOCS: { key: LegalDoc; href: string }[] = [
   { key: "terms", href: "/terms" },
   { key: "privacy", href: "/privacy" },
   { key: "accessibility", href: "/accessibility" },
-  { key: "sms", href: "/sms" },
+  ...(SMS_PROGRAM_ENABLED ? [{ key: "sms" as const, href: "/sms" }] : []),
 ];
 
 const container = "mx-auto w-full max-w-[calc(1200px+5rem)] px-6 md:px-10";

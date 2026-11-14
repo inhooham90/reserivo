@@ -1,3 +1,4 @@
+import { SMS_PROGRAM_ENABLED } from "@reserivo/shared";
 import { useTranslations } from "next-intl";
 import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import { Link } from "@/i18n/navigation";
@@ -31,6 +32,9 @@ export function PublicFooter({ className, variant = "default" }: { className?: s
         </span>
         {/* `contents` keeps the default row flat; the home grid centres the links as one group. */}
         <span className={cn("contents", home && "md:flex md:flex-wrap md:justify-center md:gap-x-6")}>
+          <Link href="/pricing" className={link}>
+            {t("pricing")}
+          </Link>
           <Link href="/terms" className={link}>
             {t("terms")}
           </Link>
@@ -40,9 +44,11 @@ export function PublicFooter({ className, variant = "default" }: { className?: s
           <Link href="/accessibility" className={link}>
             {t("accessibility")}
           </Link>
-          <Link href="/sms" className={link}>
-            {t("sms")}
-          </Link>
+          {SMS_PROGRAM_ENABLED && (
+            <Link href="/sms" className={link}>
+              {t("sms")}
+            </Link>
+          )}
           <a href={`mailto:${LEGAL.supportEmail}`} className={link}>
             {t("contact")}
           </a>

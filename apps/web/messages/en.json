@@ -83,6 +83,7 @@
     "reminders": {
       "title": "Appointment reminders",
       "body": "Every booking gets a confirmation by email straight away, and a reminder before the appointment. A client who gives a mobile number while booking can also tick a box to get that reminder as a text message: appointment reminders only, never marketing, and never without asking. The whole program, including the exact wording of the opt-in, is set out at <link>morrri.com/sms</link>.",
+      "bodyEmailOnly": "Every booking gets a confirmation by email straight away, and a reminder by email before the appointment.",
       "steps": {
         "listLabel": "What a client receives",
         "confirmTitle": "Confirmation by email",
@@ -131,19 +132,23 @@
         "d": "Messages go through {product}",
         "e": "No cut of your bookings"
       }
-    }
+    },
+    "pricingNav": "Pricing"
   },
   "footer": {
     "terms": "Terms",
     "privacy": "Privacy",
     "accessibility": "Accessibility",
     "sms": "Text reminders",
-    "contact": "Contact"
+    "contact": "Contact",
+    "pricing": "Pricing"
   },
   "storefront": {
     "metaTitle": "Book at {name} · {product}",
     "chooseService": "Choose a service to see available times.",
-    "chooseMember": "Choose a team member to see their services and available times."
+    "chooseMember": "Choose a team member to see their services and available times.",
+    "pausedLead": "Online booking is paused for now.",
+    "pausedBody": "{name} isn’t taking online bookings right now. Please contact them directly to book."
   },
   "booking": {
     "steps": {
@@ -277,7 +282,8 @@
       "body": "Give everyone their own schedule and services, keep client contact details private, and manage it all from one place.",
       "point1": "Clients book without an account",
       "point2": "Reminders by email, and by text if they opt in",
-      "monaAlt": "Mona the cat checking a business’s paperwork with a magnifying glass"
+      "monaAlt": "Mona the cat checking a business’s paperwork with a magnifying glass",
+      "point2EmailOnly": "Reminders by email before every appointment"
     },
     "show": "Show",
     "hide": "Hide",
@@ -565,6 +571,10 @@
       "yourSalons": {
         "label": "Your businesses",
         "hint": "Switch between them, or start another"
+      },
+      "billing": {
+        "label": "Billing",
+        "hint": "Your subscription, card and invoices"
       }
     },
     "salon": {
@@ -844,6 +854,76 @@
       "takesHint": "Solo operators and owners who take appointments. You can change this later under Settings → Team.",
       "create": "Create business",
       "creating": "Creating…"
+    },
+    "billing": {
+      "managersOnly": "Only managers can see and change billing.",
+      "notConfigured": "Billing isn’t set up on this server, so nothing is charged and online booking is never paused.",
+      "processing": "Thanks! Stripe is confirming your subscription. This usually takes a few seconds; reload if this doesn’t update.",
+      "statusTitle": "Subscription",
+      "state": {
+        "active": {
+          "label": "Active",
+          "body": "{price} a month. Next charge on {date}."
+        },
+        "pastDue": {
+          "label": "Payment failed",
+          "body": "Your last payment didn’t go through. Stripe will retry; update your card to keep online booking on."
+        },
+        "grace": {
+          "label": "Not subscribed yet",
+          "body": "Online booking stays on until {date}. Subscribe before then to keep it on."
+        },
+        "inactive": {
+          "label": "Ended",
+          "body": "Your subscription has ended. Subscribe again to turn online booking back on."
+        },
+        "none": {
+          "label": "Not subscribed",
+          "body": "Subscribe to turn on online booking."
+        }
+      },
+      "cancelling": "Cancelling",
+      "cancellingBody": "Your subscription ends on {date}. Online booking pauses after that.",
+      "onlineBooking": "Online booking",
+      "bookingOn": "On: clients can book from your page.",
+      "bookingPaused": "Paused: your page is up but takes no bookings. Your team can still add appointments.",
+      "manageTitle": "Card, invoices and cancelling",
+      "manageHint": "Opens Stripe’s secure billing page.",
+      "manage": "Manage billing",
+      "subscribeTitle": "Subscribe",
+      "plan": "{price} a month.",
+      "promoLabel": "Promo code (optional)",
+      "promoHint": "Have a code? It replaces the intro price.",
+      "subscribe": "Continue to payment",
+      "invoices": "Past invoices",
+      "renewal": "Renews every month at {price} after any intro period, until you cancel. Cancel anytime from Manage billing.",
+      "notice": {
+        "paused": {
+          "title": "Online booking is paused",
+          "body": "This business has no active subscription, so clients can’t book online. Your team can still add appointments.",
+          "action": "Subscribe"
+        },
+        "pastDue": {
+          "title": "Your payment didn’t go through",
+          "body": "Update your card to keep online booking on.",
+          "action": "Update card"
+        },
+        "grace": {
+          "title": "Subscribe to keep online booking on",
+          "body": "Online booking stays on until {date}.",
+          "action": "See plans"
+        }
+      },
+      "loading": "Loading billing…",
+      "loadFailed": "Billing couldn’t be loaded.",
+      "retry": "Try again",
+      "unavailable": "Payments aren’t available right now, so you can’t subscribe or change billing at the moment. Online booking stays on in the meantime. Please try again later.",
+      "processingSlow": "We haven’t heard back from Stripe yet. If you completed payment, reload this page in a minute; your card won’t be charged twice.",
+      "offerBadge": "Launch offer",
+      "offerPrice": "{intro}/month for {months} months",
+      "offerThen": "Then {price}/month.",
+      "included": "One price for the whole business: every team member, unlimited bookings.",
+      "redirecting": "Opening Stripe…"
     }
   },
   "admin": {
@@ -982,5 +1062,62 @@
     "saving": "Saving…",
     "undo": "Undo: keep emailing me",
     "saveFailed": "That didn’t save. Try again."
+  },
+  "promo": {
+    "label": "Launch offer",
+    "badge": "Launch offer:",
+    "text": "{intro}/month for your first {months} months, then {price}/month.",
+    "link": "See pricing"
+  },
+  "pricing": {
+    "metaTitle": "Pricing · {product}",
+    "metaOffer": "One plan per business: {intro}/month for the first {months} months, then {price}/month. Everything included, cancel anytime.",
+    "metaPlan": "One plan per business: {price}/month. Everything included, cancel anytime.",
+    "title": "One simple plan for your whole business",
+    "subtitle": "Everything included, for every team member. No setup fees, no per-booking fees, cancel anytime.",
+    "planName": "{product}",
+    "offerBadge": "Launch offer",
+    "perMonthFor": "/month for your first {months} months",
+    "then": "Then {price}/month.",
+    "perMonth": "/month",
+    "perBusiness": "One price per business, however many team members you have.",
+    "cta": "Get started",
+    "ctaNote": "Create your account, then email {email} and we’ll approve it for your business.",
+    "includedTitle": "Everything included",
+    "features": {
+      "page": "Your own booking page at morrri.com/your-business",
+      "team": "Every team member with their own schedule, hours and services",
+      "unlimited": "Unlimited bookings and clients",
+      "reminders": "Confirmation and reminder emails for every booking",
+      "clients": "Client records with notes and visit history, contact details private to managers",
+      "messages": "Message clients without sharing anyone’s phone number"
+    },
+    "faqTitle": "Questions",
+    "faq": {
+      "offer": {
+        "q": "How does the launch offer work?",
+        "a": "Your business pays {intro} a month for its first {months} months, then {price} a month. It’s applied automatically when you subscribe; there’s no code to enter."
+      },
+      "perPerson": {
+        "q": "Do I pay per team member?",
+        "a": "No. It’s one price per business, however many team members you add."
+      },
+      "cancel": {
+        "q": "Can I cancel anytime?",
+        "a": "Yes, from Billing in your settings. Your subscription runs to the end of the month you’ve paid for, and nothing renews after that."
+      },
+      "ends": {
+        "q": "What happens if my subscription ends?",
+        "a": "Your booking page stays up but stops taking online bookings. Your schedule, clients and history all stay, and your team can still add appointments. Subscribe again to turn online booking back on."
+      },
+      "clientsPay": {
+        "q": "Do my clients pay anything?",
+        "a": "No. Clients book for free and don’t need an account."
+      },
+      "promo": {
+        "q": "I have a promo code. Where do I enter it?",
+        "a": "On the Billing page in your settings, before you continue to payment. A promo code replaces the launch offer."
+      }
+    }
   }
 }

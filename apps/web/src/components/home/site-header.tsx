@@ -16,6 +16,8 @@ const SECTIONS = [
 const ITEM =
   "inline-flex h-full items-center rounded-full px-5 text-sm font-semibold whitespace-nowrap transition-[background-color,color,transform] outline-none focus-visible:ring-3 focus-visible:ring-ring";
 const PRESS = "hover:scale-[1.04] active:scale-[0.98] motion-reduce:hover:scale-100 motion-reduce:active:scale-100";
+const INK = "bg-mona-ink text-white";
+const IDLE = "text-mona-ink shadow-[inset_0_0_0_1px_var(--border)] hover:bg-surface-muted";
 
 /**
  * Sticky landing header (website board): section links in a white capsule,
@@ -23,8 +25,9 @@ const PRESS = "hover:scale-[1.04] active:scale-[0.98] motion-reduce:hover:scale-
  * view, its item turning ink. On a phone the capsule goes and "Get started"
  * goes under `sm`, so the row never wraps; the hero repeats both links.
  */
-export function SiteHeader() {
+export function SiteHeader({ page = "home" }: { page?: "home" | "pricing" }) {
   const t = useTranslations("home");
+  const onHome = page === "home";
   // "loading" on the server and on first paint alike, so the label only
   // changes once the session is known and hydration stays consistent.
   const { status } = useAuth();
@@ -73,22 +76,31 @@ export function SiteHeader() {
             aria-label={t("navLabel")}
             className="hidden h-full gap-1 rounded-full bg-white p-1 shadow-[0_1px_3px_rgb(0_0_0/0.06)] md:inline-flex"
           >
-            {SECTIONS.map(({ id, key }) => (
-              <a
-                key={id}
-                href={`#${id}`}
-                onClick={() => setActive(id)}
-                aria-current={active === id ? "true" : undefined}
-                className={cn(
-                  ITEM,
-                  active === id
-                    ? "bg-mona-ink text-white"
-                    : "text-mona-ink shadow-[inset_0_0_0_1px_var(--border)] hover:bg-surface-muted",
-                )}
-              >
-                {t(key)}
-              </a>
-            ))}
+            {SECTIONS.map(({ id, key }) =>
+              onHome ? (
+                <a
+                  key={id}
+                  href={`#${id}`}
+                  onClick={() => setActive(id)}
+                  aria-current={active === id ? "true" : undefined}
+                  className={cn(ITEM, active === id ? INK : IDLE)}
+                >
+                  {t(key)}
+                </a>
+              ) : (
+                // Off the home page the sections live on it, so the anchors go there.
+                <Link key={id} href={`/#${id}`} className={cn(ITEM, IDLE)}>
+                  {t(key)}
+                </Link>
+              ),
+            )}
+            <Link
+              href="/pricing"
+              aria-current={page === "pricing" ? "page" : undefined}
+              className={cn(ITEM, page === "pricing" ? INK : IDLE)}
+            >
+              {t("pricingNav")}
+            </Link>
           </nav>
           {/* Either way it ends on the dashboard: /login forwards anyone already signed in. */}
           <Link href={signedIn ? "/dashboard" : "/login"} className={cn(ITEM, PRESS, "bg-lisa-soft text-mona-ink")}>

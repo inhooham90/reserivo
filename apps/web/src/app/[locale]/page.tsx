@@ -1,3 +1,4 @@
+import { SMS_PROGRAM_ENABLED } from "@reserivo/shared";
 import Image from "next/image";
 import type { CSSProperties } from "react";
 import { ArrowRight, Bell, Link2, LockKeyhole, Mail, MessageSquareText } from "lucide-react";
@@ -5,6 +6,7 @@ import { cn } from "cn";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Wordmark } from "@/components/brand/wordmark";
 import { PhotoBanner } from "@/components/home/photo-banner";
+import { PromoBanner } from "@/components/home/promo-banner";
 import { SiteHeader } from "@/components/home/site-header";
 import { PublicFooter } from "@/components/legal/public-footer";
 import { Button } from "@/components/ui/button";
@@ -46,6 +48,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         aria-hidden
         className="absolute inset-x-0 top-0 -z-10 h-[820px] bg-[radial-gradient(38%_46%_at_16%_4%,color-mix(in_srgb,var(--lisa)_42%,transparent),transparent_72%),radial-gradient(34%_42%_at_86%_20%,color-mix(in_srgb,var(--peach)_55%,transparent),transparent_72%),linear-gradient(to_bottom,color-mix(in_srgb,var(--lisa-soft)_45%,var(--canvas)),var(--canvas))]"
       />
+      <PromoBanner />
       <SiteHeader />
 
       <main id="main" tabIndex={-1} className="flex-1 outline-none">
@@ -179,16 +182,19 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
             {t("reminders.title")}
           </h2>
           <p className="mx-auto mt-6 max-w-[49rem] font-display text-lg leading-[1.55] text-mona-ink md:text-xl">
-            {t.rich("reminders.body", {
-              link: (chunks) => (
-                <Link
-                  href="/sms"
-                  className="font-sans font-medium whitespace-nowrap underline decoration-olive underline-offset-4 transition-colors hover:decoration-mona-ink"
-                >
-                  {chunks}
-                </Link>
-              ),
-            })}
+            {/* Email-only until A2P 10DLC approval; see SMS_PROGRAM_ENABLED. */}
+            {SMS_PROGRAM_ENABLED
+              ? t.rich("reminders.body", {
+                  link: (chunks) => (
+                    <Link
+                      href="/sms"
+                      className="font-sans font-medium whitespace-nowrap underline decoration-olive underline-offset-4 transition-colors hover:decoration-mona-ink"
+                    >
+                      {chunks}
+                    </Link>
+                  ),
+                })
+              : t("reminders.bodyEmailOnly")}
           </p>
           <ol
             aria-label={t("reminders.steps.listLabel")}
@@ -196,7 +202,9 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
           >
             <Step icon={<Mail />} title={t("reminders.steps.confirmTitle")} body={t("reminders.steps.confirmBody")} />
             <Step icon={<Bell />} title={t("reminders.steps.reminderTitle")} body={t("reminders.steps.reminderBody")} />
-            <Step icon={<MessageSquareText />} title={t("reminders.steps.textTitle")} body={t("reminders.steps.textBody")} />
+            {SMS_PROGRAM_ENABLED && (
+              <Step icon={<MessageSquareText />} title={t("reminders.steps.textTitle")} body={t("reminders.steps.textBody")} />
+            )}
           </ol>
         </section>
 

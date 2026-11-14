@@ -2,6 +2,7 @@
 
 import {
   addDays,
+  SMS_PROGRAM_ENABLED,
   todayIn,
   type AvailabilityResponse,
   type BookAnyAppointmentInput,
@@ -734,7 +735,7 @@ function Details({
                 name: name.trim(),
                 email: email.trim(),
                 phone: phone.trim() || undefined,
-                smsConsent: phone.trim() ? smsConsent : undefined,
+                smsConsent: SMS_PROGRAM_ENABLED && phone.trim() ? smsConsent : undefined,
               },
               notes: notes.trim() || undefined,
             });
@@ -780,7 +781,8 @@ function Details({
               <FieldError message={fieldError("phone")} />
             </div>
           </div>
-          <SmsConsent checked={smsConsent} onChange={setSmsConsent} hasPhone={Boolean(phone.trim())} />
+          {/* Off until A2P 10DLC approval; see SMS_PROGRAM_ENABLED. */}
+          {SMS_PROGRAM_ENABLED && <SmsConsent checked={smsConsent} onChange={setSmsConsent} hasPhone={Boolean(phone.trim())} />}
           <div className="grid gap-2">
             <Label htmlFor="bk-notes">{t("details.notes")}</Label>
             {/* Not a pill: a multi-line field in a full capsule clips its corners. */}

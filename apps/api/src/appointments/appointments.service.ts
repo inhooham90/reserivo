@@ -26,6 +26,7 @@ import {
 } from '@reserivo/shared';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { SlotsService } from '../availability/slots.service.js';
+import { BillingService } from '../billing/billing.service.js';
 import { CustomersService } from '../customers/customers.service.js';
 import { NotificationsService } from '../notifications/notifications.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -92,6 +93,7 @@ export class AppointmentsService {
     private readonly slots: SlotsService,
     private readonly customers: CustomersService,
     private readonly notifications: NotificationsService,
+    private readonly billing: BillingService,
   ) {}
 
   // ---------- Public ----------
@@ -463,9 +465,11 @@ export class AppointmentsService {
     }
   }
 
+  /** Public paths only, so this is also where an unpaid business stops taking online bookings. Staff bookings never pass here. */
   private async salonBySlug(slug: string) {
     const salon = await this.prisma.salon.findUnique({ where: { slug } });
     if (!salon) throw new NotFoundException('Business not found');
+    if (!this.billing.acceptsBookings(salon)) throw new ConflictException('This business isn’t taking online bookings right now');
     return salon;
   }
 

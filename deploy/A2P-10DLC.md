@@ -1,5 +1,12 @@
 # A2P 10DLC campaign registration
 
+> **The SMS program is currently switched off** (`SMS_PROGRAM_ENABLED = false` in
+> `packages/shared/src/legal.ts`): no consent checkbox, no `/sms` program page,
+> no footer or home-page links, no texts sent. **Set it to `true` and deploy
+> before submitting or re-submitting the campaign** — the reviewer must be able
+> to find `/sms` from the site root and see the live checkbox, or it is rejected
+> again with 30909.
+
 What is filed with Twilio for the campaign, kept here so it can be diffed against
 the texts it has to agree with: the consent checkbox
 (`apps/web/src/components/booking/sms-consent.tsx`), the "Text messages"

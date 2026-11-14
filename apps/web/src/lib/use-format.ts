@@ -6,6 +6,7 @@ import type { Locale } from "@/i18n/routing";
 import {
   formatCents,
   formatDuration,
+  formatPrice,
   formatInTz,
   formatLocalDate,
   formatLocalDateParts,
@@ -38,6 +39,7 @@ export function useFormat() {
       locale,
 
       cents: (c: number) => formatCents(c, locale),
+      price: (c: number) => formatPrice(c, locale),
       duration: (min: number) => formatDuration(min, locale),
       inTz: (iso: string | Date, timeZone: string, style?: DateStyle) => formatInTz(iso, timeZone, locale, style),
       localDate: (ymd: string, style?: DateStyle) => formatLocalDate(ymd, locale, style),

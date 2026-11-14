@@ -51,11 +51,20 @@ export default async function SalonPublicPage({ params }: Props) {
           </h1>
           <p className="max-w-[42ch] text-lg text-body">
             {/* Same test as BookingFlow's: with more than one team member the flow opens on choosing one. */}
-            {t(salon.designers.filter((d) => d.services.length > 0).length > 1 ? "chooseMember" : "chooseService")}
+            {!salon.acceptingBookings
+              ? t("pausedLead")
+              : t(salon.designers.filter((d) => d.services.length > 0).length > 1 ? "chooseMember" : "chooseService")}
           </p>
         </section>
         <div className="pt-10 md:pt-14">
-          <BookingFlow salon={salon} />
+          {/* No subscription: the page stays up (the link on their card keeps working), but takes no bookings. */}
+          {salon.acceptingBookings ? (
+            <BookingFlow salon={salon} />
+          ) : (
+            <p data-component="BookingPaused" className="max-w-[56ch] text-lg text-body">
+              {t("pausedBody", { name: salon.name })}
+            </p>
+          )}
         </div>
       </main>
       <PublicFooter className="max-w-[calc(1200px+5rem)] md:px-10" />

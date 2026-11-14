@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { SMS_PROGRAM_ENABLED } from '@reserivo/shared';
 import type { Env } from '../config/env.js';
 
 export interface SmsTransport {
@@ -79,9 +80,13 @@ export class SmsService {
     private readonly config: ConfigService<Env, true>,
   ) {}
 
-  /** False until Twilio is configured, so the reminder sweep skips SMS entirely. */
+  /**
+   * False until the program is switched on (SMS_PROGRAM_ENABLED, after A2P
+   * 10DLC approval) *and* Twilio is configured, so the reminder sweep skips
+   * SMS entirely. Setting the keys alone sends nothing.
+   */
   get enabled(): boolean {
-    return Boolean(this.config.get('TWILIO_ACCOUNT_SID') && this.config.get('TWILIO_FROM_NUMBER'));
+    return SMS_PROGRAM_ENABLED && Boolean(this.config.get('TWILIO_ACCOUNT_SID') && this.config.get('TWILIO_FROM_NUMBER'));
   }
 
   /** Throws on failure: the caller decides whether to retry, unlike fire-and-forget email. */

@@ -42,6 +42,20 @@ const envSchema = z.object({
   TWILIO_ACCOUNT_SID: optionalString,
   TWILIO_AUTH_TOKEN: optionalString,
   TWILIO_FROM_NUMBER: optionalString,
+  /**
+   * Billing. Unset STRIPE_SECRET_KEY → billing is off: nothing is charged and
+   * no business is paused (development and tests). Once set, the price and the
+   * webhook secret must be too, or a business could subscribe and never be
+   * recorded as paid.
+   *   STRIPE_PRICE_ID          — the $29/month recurring Price.
+   *   STRIPE_INTRO_COUPON_ID   — $28 off, duration "repeating", 6 months. Optional;
+   *                              without it the first subscription pays full price.
+   *   STRIPE_WEBHOOK_SECRET    — whsec_… of the endpoint pointing at /billing/webhook.
+   */
+  STRIPE_SECRET_KEY: optionalString,
+  STRIPE_PRICE_ID: optionalString,
+  STRIPE_INTRO_COUPON_ID: optionalString,
+  STRIPE_WEBHOOK_SECRET: optionalString,
   EMAIL_FROM: z.string().default('Morrri <onboarding@resend.dev>'),
   /**
    * Comma-separated emails that always hold site admin. Applied on boot to
@@ -61,6 +75,11 @@ const envSchema = z.object({
   JWT_REFRESH_SECRET: z.string().min(16),
   JWT_ACCESS_TTL_SECONDS: z.coerce.number().int().positive().default(15 * 60),
   REFRESH_TTL_DAYS: z.coerce.number().int().positive().default(30),
+}).superRefine((env, ctx) => {
+  if (!env.STRIPE_SECRET_KEY) return;
+  for (const key of ['STRIPE_PRICE_ID', 'STRIPE_WEBHOOK_SECRET'] as const) {
+    if (!env[key]) ctx.addIssue({ code: 'custom', path: [key], message: `required when STRIPE_SECRET_KEY is set` });
+  }
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -7,7 +7,8 @@ import { AppModule } from './app.module.js';
 import type { Env } from './config/env.js';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // rawBody: the Stripe webhook verifies its signature over the exact bytes received.
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   const config = app.get<ConfigService<Env, true>>(ConfigService);
   const isProduction = config.get('NODE_ENV') === 'production';
 

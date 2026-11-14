@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { BLOCKING_STATUSES, type CreateCustomerInput, type Customer, type CustomerDetail, type CustomersQuery, type UpdateCustomerInput } from '@reserivo/shared';
+import { BLOCKING_STATUSES, SMS_PROGRAM_ENABLED, type CreateCustomerInput, type Customer, type CustomerDetail, type CustomersQuery, type UpdateCustomerInput } from '@reserivo/shared';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { isManager } from '../tenancy/access.js';
@@ -35,7 +35,10 @@ export class CustomersService {
   ): Promise<CustomerRow> {
     // Consent is only recorded when explicitly given, and withdrawing it here
     // takes effect immediately — the TCPA treats an opt-out as binding.
-    const smsConsentAt = details.smsConsent === undefined ? undefined : details.smsConsent ? new Date() : null;
+    // While the program is off nobody is shown the checkbox, so a `true` (only
+    // possible through the raw API) is not consent to anything; a withdrawal still is.
+    const smsConsentAt =
+      details.smsConsent === undefined || (details.smsConsent && !SMS_PROGRAM_ENABLED) ? undefined : details.smsConsent ? new Date() : null;
 
     if (user) {
       return this.prisma.customer.upsert({

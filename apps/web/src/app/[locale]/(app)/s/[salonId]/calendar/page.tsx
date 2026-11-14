@@ -31,6 +31,7 @@ import { Label } from "@/components/ui/label";
 import { Link } from "@/i18n/navigation";
 import { api, ApiError } from "@/lib/api";
 import { salonKeys, useSalon } from "@/lib/salon-context";
+import { BillingNotice } from "@/components/billing-notice";
 import { SetupGuide } from "@/components/setup/setup-guide";
 import { useFormat } from "@/lib/use-format";
 import { ghostPillSm, pillButtonSm, pillSelectSm, textLink } from "@/lib/v3";
@@ -358,6 +359,7 @@ export default function CalendarPage() {
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
+      <BillingNotice />
       <SetupGuide />
       {/* Two fixed rows. The date's length varies by day and language, so the
           date navigation and New appointment share a row that never wraps from

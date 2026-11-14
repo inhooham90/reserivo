@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog } from "@base-ui/react/dialog";
-import { Clock, LayoutGrid, Scissors, Search, Store, UsersRound, X, type LucideIcon } from "lucide-react";
+import { Clock, CreditCard, LayoutGrid, Scissors, Search, Store, UsersRound, X, type LucideIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
@@ -11,7 +11,7 @@ import { useSalon } from "@/lib/salon-context";
 import { pillInputSm } from "@/lib/v3";
 import { cn } from "cn";
 
-type SectionKey = "salon" | "team" | "services" | "hours";
+type SectionKey = "salon" | "team" | "services" | "hours" | "billing";
 
 /** The salon's own sections, in rail order. "Your salons" is an account page and sits apart. */
 const SECTIONS: { key: SectionKey; href: string; icon: LucideIcon }[] = [
@@ -19,7 +19,11 @@ const SECTIONS: { key: SectionKey; href: string; icon: LucideIcon }[] = [
   { key: "team", href: "/team", icon: UsersRound },
   { key: "services", href: "/services", icon: Scissors },
   { key: "hours", href: "/hours", icon: Clock },
+  { key: "billing", href: "/billing", icon: CreditCard },
 ];
+
+/** The business's money: off the rail for anyone who is not a manager (the API refuses them too). */
+const MANAGER_ONLY: SectionKey[] = ["billing"];
 
 interface SettingsDialogContextValue {
   close: () => void;
@@ -52,7 +56,7 @@ const railItem =
  */
 export function SettingsDialog({ intercepted = false, children }: { intercepted?: boolean; children: ReactNode }) {
   const { salonId } = useParams<{ salonId: string }>();
-  const { salon } = useSalon();
+  const { salon, isManager } = useSalon();
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations("settings");
@@ -71,7 +75,7 @@ export function SettingsDialog({ intercepted = false, children }: { intercepted?
   const q = query.trim().toLowerCase();
   const matches = (key: string) =>
     !q || `${t(`sections.${key}.label`)} ${t(`sections.${key}.hint`)}`.toLowerCase().includes(q);
-  const visible = SECTIONS.filter((s) => matches(s.key));
+  const visible = SECTIONS.filter((s) => (isManager || !MANAGER_ONLY.includes(s.key)) && matches(s.key));
   const showSalons = matches("yourSalons");
 
   return (

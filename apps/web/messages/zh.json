@@ -83,6 +83,7 @@
     "reminders": {
       "title": "预约提醒",
       "body": "每笔预约都会立即通过电子邮件确认，并在到店前发送提醒。预约时填写手机号码的客户还可以勾选一个选项，通过短信接收这条提醒：只发送预约提醒，绝不发送营销信息，未经同意绝不发送。完整说明（包括同意条款的原文）请见 <link>morrri.com/sms</link>。",
+      "bodyEmailOnly": "每笔预约都会立即通过电子邮件确认，并在到店前通过电子邮件发送提醒。",
       "steps": {
         "listLabel": "客户会收到的消息",
         "confirmTitle": "邮件确认",
@@ -131,19 +132,23 @@
         "d": "消息通过 {product} 传递",
         "e": "预约不抽成"
       }
-    }
+    },
+    "pricingNav": "价格"
   },
   "footer": {
     "terms": "服务条款",
     "privacy": "隐私政策",
     "accessibility": "无障碍",
     "sms": "短信提醒",
-    "contact": "联系我们"
+    "contact": "联系我们",
+    "pricing": "价格"
   },
   "storefront": {
     "metaTitle": "预约 {name} · {product}",
     "chooseService": "选择服务项目即可查看可预约时间。",
-    "chooseMember": "选择团队成员即可查看其服务和可预约时间。"
+    "chooseMember": "选择团队成员即可查看其服务和可预约时间。",
+    "pausedLead": "在线预约暂时关闭。",
+    "pausedBody": "{name} 目前不接受在线预约。请直接联系商家预约。"
   },
   "booking": {
     "steps": {
@@ -277,7 +282,8 @@
       "body": "让每位成员拥有自己的日程和服务，保护客户联系方式的隐私，一切都在一处管理。",
       "point1": "客户无需注册即可预约",
       "point2": "邮件提醒，客户同意后也可短信提醒",
-      "monaAlt": "猫咪 Mona 正用放大镜查看商家的文件"
+      "monaAlt": "猫咪 Mona 正用放大镜查看商家的文件",
+      "point2EmailOnly": "每次预约前通过电子邮件提醒"
     },
     "show": "显示",
     "hide": "隐藏",
@@ -565,6 +571,10 @@
       "yourSalons": {
         "label": "我的商家",
         "hint": "在商家之间切换，或新建一个"
+      },
+      "billing": {
+        "label": "账单",
+        "hint": "订阅、银行卡和发票"
       }
     },
     "salon": {
@@ -844,6 +854,76 @@
       "takesHint": "适用于个人经营者和亲自接受预约的店主。之后可在 设置 → 团队 中更改。",
       "create": "创建商家",
       "creating": "正在创建…"
+    },
+    "billing": {
+      "managersOnly": "只有管理员可以查看和更改账单。",
+      "notConfigured": "此服务器未设置账单，因此不会收费，在线预约也不会被暂停。",
+      "processing": "谢谢！Stripe 正在确认您的订阅，通常只需几秒钟；如果没有更新，请刷新页面。",
+      "statusTitle": "订阅",
+      "state": {
+        "active": {
+          "label": "有效",
+          "body": "每月 {price}。下次扣款日期：{date}。"
+        },
+        "pastDue": {
+          "label": "付款失败",
+          "body": "上一次付款未成功。Stripe 会重试；请更新银行卡以保持在线预约开启。"
+        },
+        "grace": {
+          "label": "尚未订阅",
+          "body": "在线预约将保持开启至 {date}。请在此之前订阅以继续开启。"
+        },
+        "inactive": {
+          "label": "已结束",
+          "body": "您的订阅已结束。重新订阅即可再次开启在线预约。"
+        },
+        "none": {
+          "label": "未订阅",
+          "body": "订阅后即可开启在线预约。"
+        }
+      },
+      "cancelling": "即将取消",
+      "cancellingBody": "您的订阅将于 {date} 结束，之后在线预约将暂停。",
+      "onlineBooking": "在线预约",
+      "bookingOn": "已开启：客户可以在您的页面上预约。",
+      "bookingPaused": "已暂停：页面仍可访问，但不接受预约。您的团队仍可添加预约。",
+      "manageTitle": "银行卡、发票和取消订阅",
+      "manageHint": "将打开 Stripe 的安全账单页面。",
+      "manage": "管理账单",
+      "subscribeTitle": "订阅",
+      "plan": "每月 {price}。",
+      "promoLabel": "优惠码（可选）",
+      "promoHint": "有优惠码？它将代替首期优惠价格。",
+      "subscribe": "前往付款",
+      "invoices": "历史发票",
+      "renewal": "优惠期结束后，每月按 {price} 自动续订，直至您取消。可随时在“管理账单”中取消。",
+      "notice": {
+        "paused": {
+          "title": "在线预约已暂停",
+          "body": "此商家没有有效订阅，客户无法在线预约。您的团队仍可添加预约。",
+          "action": "订阅"
+        },
+        "pastDue": {
+          "title": "您的付款未成功",
+          "body": "请更新银行卡以保持在线预约开启。",
+          "action": "更新银行卡"
+        },
+        "grace": {
+          "title": "订阅以保持在线预约开启",
+          "body": "在线预约将保持开启至 {date}。",
+          "action": "查看方案"
+        }
+      },
+      "loading": "正在加载账单…",
+      "loadFailed": "无法加载账单。",
+      "retry": "重试",
+      "unavailable": "目前无法付款，因此暂时无法订阅或更改账单。在此期间在线预约保持开启。请稍后再试。",
+      "processingSlow": "尚未收到 Stripe 的回复。如果您已完成付款，请稍后刷新此页面；您的卡不会被重复扣款。",
+      "offerBadge": "上线优惠",
+      "offerPrice": "{months} 个月内每月 {intro}",
+      "offerThen": "之后每月 {price}。",
+      "included": "整个商家一个价格：所有团队成员，预约不限。",
+      "redirecting": "正在打开 Stripe…"
     }
   },
   "admin": {
@@ -982,5 +1062,62 @@
     "saving": "正在保存…",
     "undo": "撤销：继续给我发邮件",
     "saveFailed": "未能保存，请重试。"
+  },
+  "promo": {
+    "label": "上线优惠",
+    "badge": "上线优惠：",
+    "text": "前 {months} 个月每月 {intro}，之后每月 {price}。",
+    "link": "查看价格"
+  },
+  "pricing": {
+    "metaTitle": "价格 · {product}",
+    "metaOffer": "每个商家一个方案：前 {months} 个月每月 {intro}，之后每月 {price}。包含全部功能，可随时取消。",
+    "metaPlan": "每个商家一个方案：每月 {price}。包含全部功能，可随时取消。",
+    "title": "为整个商家准备的一个简单方案",
+    "subtitle": "每位团队成员都可使用全部功能。无安装费，无按预约收费，可随时取消。",
+    "planName": "{product}",
+    "offerBadge": "上线优惠",
+    "perMonthFor": "/月，前 {months} 个月",
+    "then": "之后每月 {price}。",
+    "perMonth": "/月",
+    "perBusiness": "无论团队有多少成员，每个商家只需一个价格。",
+    "cta": "立即开始",
+    "ctaNote": "创建账户后，请发送电子邮件至 {email}，我们会为您的商家开通。",
+    "includedTitle": "包含全部功能",
+    "features": {
+      "page": "专属预约页面：morrri.com/your-business",
+      "team": "每位团队成员都有自己的日程、工作时间和服务",
+      "unlimited": "预约和客户数量不限",
+      "reminders": "每笔预约都有确认和提醒邮件",
+      "clients": "包含备注和到店记录的客户档案，联系方式仅管理员可见",
+      "messages": "与客户发消息，无需透露任何人的电话号码"
+    },
+    "faqTitle": "常见问题",
+    "faq": {
+      "offer": {
+        "q": "上线优惠如何使用？",
+        "a": "您的商家前 {months} 个月每月支付 {intro}，之后每月 {price}。订阅时自动生效，无需输入优惠码。"
+      },
+      "perPerson": {
+        "q": "需要按团队成员付费吗？",
+        "a": "不需要。无论添加多少团队成员，每个商家只需一个价格。"
+      },
+      "cancel": {
+        "q": "可以随时取消吗？",
+        "a": "可以，在设置中的“账单”里取消。订阅持续到已付款月份结束，之后不再续订。"
+      },
+      "ends": {
+        "q": "订阅结束后会怎样？",
+        "a": "预约页面仍可访问，但不再接受在线预约。日程、客户和历史记录都会保留，团队仍可添加预约。重新订阅即可再次开启在线预约。"
+      },
+      "clientsPay": {
+        "q": "我的客户需要付费吗？",
+        "a": "不需要。客户免费预约，也无需注册账户。"
+      },
+      "promo": {
+        "q": "我有优惠码，在哪里输入？",
+        "a": "在设置中的“账单”页面、前往付款之前输入。优惠码将代替上线优惠。"
+      }
+    }
   }
 }

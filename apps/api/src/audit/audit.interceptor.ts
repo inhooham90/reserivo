@@ -8,10 +8,10 @@ import { AuditService } from './audit.service.js';
 
 const MUTATING = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 /**
- * Endpoints that hand out credentials: their bodies are never worth
+ * Endpoints that hand out credentials, and Stripe's webhook: their bodies are never worth
  * persisting, and impersonation writes its own labelled row instead.
  */
-const SKIP_PREFIXES = ['/auth/', '/admin/impersonate/'];
+const SKIP_PREFIXES = ['/auth/', '/admin/impersonate/', '/billing/webhook'];
 
 type AuditedRequest = Request & { user?: AuthenticatedUser; tenant?: TenantContext };
 

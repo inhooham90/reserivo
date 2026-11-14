@@ -24,6 +24,7 @@ const RESERVED_SLUGS = new Set([
   'ko',
   'login',
   'messages',
+  'pricing',
   'privacy',
   'register',
   'reset-password',
@@ -117,6 +118,8 @@ export type MySalon = z.infer<typeof mySalonSchema>;
 
 /** The booking page payload: salon + opening hours + bookable team + their live services. No contact fields, ever. */
 export const publicSalonSchema = salonSchema.extend({
+  /** False while the business has no live subscription (see billing.ts): the page shows a notice instead of the flow. */
+  acceptingBookings: z.boolean(),
   hours: z.array(z.object({ weekday: z.number().int(), startMinutes: z.number().int(), endMinutes: z.number().int() })),
   designers: z.array(
     z.object({
