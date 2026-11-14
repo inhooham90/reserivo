@@ -11,6 +11,7 @@ import { useSettingsDialog } from "@/components/settings/settings-dialog";
 import { SettingsRow, SettingsRows, SettingsSection, Switch, WithUnit } from "@/components/settings/settings-ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { api, ApiError } from "@/lib/api";
 import { salonKeys, useSalon } from "@/lib/salon-context";
 import { ghostPillSm, pillButtonSm, pillInputSm, pillSelectSm } from "@/lib/v3";
@@ -22,11 +23,17 @@ const REMINDER_CHOICES = [48, 24, 2] as const;
 type Form = Pick<
   Salon,
   "name" | "timezone" | "slotIntervalMin" | "leadTimeMin" | "maxAdvanceDays" | "cancelWindowHours" | "reminderHoursBefore"
->;
+> & {
+  // Edited as text; the shared schema turns an emptied field back into null.
+  phone: string;
+  address: string;
+};
 
 const fromSalon = (s: Salon): Form => ({
   name: s.name,
   timezone: s.timezone,
+  phone: s.phone ?? "",
+  address: s.address ?? "",
   slotIntervalMin: s.slotIntervalMin,
   leadTimeMin: s.leadTimeMin,
   maxAdvanceDays: s.maxAdvanceDays,
@@ -110,6 +117,37 @@ export default function SalonSettings() {
           </SettingsRow>
         </SettingsRows>
       </SettingsSection>
+
+      {/* Anchor for the setup guide's contact step. */}
+      <div id="guide-contact" className="scroll-mt-48 md:scroll-mt-36">
+        <SettingsSection title={t("contactTitle")} hint={t("contactHint")}>
+          <SettingsRows>
+            <SettingsRow label={t("phone")} htmlFor="st-phone" description={t("phoneHint")}>
+              <Input
+                id="st-phone"
+                type="tel"
+                autoComplete="tel"
+                className={pillInputSm}
+                value={form.phone}
+                disabled={!isManager}
+                onChange={(e) => set({ phone: e.target.value })}
+              />
+            </SettingsRow>
+            <SettingsRow label={t("address")} htmlFor="st-address" description={t("addressHint")}>
+              {/* Not a pill: a multi-line field in a full capsule clips its corners. */}
+              <Textarea
+                id="st-address"
+                rows={3}
+                autoComplete="street-address"
+                className="rounded-lg bg-card"
+                value={form.address}
+                disabled={!isManager}
+                onChange={(e) => set({ address: e.target.value })}
+              />
+            </SettingsRow>
+          </SettingsRows>
+        </SettingsSection>
+      </div>
 
       <SettingsSection title={t("policies")} hint={t("policiesHint")}>
         <SettingsRows>

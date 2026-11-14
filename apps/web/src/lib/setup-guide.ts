@@ -13,6 +13,7 @@ import { salonKeys } from "@/lib/salon-context";
 export const STEP_SECTION: Record<SetupStep, string | null> = {
   business: "",
   businessHours: "/hours",
+  contact: "",
   myHours: "/hours",
   services: "/services",
   profile: "/team",
@@ -22,6 +23,7 @@ export const STEP_SECTION: Record<SetupStep, string | null> = {
 
 /** The element a step's section scrolls to, where the pane holds more than that step. */
 export const STEP_ANCHOR: Partial<Record<SetupStep, string>> = {
+  contact: "guide-contact",
   myHours: "guide-my-hours",
   profile: "guide-profile",
   team: "guide-invite",

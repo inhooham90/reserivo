@@ -25,7 +25,7 @@ export class SetupService {
     if (!member) throw new NotFoundException('Membership not found');
 
     const keys = setupStepsFor(member.roles);
-    const [services, members, invitations, colleagues] = await Promise.all([
+    const [services, members, invitations, colleagues, salon] = await Promise.all([
       keys.includes('services') ? this.prisma.service.count({ where: { designerId: member.id } }) : 0,
       keys.includes('team') ? this.prisma.salonMembership.count({ where: { salonId: tenant.salonId, status: 'ACTIVE' } }) : 0,
       keys.includes('team')
@@ -37,6 +37,9 @@ export class SetupService {
         where: { salonId: tenant.salonId, setupSteps: { hasSome: [...BUSINESS_STEPS] } },
         select: { setupSteps: true },
       }),
+      keys.includes('contact')
+        ? this.prisma.salon.findUnique({ where: { id: tenant.salonId }, select: { phone: true, address: true } })
+        : null,
     ]);
     // The business's own steps are done once anyone has done them: a second
     // manager should not be sent to re-check hours the owner already set.
@@ -47,6 +50,8 @@ export class SetupService {
     const done: Record<SetupStep, boolean> = {
       business: stored.has('business'),
       businessHours: stored.has('businessHours'),
+      // Derived, and shared like the business's other steps: either detail counts.
+      contact: Boolean(salon?.phone || salon?.address),
       myHours: stored.has('myHours'),
       services: services > 0,
       profile: Boolean(member.bio?.trim()),

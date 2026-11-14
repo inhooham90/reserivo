@@ -20,6 +20,9 @@ export type NotificationEvent =
         serviceName: string;
         startAt: string;
         timezone: string;
+        /** The business's public contact details, so the client can reach them to change it. */
+        salonPhone?: string | null;
+        salonAddress?: string | null;
       };
     }
   | {
@@ -38,6 +41,8 @@ export type NotificationEvent =
         serviceName: string;
         startAt: string;
         timezone: string;
+        salonPhone?: string | null;
+        salonAddress?: string | null;
         /** How far ahead this reminder is going out, so the wording can match. */
         hoursBefore: number;
         /** Where the customer can cancel or reschedule. */

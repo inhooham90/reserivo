@@ -153,13 +153,19 @@ describe('Phase 4 (e2e)', () => {
       .expect(200);
 
     // Scoped to this admin: the suite shares a database, so an unfiltered page
-    // fills up with other specs' rows.
-    const res = await api()
-      .get('/admin/audit')
-      .set(auth(adminToken))
-      .query({ impersonatedOnly: 'true', actorUserId: adminUserId, limit: 100 })
-      .expect(200);
-    const edit = res.body.entries.find((e: { action: string }) => e.action.includes('members'));
+    // fills up with other specs' rows. The interceptor writes its row after the
+    // response has gone (fire-and-forget), so under a busy parallel run the
+    // row can land a moment late: wait for it rather than assume it is there.
+    let edit: unknown;
+    for (let attempt = 0; attempt < 20 && !edit; attempt++) {
+      if (attempt) await new Promise((r) => setTimeout(r, 100));
+      const res = await api()
+        .get('/admin/audit')
+        .set(auth(adminToken))
+        .query({ impersonatedOnly: 'true', actorUserId: adminUserId, limit: 100 })
+        .expect(200);
+      edit = res.body.entries.find((e: { action: string }) => e.action.includes('members'));
+    }
     expect(edit).toMatchObject({
       actor: { id: adminUserId, name: admin.name },
       impersonated: { id: targetUserId, name: target.name },

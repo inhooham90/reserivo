@@ -16,12 +16,16 @@ const ITEM_CLASS =
  *
  * The popup renders in a portal outside .theme-morrri, so it carries the class itself.
  */
-export function PersonalMenu({ className }: { className?: string }) {
+export function PersonalMenu({ className, unread = 0 }: { className?: string; unread?: number }) {
   const t = useTranslations("nav");
   return (
     <Menu.Root>
       <Menu.Trigger render={<Button variant="ghost" size="sm" className={className} />}>
         {t("personal")}
+        {/* A reply to something the person booked elsewhere: a dot here, the count on the item. */}
+        {unread > 0 && (
+          <span aria-hidden data-component="UnreadDot" className="size-2 rounded-full bg-destructive" />
+        )}
         <ChevronDown aria-hidden className="size-3.5" />
       </Menu.Trigger>
       <Menu.Portal>
@@ -32,6 +36,7 @@ export function PersonalMenu({ className }: { className?: string }) {
             </Menu.LinkItem>
             <Menu.LinkItem render={<Link href="/messages" />} className={ITEM_CLASS}>
               {t("myMessages")}
+              {unread > 0 && <span className="ml-auto pl-3 text-xs font-semibold text-destructive">{t("unread", { count: unread })}</span>}
             </Menu.LinkItem>
           </Menu.Popup>
         </Menu.Positioner>

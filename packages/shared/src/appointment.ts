@@ -170,7 +170,15 @@ export const customerAppointmentSchema = z.object({
   priceCents: z.number().int(),
   designerId: z.string(),
   designerName: z.string(),
-  salon: z.object({ id: z.string(), name: z.string(), slug: z.string(), timezone: z.string() }),
+  /** phone and address are the business's public contact details: how a client changes a booking they can no longer cancel. */
+  salon: z.object({
+    id: z.string(),
+    name: z.string(),
+    slug: z.string(),
+    timezone: z.string(),
+    phone: z.string().nullable(),
+    address: z.string().nullable(),
+  }),
   /** Latest instant the customer may still self-cancel; null when the window has passed. */
   cancellableUntil: z.string().nullable(),
   notes: z.string().nullable(),

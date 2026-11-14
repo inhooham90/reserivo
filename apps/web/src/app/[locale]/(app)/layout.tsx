@@ -12,6 +12,7 @@ import { SettingsMenu } from "@/components/layout/settings-menu";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { useLiveUpdates, useUnread } from "@/lib/live";
 import { ghostPillSm, navGroup, navItem, outlinePillSm, textLink } from "@/lib/v3";
 import { cn } from "cn";
 
@@ -34,6 +35,20 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     if (status === "anonymous") router.replace("/login");
   }, [status, router]);
 
+  // Messages arrive live (see lib/live.ts); the counts drive the badges below.
+  const signedIn = status === "authenticated";
+  useLiveUpdates(signedIn);
+  const unread = useUnread(signedIn).data;
+  const staffUnread = unread ? (salonId ? (unread.salons[salonId] ?? 0) : Object.values(unread.salons).reduce((a, b) => a + b, 0)) : 0;
+  const personalUnread = unread?.personal ?? 0;
+  const tabUnread = user?.isBusinessAccount ? staffUnread : personalUnread;
+
+  // "(2) Morrri" in the browser tab, for the front-desk computer with Morrri in a background tab.
+  useEffect(() => {
+    const base = document.title.replace(/^\(\d+\)\s*/, "");
+    document.title = tabUnread > 0 ? `(${tabUnread}) ${base}` : base;
+  }, [tabUnread, pathname]);
+
   if (status !== "authenticated" || !user) {
     return (
       <div className="theme-morrri flex flex-1 items-center justify-center text-muted-foreground">{common("loading")}</div>
@@ -48,11 +63,16 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     ...(user.isBusinessAccount
       ? [
           { href: salonId ? `/s/${salonId}/calendar` : "/dashboard", label: t("schedule"), active: inSalon("calendar") },
-          { href: salonId ? `/s/${salonId}/messages` : "/dashboard?to=messages", label: t("messages"), active: inSalon("messages") },
+          {
+            href: salonId ? `/s/${salonId}/messages` : "/dashboard?to=messages",
+            label: t("messages"),
+            active: inSalon("messages"),
+            badge: staffUnread,
+          },
         ]
       : [
           { href: "/appointments", label: t("myAppointments"), active: pathname.startsWith("/appointments") },
-          { href: "/messages", label: t("messages"), active: pathname.startsWith("/messages") },
+          { href: "/messages", label: t("messages"), active: pathname.startsWith("/messages"), badge: personalUnread },
         ]),
     ...(user.isSiteAdmin ? [{ href: "/admin", label: t("admin"), active: pathname.startsWith("/admin") }] : []),
   ];
@@ -96,6 +116,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               {links.map((link) => (
                 <Link key={link.href} href={link.href} aria-current={link.active ? "page" : undefined} className={navItem(link.active)}>
                   {link.label}
+                  {"badge" in link && link.badge ? <UnreadBadge count={link.badge} label={t("unread", { count: link.badge })} /> : null}
                 </Link>
               ))}
             </nav>
@@ -109,7 +130,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 </span>
                 <span className="hidden lg:inline">{user.name}</span>
               </span>
-              {user.isBusinessAccount && <PersonalMenu className={ghostPillSm} />}
+              {user.isBusinessAccount && <PersonalMenu className={ghostPillSm} unread={personalUnread} />}
               <LocaleSwitcher className={cn(ghostPillSm, "hidden sm:inline-flex")} />
               <SettingsMenu className={ghostPillSm} />
               <Button
@@ -140,6 +161,16 @@ function initials(name: string): string {
   const words = name.trim().split(/\s+/).filter(Boolean);
   const picked = words.length > 1 ? [words[0], words[words.length - 1]] : words;
   return picked.map((w) => Array.from(w)[0] ?? "").join("").toUpperCase();
+}
+
+/** A count pill on a nav item. The visible number is decorative; the label says it in words. */
+function UnreadBadge({ count, label }: { count: number; label: string }) {
+  return (
+    <span data-component="UnreadBadge" className="ml-0.5 inline-grid min-w-5 place-items-center rounded-full bg-destructive px-1.5 text-xs leading-5 font-semibold text-destructive-foreground tabular-nums">
+      <span aria-hidden>{count > 99 ? "99+" : count}</span>
+      <span className="sr-only">{label}</span>
+    </span>
+  );
 }
 
 /**

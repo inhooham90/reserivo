@@ -85,8 +85,42 @@ export const createSalonSchema = z.object({
 });
 export type CreateSalonInput = z.infer<typeof createSalonSchema>;
 
+/** An empty field clears the value rather than storing "". */
+const blankToNull = (v: unknown) => (typeof v === 'string' && v.trim() === '' ? null : v);
+
+/**
+ * The business's public phone number. Free-form within reason (US numbers are
+ * written every which way), so it is checked for shape, not parsed: digits and
+ * the usual punctuation, at least seven digits.
+ */
+export const businessPhoneSchema = z.preprocess(
+  blankToNull,
+  z
+    .string()
+    .trim()
+    .max(30)
+    .regex(/^\+?[\d\s().\-]+$/, 'Use digits and + ( ) - . only')
+    .refine((v) => v.replace(/\D/g, '').length >= 7, 'That number looks too short')
+    .nullable(),
+);
+
+/** The business's street address, as it should be printed. Line breaks allowed. */
+export const businessAddressSchema = z.preprocess(blankToNull, z.string().trim().max(300).nullable());
+
+/** `tel:` link for a number written however the business wrote it. */
+export const telHref = (phone: string) => `tel:${phone.replace(/[^\d+]/g, '')}`;
+
+/** A maps search for the address: opens Google Maps on the web and the maps app on phones. */
+export const mapsHref = (address: string) =>
+  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address.replace(/\s*\n\s*/g, ', '))}`;
+
 export const updateSalonSchema = z
-  .object({ name: z.string().trim().min(1).max(120), timezone: timezoneSchema })
+  .object({
+    name: z.string().trim().min(1).max(120),
+    timezone: timezoneSchema,
+    phone: businessPhoneSchema,
+    address: businessAddressSchema,
+  })
   .extend(salonPoliciesSchema.shape)
   .partial();
 export type UpdateSalonInput = z.infer<typeof updateSalonSchema>;
@@ -98,6 +132,9 @@ export const salonSchema = z
     name: z.string(),
     slug: z.string(),
     timezone: z.string(),
+    /** Public contact details, shown to clients on the booking page, their reservations and in emails. */
+    phone: z.string().nullable(),
+    address: z.string().nullable(),
     createdAt: z.string(),
   })
   .extend(salonPoliciesSchema.shape);

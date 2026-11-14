@@ -64,3 +64,26 @@ export const threadSchema = z.object({
   messages: z.array(messageSchema),
 });
 export type Thread = z.infer<typeof threadSchema>;
+
+/**
+ * Unread messages for the signed-in person: their own inbox as a client, and
+ * one count per business where they are staff (scoped like the staff inbox: a
+ * manager counts the whole business, anyone else their own conversations).
+ */
+export const unreadCountsSchema = z.object({
+  personal: z.number().int(),
+  salons: z.record(z.string(), z.number().int()),
+});
+export type UnreadCounts = z.infer<typeof unreadCountsSchema>;
+
+/**
+ * What the live stream (`GET /me/events`) pushes. Deliberately just ids: the
+ * browser refetches through the ordinary endpoints, which apply every access
+ * rule, so the stream can never leak a message body or a contact field.
+ * `salonId` is set when the receiver sees the conversation as staff.
+ */
+export const liveEventSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('message'), conversationId: z.string(), salonId: z.string().optional() }),
+  z.object({ type: z.literal('ping') }),
+]);
+export type LiveEvent = z.infer<typeof liveEventSchema>;

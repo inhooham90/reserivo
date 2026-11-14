@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { BookingFlow } from "@/components/booking/booking-flow";
+import { BusinessContact } from "@/components/business-contact";
 import { PublicFooter } from "@/components/legal/public-footer";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
@@ -55,6 +56,8 @@ export default async function SalonPublicPage({ params }: Props) {
               ? t("pausedLead")
               : t(salon.designers.filter((d) => d.services.length > 0).length > 1 ? "chooseMember" : "chooseService")}
           </p>
+          {/* Most useful when booking is paused: the page still says how to reach them. */}
+          <BusinessContact phone={salon.phone} address={salon.address} className="text-base" />
         </section>
         <div className="pt-10 md:pt-14">
           {/* No subscription: the page stays up (the link on their card keeps working), but takes no bookings. */}

@@ -59,6 +59,7 @@ describe('Setup guide (e2e)', () => {
     expect(body.steps.map((s: { key: string }) => s.key)).toEqual([
       'business',
       'businessHours',
+      'contact',
       'myHours',
       'services',
       'profile',
@@ -84,9 +85,14 @@ describe('Setup guide (e2e)', () => {
     await api().post(`/salons/${salonId}/services`).set(auth('owner')).send({ name: 'Cut', priceCents: 5000, durationMin: 45 }).expect(201);
     await api().patch(`/salons/${salonId}/members/${ownerMemberId}`).set(auth('owner')).send({ bio: 'Twenty years behind the chair.' }).expect(200);
 
+    // Contact is read off the business: nothing set yet, so still open.
+    expect(doneOf(await guide('owner')).contact).toBe(false);
+    await api().patch(`/salons/${salonId}`).set(auth('owner')).send({ phone: '(555) 010-2030' }).expect(200);
+
     expect(doneOf(await guide('owner'))).toEqual({
       business: true,
       businessHours: true,
+      contact: true,
       myHours: true,
       services: true,
       profile: true,
@@ -108,7 +114,8 @@ describe('Setup guide (e2e)', () => {
     expect(doneOf(await guide('owner')).team).toBe(true);
 
     await join('desk', desk.email, ['MANAGER']);
-    expect(doneOf(await guide('desk'))).toEqual({ business: true, businessHours: true, team: true, share: false });
+    // The phone the owner added counts for every manager, like the other business steps.
+    expect(doneOf(await guide('desk'))).toEqual({ business: true, businessHours: true, contact: true, team: true, share: false });
   });
 
   it('hiding is per person and reversible', async () => {

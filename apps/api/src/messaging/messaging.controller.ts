@@ -1,4 +1,6 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post, Query, Sse } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
+import type { Observable } from 'rxjs';
 import {
   sendMessageSchema,
   staffStartConversationSchema,
@@ -10,12 +12,15 @@ import {
   type StaffStartConversationInput,
   type StartConversationInput,
   type Thread,
+  type LiveEvent,
+  type UnreadCounts,
 } from '@reserivo/shared';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { CurrentUser } from '../common/decorators/current-user.decorator.js';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 import { SalonRoles, Tenant } from '../tenancy/salon-roles.decorator.js';
 import type { TenantContext } from '../tenancy/tenant.types.js';
+import { LiveEventsService } from './live-events.service.js';
 import { MessagingService } from './messaging.service.js';
 
 /** The customer's inbox, across salons. */
@@ -89,5 +94,35 @@ export class SalonConversationsController {
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<Message> {
     return this.messaging.sendStaff(tenant, id, body.body, user);
+  }
+}
+
+/**
+ * The signed-in person's live channel and badge counts. Under `me/` because
+ * they span every inbox the person has: their own as a client and each
+ * business they work at.
+ */
+@Controller('me')
+export class MyLiveController {
+  constructor(
+    private readonly messaging: MessagingService,
+    private readonly live: LiveEventsService,
+  ) {}
+
+  @Get('unread')
+  unread(@CurrentUser() user: AuthenticatedUser): Promise<UnreadCounts> {
+    return this.messaging.unreadCounts(user);
+  }
+
+  /**
+   * Server-Sent Events. The browser reads it with fetch rather than
+   * EventSource, because EventSource cannot send the Authorization header and
+   * the access token lives only in memory (see lib/api.ts). Exempt from the
+   * throttler: it is one long request, and the client backs off on reconnect.
+   */
+  @SkipThrottle()
+  @Sse('events')
+  events(@CurrentUser() user: AuthenticatedUser): Observable<{ data: LiveEvent }> {
+    return this.live.streamFor(user.id);
   }
 }

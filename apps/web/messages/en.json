@@ -216,7 +216,9 @@
       "payAtSalon": "{price} · pay in person.",
       "cancelUntil": "Cancel free online until {time}.",
       "seeAppointments": "See my appointments",
-      "createAccount": "<link>Create an account</link> with the same email to manage or cancel this booking online."
+      "createAccount": "<link>Create an account</link> with the same email, then confirm it, to manage or cancel this booking online.",
+      "toChange": "To change your time, contact {salon}:",
+      "confirmToSee": "It appears under My appointments once you confirm {email}. Check your inbox for the link."
     }
   },
   "rating": {
@@ -321,7 +323,8 @@
     "primaryLabel": "Main",
     "schedule": "Schedule",
     "personal": "Personal",
-    "myMessages": "My messages"
+    "myMessages": "My messages",
+    "unread": "{count} unread"
   },
   "schedule": {
     "toolbar": {
@@ -501,6 +504,13 @@
         "action": "Set opening hours",
         "confirm": "These hours are right"
       },
+      "contact": {
+        "title": "Add your phone and address",
+        "short": "Contact details",
+        "body": "Clients who need to change a booking look for a way to reach you. Your phone and address appear on your booking page, their reservations and their emails.",
+        "hint": "Fill in Phone and Address under Contact details, then save.",
+        "action": "Add contact details"
+      },
       "myHours": {
         "title": "Set your working hours",
         "short": "Your hours",
@@ -603,7 +613,13 @@
       "noReminders": "No reminders will be sent.",
       "save": "Save settings",
       "saving": "Saving…",
-      "saved": "Saved"
+      "saved": "Saved",
+      "contactTitle": "Contact details",
+      "contactHint": "Shown to clients on your booking page, on their reservations and in their confirmation and reminder emails, so they can reach you to change a booking.",
+      "phone": "Phone",
+      "phoneHint": "The number clients should call. Shown publicly.",
+      "address": "Address",
+      "addressHint": "Where clients come for their appointment. Shown publicly with a directions link."
     },
     "roles": {
       "managerHint": "Team, business hours, settings, customer contact details",
@@ -1119,5 +1135,10 @@
         "a": "On the Billing page in your settings, before you continue to payment. A promo code replaces the launch offer."
       }
     }
+  },
+  "contact": {
+    "label": "How to reach this business",
+    "call": "Call",
+    "directions": "Get directions"
   }
 }

@@ -25,6 +25,7 @@ import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { RatingSummary } from "@/components/rating/stars";
 import { SmsConsent } from "@/components/booking/sms-consent";
+import { BusinessContact } from "@/components/business-contact";
 import { useFormat } from "@/lib/use-format";
 import { outlinePillSm, pillButton, pillInput, textLink } from "@/lib/v3";
 import { cn } from "cn";
@@ -838,11 +839,21 @@ function Confirmation({ appt }: { appt: CustomerAppointment }) {
             </>
           )}
         </p>
-        <div className="border-t border-border pt-6">
+        {(appt.salon.phone || appt.salon.address) && (
+          <div className="grid gap-2">
+            <p className="text-body">{t("toChange", { salon: appt.salon.name })}</p>
+            <BusinessContact phone={appt.salon.phone} address={appt.salon.address} />
+          </div>
+        )}
+        <div className="grid gap-3 border-t border-border pt-6">
           {user ? (
-            <Button size="lg" className={cn(pillButton, "text-base")} nativeButton={false} render={<Link href="/appointments" />}>
-              {t("seeAppointments")}
-            </Button>
+            <>
+              <Button size="lg" className={cn(pillButton, "justify-self-start text-base")} nativeButton={false} render={<Link href="/appointments" />}>
+                {t("seeAppointments")}
+              </Button>
+              {/* Bookings are matched to an account by email only once that email is confirmed (see ownedBy). */}
+              {!user.emailVerified && <p className="text-body">{t("confirmToSee", { email: user.email })}</p>}
+            </>
           ) : (
             <p className="text-body">
               {t.rich("createAccount", {

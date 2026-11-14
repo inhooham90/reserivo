@@ -4,11 +4,12 @@ import type { Message, StaffConversation, Thread } from "@reserivo/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { ThreadView } from "@/components/messaging/thread-view";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { api, ApiError } from "@/lib/api";
+import { unreadKey } from "@/lib/live";
 import { salonKeys, useSalon } from "@/lib/salon-context";
 import { cn } from "cn";
 
@@ -38,14 +39,19 @@ function StaffMessages() {
   const convs = useQuery({
     queryKey: [...salonKeys.salon(salon.id), "conversations", designerFilter],
     queryFn: () => api<StaffConversation[]>(`/salons/${salon.id}/conversations${designerFilter ? `?designerId=${designerFilter}` : ""}`),
-    refetchInterval: 15_000,
+    // Live events (lib/live.ts) refresh this; the poll only covers a dropped connection.
+    refetchInterval: 60_000,
   });
   const thread = useQuery({
     queryKey: [...salonKeys.salon(salon.id), "conversations", "thread", open],
     queryFn: () => api<Thread>(`/salons/${salon.id}/conversations/${open}`),
     enabled: Boolean(open),
-    refetchInterval: 5_000,
+    refetchInterval: 30_000,
   });
+  // Opening a thread marks it read, so the header badge drops straight away.
+  useEffect(() => {
+    if (thread.dataUpdatedAt) void queryClient.invalidateQueries({ queryKey: unreadKey });
+  }, [thread.dataUpdatedAt, queryClient]);
   const current = convs.data?.find((c) => c.id === open);
 
   const send = useMutation({

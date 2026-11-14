@@ -6,6 +6,8 @@ import { Link } from "@/i18n/navigation";
 import { useParams } from "next/navigation";
 import { ThreadView } from "@/components/messaging/thread-view";
 import { api, ApiError } from "@/lib/api";
+import { unreadKey } from "@/lib/live";
+import { useEffect } from "react";
 
 export default function ConversationPage() {
   const { conversationId } = useParams<{ conversationId: string }>();
@@ -14,8 +16,13 @@ export default function ConversationPage() {
   const thread = useQuery({
     queryKey: ["me", "conversations", conversationId],
     queryFn: () => api<Thread>(`/me/conversations/${conversationId}`),
-    refetchInterval: 5_000,
+    // New messages arrive through the live stream (lib/live.ts); this only covers a dropped connection.
+    refetchInterval: 30_000,
   });
+  // Fetching the thread marks it read, so the badge drops as soon as it is on screen.
+  useEffect(() => {
+    if (thread.dataUpdatedAt) void queryClient.invalidateQueries({ queryKey: unreadKey });
+  }, [thread.dataUpdatedAt, queryClient]);
   const convs = useQuery({ queryKey: ["me", "conversations"], queryFn: () => api<CustomerConversation[]>("/me/conversations") });
   const meta = convs.data?.find((c) => c.id === conversationId);
 

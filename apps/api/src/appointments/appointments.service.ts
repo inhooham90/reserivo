@@ -77,13 +77,13 @@ type ApptRow = {
   createdAt: Date;
   customer: { id: string; name: string; email: string | null; phone: string | null; userId: string | null };
   designer: { displayName: string };
-  salon: { id: string; name: string; slug: string; timezone: string; cancelWindowHours: number };
+  salon: { id: string; name: string; slug: string; timezone: string; cancelWindowHours: number; phone: string | null; address: string | null };
 };
 
 const APPT_INCLUDE = {
   customer: { select: { id: true, name: true, email: true, phone: true, userId: true } },
   designer: { select: { displayName: true } },
-  salon: { select: { id: true, name: true, slug: true, timezone: true, cancelWindowHours: true } },
+  salon: { select: { id: true, name: true, slug: true, timezone: true, cancelWindowHours: true, phone: true, address: true } },
 } as const;
 
 @Injectable()
@@ -528,6 +528,8 @@ export class AppointmentsService {
         serviceName: row.serviceNameSnapshot,
         startAt: row.startAt.toISOString(),
         timezone: row.salon.timezone,
+        salonPhone: row.salon.phone,
+        salonAddress: row.salon.address,
       },
     });
   }
@@ -543,7 +545,7 @@ export class AppointmentsService {
       priceCents: r.priceCentsSnapshot,
       designerId: r.designerId,
       designerName: r.designer.displayName,
-      salon: { id: r.salon.id, name: r.salon.name, slug: r.salon.slug, timezone: r.salon.timezone },
+      salon: { id: r.salon.id, name: r.salon.name, slug: r.salon.slug, timezone: r.salon.timezone, phone: r.salon.phone, address: r.salon.address },
       cancellableUntil: until && until > new Date() ? until.toISOString() : null,
       notes: r.notes,
     };

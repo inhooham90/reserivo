@@ -29,13 +29,25 @@ function wrap(title: string, lines: string[], cta?: { label: string; href: strin
   return `<!doctype html><html><body style="margin:0;padding:24px;background:#faf8f4"><div style="max-width:520px;margin:0 auto;background:#fff;border:1px solid #e9e3da;border-radius:12px;padding:28px"><h1 style="margin:0 0 16px;font:600 22px Georgia,serif;color:#2a2622">${esc(title)}</h1>${body}${button}</div></body></html>`;
 }
 
+/**
+ * How to reach the business, for a client who needs to change a booking. Only
+ * the lines the business filled in; nothing when it has neither, rather than
+ * an empty heading.
+ */
+function contactLines(d: { salonName: string; salonPhone?: string | null; salonAddress?: string | null }): string[] {
+  const lines: string[] = [];
+  if (d.salonPhone) lines.push(`To change it, call ${d.salonName} at ${d.salonPhone}.`);
+  if (d.salonAddress) lines.push(`Address: ${d.salonAddress.replace(/\s*\n\s*/g, ', ')}`);
+  return lines;
+}
+
 /** Plain-text first; HTML is the same content with a button. */
 export function render(event: NotificationEvent, webUrl: string): RenderedEmail {
   switch (event.type) {
     case 'appointment.booked': {
       const d = event.data;
       const at = when(d.startAt, d.timezone);
-      const lines = [`Hi ${event.to.name},`, `You're booked for ${d.serviceName} with ${d.designerName} at ${d.salonName}.`, at];
+      const lines = [`Hi ${event.to.name},`, `You're booked for ${d.serviceName} with ${d.designerName} at ${d.salonName}.`, at, ...contactLines(d)];
       const cta = { label: 'See my appointments', href: `${webUrl}/appointments` };
       return {
         subject: `Booked: ${d.serviceName} at ${d.salonName}`,
@@ -46,7 +58,7 @@ export function render(event: NotificationEvent, webUrl: string): RenderedEmail 
     case 'appointment.rescheduled': {
       const d = event.data;
       const at = when(d.startAt, d.timezone);
-      const lines = [`Hi ${event.to.name},`, `Your ${d.serviceName} with ${d.designerName} at ${d.salonName} has a new time:`, at];
+      const lines = [`Hi ${event.to.name},`, `Your ${d.serviceName} with ${d.designerName} at ${d.salonName} has a new time:`, at, ...contactLines(d)];
       const cta = { label: 'See my appointments', href: `${webUrl}/appointments` };
       return {
         subject: `New time: ${d.serviceName} at ${d.salonName}`,
@@ -73,7 +85,8 @@ export function render(event: NotificationEvent, webUrl: string): RenderedEmail 
         `Hi ${event.to.name},`,
         `A reminder that you're booked for ${d.serviceName} with ${d.designerName} at ${d.salonName}.`,
         at,
-        'Need to change it? Use the link below.',
+        // With a phone number, calling is the answer; the link only cancels, and only inside the window.
+        ...(d.salonPhone ? contactLines(d) : ['Need to change it? Use the link below.', ...contactLines(d)]),
       ];
       const cta = { label: 'View or cancel', href: d.link };
       return {

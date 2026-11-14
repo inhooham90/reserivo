@@ -42,7 +42,7 @@ export class RemindersService {
         startAt: { gt: now, lte: new Date(now.getTime() + maxLead * 3_600_000) },
       },
       include: {
-        salon: { select: { id: true, name: true, slug: true, timezone: true, reminderHoursBefore: true } },
+        salon: { select: { id: true, name: true, slug: true, timezone: true, reminderHoursBefore: true, phone: true, address: true } },
         designer: { select: { displayName: true } },
         customer: { select: { name: true, email: true, phone: true, smsConsentAt: true } },
         reminders: { select: { hoursBefore: true, channel: true } },
@@ -98,7 +98,7 @@ export class RemindersService {
       customerId: string;
       startAt: Date;
       serviceNameSnapshot: string;
-      salon: { id: string; name: string; slug: string; timezone: string };
+      salon: { id: string; name: string; slug: string; timezone: string; phone: string | null; address: string | null };
       designer: { displayName: string };
       customer: { name: string; email: string | null; phone: string | null };
     },
@@ -126,6 +126,8 @@ export class RemindersService {
             serviceName: appt.serviceNameSnapshot,
             startAt: appt.startAt.toISOString(),
             timezone: appt.salon.timezone,
+            salonPhone: appt.salon.phone,
+            salonAddress: appt.salon.address,
             hoursBefore,
             link,
           },

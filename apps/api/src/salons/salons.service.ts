@@ -107,6 +107,8 @@ export class SalonsService {
     name: string;
     slug: string;
     timezone: string;
+    phone: string | null;
+    address: string | null;
     slotIntervalMin: number;
     leadTimeMin: number;
     maxAdvanceDays: number;
@@ -119,6 +121,8 @@ export class SalonsService {
       name: s.name,
       slug: s.slug,
       timezone: s.timezone,
+      phone: s.phone,
+      address: s.address,
       slotIntervalMin: s.slotIntervalMin,
       leadTimeMin: s.leadTimeMin,
       maxAdvanceDays: s.maxAdvanceDays,

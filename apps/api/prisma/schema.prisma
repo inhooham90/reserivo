@@ -103,6 +103,11 @@ model Salon {
   cancelWindowHours Int      @default(24)
   /// Hours before the start to send a reminder. Empty turns reminders off.
   reminderHoursBefore Int[]  @default([24])
+  /// Public contact details, entered by a manager, shown to clients on the
+  /// booking page, on their reservations and in emails. The business's, not a
+  /// person's: a manager's own phone and email are never exposed.
+  phone             String?
+  address           String?
 
   /// Billing: one Stripe subscription per business, mirrored here by the
   /// webhook. Stripe is the source of truth; these columns are a cache that
@@ -569,6 +574,11 @@ model Conversation {
   lastMessageAt      DateTime? @db.Timestamptz(6)
   customerLastReadAt DateTime? @db.Timestamptz(6)
   staffLastReadAt    DateTime? @db.Timestamptz(6)
+  /// When each side was last emailed about unread messages here. One email
+  /// per unread streak: a new one is owed only after they have read since.
+  /// Set by MessagingService.sweepNudges, which claims the row as it sets it.
+  customerNotifiedAt DateTime? @db.Timestamptz(6)
+  staffNotifiedAt    DateTime? @db.Timestamptz(6)
   createdAt          DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt          DateTime  @updatedAt @db.Timestamptz(6)
 

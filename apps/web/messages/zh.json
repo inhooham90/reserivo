@@ -216,7 +216,9 @@
       "payAtSalon": "{price} · 到店付款。",
       "cancelUntil": "{time}前可在线免费取消。",
       "seeAppointments": "查看我的预约",
-      "createAccount": "用同一邮箱<link>创建账号</link>，即可在线管理或取消这笔预约。"
+      "createAccount": "用同一邮箱<link>创建账号</link>并完成邮箱确认后，即可在线管理或取消这笔预约。",
+      "toChange": "如需更改时间，请联系 {salon}：",
+      "confirmToSee": "确认 {email} 后，这笔预约会显示在“我的预约”中。请查看收件箱中的链接。"
     }
   },
   "rating": {
@@ -321,7 +323,8 @@
     "primaryLabel": "主导航",
     "schedule": "日程",
     "personal": "个人",
-    "myMessages": "我的消息"
+    "myMessages": "我的消息",
+    "unread": "{count} 条未读"
   },
   "schedule": {
     "toolbar": {
@@ -501,6 +504,13 @@
         "action": "设置营业时间",
         "confirm": "时间没问题"
       },
+      "contact": {
+        "title": "添加电话和地址",
+        "short": "联系方式",
+        "body": "需要更改预约的客户会寻找联系您的方式。您的电话和地址会显示在预约页面、客户的预约信息和邮件中。",
+        "hint": "在“联系方式”中填写电话和地址，然后保存。",
+        "action": "添加联系方式"
+      },
       "myHours": {
         "title": "设置你的工作时间",
         "short": "你的工作时间",
@@ -603,7 +613,13 @@
       "noReminders": "不会发送任何提醒。",
       "save": "保存设置",
       "saving": "正在保存…",
-      "saved": "已保存"
+      "saved": "已保存",
+      "contactTitle": "联系方式",
+      "contactHint": "显示在您的预约页面、客户的预约信息以及确认和提醒邮件中，方便客户联系您更改预约。",
+      "phone": "电话",
+      "phoneHint": "客户应拨打的号码，将公开显示。",
+      "address": "地址",
+      "addressHint": "客户前来赴约的地点，将连同路线链接公开显示。"
     },
     "roles": {
       "managerHint": "团队、商家营业时间、设置、客户联系方式",
@@ -1119,5 +1135,10 @@
         "a": "在设置中的“账单”页面、前往付款之前输入。优惠码将代替上线优惠。"
       }
     }
+  },
+  "contact": {
+    "label": "联系这家商家",
+    "call": "拨打电话",
+    "directions": "查看路线"
   }
 }

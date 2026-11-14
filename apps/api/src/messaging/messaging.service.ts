@@ -7,11 +7,13 @@ import type {
   StaffStartConversationInput,
   StartConversationInput,
   Thread,
+  UnreadCounts,
 } from '@reserivo/shared';
 import { ownedBy } from '../appointments/appointments.service.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import type { Env } from '../config/env.js';
 import { CustomersService } from '../customers/customers.service.js';
+import { LiveEventsService } from './live-events.service.js';
 import { MembersService } from '../members/members.service.js';
 import { NotificationsService } from '../notifications/notifications.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -30,6 +32,9 @@ type ConvRow = {
   customer: { id: string; name: string; email: string | null; userId: string | null };
   designer: { id: string; displayName: string; photoUrl: string | null; userId: string; user: { email: string } };
 };
+
+/** How long a message may sit unread before its recipient gets an email about it. */
+export const MESSAGE_NUDGE_DELAY_MIN = 5;
 
 const CONV_INCLUDE = {
   salon: { select: { id: true, name: true, slug: true } },
@@ -50,6 +55,7 @@ export class MessagingService {
     private readonly customers: CustomersService,
     private readonly notifications: NotificationsService,
     private readonly config: ConfigService<Env, true>,
+    private readonly live: LiveEventsService,
   ) {}
 
   // ---------- Customer side ----------
@@ -223,17 +229,7 @@ export class MessagingService {
       this.prisma.message.create({ data: { conversationId: conv.id, sender: 'CUSTOMER', body, actorUserId: user.id } }),
       this.prisma.conversation.update({ where: { id: conv.id }, data: { lastMessageAt: now, customerLastReadAt: now } }),
     ]);
-    // The designer is told a message arrived — never the customer's contact details.
-    this.notifications.emit({
-      type: 'message.received',
-      to: { email: conv.designer.user.email, name: conv.designer.displayName },
-      data: {
-        conversationId: conv.id,
-        fromName: conv.customer.name,
-        salonName: conv.salon.name,
-        link: `${this.config.get('WEB_URL')}/s/${conv.salonId}/messages?c=${conv.id}`,
-      },
-    });
+    await this.announce(conv);
     return { id: m.id, sender: 'CUSTOMER', body: m.body, createdAt: m.createdAt.toISOString(), fromName: conv.customer.name };
   }
 
@@ -245,16 +241,7 @@ export class MessagingService {
       }),
       this.prisma.conversation.update({ where: { id: conv.id }, data: { lastMessageAt: now, staffLastReadAt: now } }),
     ]);
-    this.notifications.emit({
-      type: 'message.received',
-      to: { email: conv.customer.email, name: conv.customer.name },
-      data: {
-        conversationId: conv.id,
-        fromName: conv.designer.displayName,
-        salonName: conv.salon.name,
-        link: `${this.config.get('WEB_URL')}/messages/${conv.id}`,
-      },
-    });
+    await this.announce(conv);
     return {
       id: m.id,
       sender: 'STAFF',
@@ -264,6 +251,136 @@ export class MessagingService {
       ...(user.id !== conv.designer.userId ? { writtenBy: user.name } : {}),
       mine: true,
     };
+  }
+
+  // ---------- Live updates, unread counts and email nudges ----------
+
+  /**
+   * Tells every open tab that can see this conversation to refetch: the
+   * client side (their account) and the staff side (the team member it
+   * belongs to, plus the business's managers, who see the whole inbox). Ids
+   * only; see LiveEvent. Email is not sent here but by `sweepNudges`, once a
+   * message has sat unread for a while.
+   */
+  private async announce(conv: ConvRow): Promise<void> {
+    const managers = await this.prisma.salonMembership.findMany({
+      where: { salonId: conv.salonId, status: 'ACTIVE', roles: { has: 'MANAGER' } },
+      select: { userId: true },
+    });
+    this.live.publish([conv.designer.userId, ...managers.map((m) => m.userId)], {
+      type: 'message',
+      conversationId: conv.id,
+      salonId: conv.salonId,
+    });
+    this.live.publish([conv.customer.userId], { type: 'message', conversationId: conv.id });
+  }
+
+  /** The header badges: the person's own inbox, and each business they work at, scoped like its inbox. */
+  async unreadCounts(user: AuthenticatedUser): Promise<UnreadCounts> {
+    const [customers, memberships] = await Promise.all([
+      this.prisma.customer.findMany({ where: this.ownedBy(user), select: { id: true } }),
+      this.prisma.salonMembership.findMany({
+        where: { userId: user.id, status: 'ACTIVE' },
+        select: { id: true, salonId: true, roles: true },
+      }),
+    ]);
+    const customerIds = customers.map((c) => c.id);
+    const managedSalons = memberships.filter((m) => m.roles.includes('MANAGER')).map((m) => m.salonId);
+    const ownThreads = memberships.filter((m) => !m.roles.includes('MANAGER')).map((m) => m.id);
+
+    const [personal, staff] = await Promise.all([
+      customerIds.length
+        ? this.prisma.$queryRaw<{ n: bigint }[]>`
+            SELECT count(*) AS n FROM conversations c
+            JOIN messages m ON m."conversationId" = c.id AND m.sender = 'STAFF'
+              AND m."createdAt" > COALESCE(c."customerLastReadAt", '-infinity'::timestamptz)
+            WHERE c."customerId" = ANY(${customerIds}::uuid[])`
+        : Promise.resolve([{ n: 0n }]),
+      memberships.length
+        ? this.prisma.$queryRaw<{ salonId: string; n: bigint }[]>`
+            SELECT c."salonId", count(*) AS n FROM conversations c
+            JOIN messages m ON m."conversationId" = c.id AND m.sender = 'CUSTOMER'
+              AND m."createdAt" > COALESCE(c."staffLastReadAt", '-infinity'::timestamptz)
+            WHERE c."salonId" = ANY(${managedSalons}::uuid[]) OR c."designerId" = ANY(${ownThreads}::uuid[])
+            GROUP BY c."salonId"`
+        : Promise.resolve([] as { salonId: string; n: bigint }[]),
+    ]);
+    const salons: Record<string, number> = Object.fromEntries(memberships.map((m) => [m.salonId, 0]));
+    for (const row of staff) salons[row.salonId] = Number(row.n);
+    return { personal: Number(personal[0]?.n ?? 0), salons };
+  }
+
+  /**
+   * Emails whoever has left a message unread for `delayMin` minutes: one email
+   * per unread streak, not one per message, so a back-and-forth on screen
+   * sends nothing and a burst of five messages sends one nudge. The next
+   * streak starts once they have read the conversation.
+   *
+   * The UPDATE ... RETURNING is the claim: two instances sweeping at once
+   * cannot both mark the same row, so nobody is emailed twice. `now` is a
+   * parameter so tests can move the clock. Only the last week is considered,
+   * so a quiet old thread is never dug up.
+   */
+  async sweepNudges(now = new Date(), delayMin = MESSAGE_NUDGE_DELAY_MIN): Promise<number> {
+    const due = new Date(now.getTime() - delayMin * 60_000);
+    const since = new Date(now.getTime() - 7 * 24 * 3_600_000);
+    const [toStaff, toCustomers] = await Promise.all([
+      this.prisma.$queryRaw<{ id: string }[]>`
+        UPDATE conversations c SET "staffNotifiedAt" = ${now}
+        WHERE c."lastMessageAt" > ${since}
+          AND (c."staffNotifiedAt" IS NULL OR c."staffNotifiedAt" < COALESCE(c."staffLastReadAt", '-infinity'::timestamptz))
+          AND EXISTS (
+            SELECT 1 FROM messages m WHERE m."conversationId" = c.id AND m.sender = 'CUSTOMER'
+              AND m."createdAt" > COALESCE(c."staffLastReadAt", '-infinity'::timestamptz)
+              AND m."createdAt" <= ${due})
+        RETURNING c.id`,
+      this.prisma.$queryRaw<{ id: string }[]>`
+        UPDATE conversations c SET "customerNotifiedAt" = ${now}
+        WHERE c."lastMessageAt" > ${since}
+          AND (c."customerNotifiedAt" IS NULL OR c."customerNotifiedAt" < COALESCE(c."customerLastReadAt", '-infinity'::timestamptz))
+          AND EXISTS (
+            SELECT 1 FROM messages m WHERE m."conversationId" = c.id AND m.sender = 'STAFF'
+              AND m."createdAt" > COALESCE(c."customerLastReadAt", '-infinity'::timestamptz)
+              AND m."createdAt" <= ${due})
+        RETURNING c.id`,
+    ]);
+
+    const ids = [...new Set([...toStaff, ...toCustomers].map((r) => r.id))];
+    if (!ids.length) return 0;
+    const convs = new Map(
+      (await this.prisma.conversation.findMany({ where: { id: { in: ids } }, include: CONV_INCLUDE })).map((c) => [c.id, c]),
+    );
+    const web = this.config.get('WEB_URL');
+    for (const { id } of toStaff) {
+      const conv = convs.get(id);
+      if (!conv) continue;
+      // The team member is told a message is waiting: never the customer's contact details, never the text.
+      this.notifications.emit({
+        type: 'message.received',
+        to: { email: conv.designer.user.email, name: conv.designer.displayName },
+        data: {
+          conversationId: conv.id,
+          fromName: conv.customer.name,
+          salonName: conv.salon.name,
+          link: `${web}/s/${conv.salonId}/messages?c=${conv.id}`,
+        },
+      });
+    }
+    for (const { id } of toCustomers) {
+      const conv = convs.get(id);
+      if (!conv) continue;
+      this.notifications.emit({
+        type: 'message.received',
+        to: { email: conv.customer.email, name: conv.customer.name },
+        data: {
+          conversationId: conv.id,
+          fromName: conv.designer.displayName,
+          salonName: conv.salon.name,
+          link: `${web}/messages/${conv.id}`,
+        },
+      });
+    }
+    return toStaff.length + toCustomers.length;
   }
 
   private lastOf(messages: { body: string; sender: 'CUSTOMER' | 'STAFF'; createdAt: Date }[]) {

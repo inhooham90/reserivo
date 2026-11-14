@@ -216,7 +216,9 @@
       "payAtSalon": "{price} · pagas en persona.",
       "cancelUntil": "Puedes cancelar gratis en línea hasta el {time}.",
       "seeAppointments": "Ver mis citas",
-      "createAccount": "<link>Crea una cuenta</link> con el mismo correo para gestionar o cancelar esta reserva en línea."
+      "createAccount": "<link>Crea una cuenta</link> con el mismo correo y confírmalo para gestionar o cancelar esta reserva en línea.",
+      "toChange": "Para cambiar la hora, contacta con {salon}:",
+      "confirmToSee": "Aparecerá en Mis citas cuando confirmes {email}. Revisa tu bandeja de entrada para encontrar el enlace."
     }
   },
   "rating": {
@@ -321,7 +323,8 @@
     "primaryLabel": "Principal",
     "schedule": "Agenda",
     "personal": "Personal",
-    "myMessages": "Mis mensajes"
+    "myMessages": "Mis mensajes",
+    "unread": "{count} sin leer"
   },
   "schedule": {
     "toolbar": {
@@ -501,6 +504,13 @@
         "action": "Definir horario",
         "confirm": "El horario está bien"
       },
+      "contact": {
+        "title": "Añade tu teléfono y dirección",
+        "short": "Datos de contacto",
+        "body": "Los clientes que necesitan cambiar una reserva buscan cómo contactarte. Tu teléfono y dirección aparecen en tu página de reservas, en sus citas y en sus correos.",
+        "hint": "Completa Teléfono y Dirección en Datos de contacto y guarda.",
+        "action": "Añadir datos de contacto"
+      },
       "myHours": {
         "title": "Define tu horario de trabajo",
         "short": "Tu horario",
@@ -603,7 +613,13 @@
       "noReminders": "No se enviarán recordatorios.",
       "save": "Guardar ajustes",
       "saving": "Guardando…",
-      "saved": "Guardado"
+      "saved": "Guardado",
+      "contactTitle": "Datos de contacto",
+      "contactHint": "Se muestran a los clientes en tu página de reservas, en sus citas y en los correos de confirmación y recordatorio, para que puedan contactarte si necesitan cambiar una reserva.",
+      "phone": "Teléfono",
+      "phoneHint": "El número al que deben llamar los clientes. Se muestra públicamente.",
+      "address": "Dirección",
+      "addressHint": "Dónde acuden los clientes a su cita. Se muestra públicamente con un enlace para llegar."
     },
     "roles": {
       "managerHint": "Equipo, horario del negocio, ajustes, datos de contacto de clientes",
@@ -1119,5 +1135,10 @@
         "a": "En la página de Facturación de tu configuración, antes de continuar al pago. Un código promocional reemplaza la oferta de lanzamiento."
       }
     }
+  },
+  "contact": {
+    "label": "Cómo contactar con este negocio",
+    "call": "Llamar",
+    "directions": "Cómo llegar"
   }
 }

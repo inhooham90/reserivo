@@ -7,7 +7,7 @@ import type { SalonRole } from './roles';
  * must fit inside its opening hours), then the person's own chair, then the
  * people and the link that bring clients in.
  */
-export const SETUP_STEPS = ['business', 'businessHours', 'myHours', 'services', 'profile', 'team', 'share'] as const;
+export const SETUP_STEPS = ['business', 'businessHours', 'contact', 'myHours', 'services', 'profile', 'team', 'share'] as const;
 export type SetupStep = (typeof SETUP_STEPS)[number];
 
 /**
@@ -20,7 +20,13 @@ export type SetupStep = (typeof SETUP_STEPS)[number];
 export const STORED_SETUP_STEPS = ['business', 'businessHours', 'myHours', 'team', 'share'] as const;
 export type StoredSetupStep = (typeof STORED_SETUP_STEPS)[number];
 
-const MANAGER_STEPS: readonly SetupStep[] = ['business', 'businessHours', 'team', 'share'];
+/**
+ * `contact` (the business's phone or address) is derived from the salon row,
+ * like services: it is done once either is set and re-opens if both are
+ * cleared. It is the only way a client can reach a business to change a
+ * booking they can no longer cancel online, so it is nudged, not required.
+ */
+const MANAGER_STEPS: readonly SetupStep[] = ['business', 'businessHours', 'contact', 'team', 'share'];
 const DESIGNER_STEPS: readonly SetupStep[] = ['myHours', 'services', 'profile', 'share'];
 
 /** Which steps a member sees: managers set up the business, whoever takes appointments sets up their own chair. */
